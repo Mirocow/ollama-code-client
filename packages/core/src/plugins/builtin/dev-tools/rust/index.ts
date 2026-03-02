@@ -39,6 +39,8 @@ export type RustAction =
   | 'clean' // Clean build artifacts
   | 'cargo_new' // Create new project
   | 'cargo_init' // Initialize project in current directory
+  | 'init' // Alias for cargo_init
+  | 'new' // Alias for cargo_new
   | 'cargo_add' // Add dependency
   | 'cargo_remove' // Remove dependency
   | 'cargo_update' // Update dependencies
@@ -119,7 +121,9 @@ export class RustToolInvocation extends BaseToolInvocation<
     // Actions that modify the project/system need confirmation
     const needsConfirmation = [
       'cargo_new',
+      'new',
       'cargo_init',
+      'init',
       'cargo_add',
       'cargo_remove',
       'cargo_publish',
@@ -175,9 +179,11 @@ export class RustToolInvocation extends BaseToolInvocation<
         return this.buildCleanCommand();
 
       case 'cargo_new':
+      case 'new': // Alias for cargo_new
         return this.buildCargoNewCommand();
 
       case 'cargo_init':
+      case 'init': // Alias for cargo_init
         return this.buildCargoInitCommand();
 
       case 'cargo_add':
@@ -761,6 +767,8 @@ export class RustTool extends BaseDeclarativeTool<RustToolParams, ToolResult> {
               'clean',
               'cargo_new',
               'cargo_init',
+              'init', // Alias for cargo_init
+              'new', // Alias for cargo_new
               'cargo_add',
               'cargo_remove',
               'cargo_update',
@@ -855,7 +863,7 @@ export class RustTool extends BaseDeclarativeTool<RustToolParams, ToolResult> {
       return 'Action is required.';
     }
 
-    if (params.action === 'cargo_new' && !params.crate_name) {
+    if ((params.action === 'cargo_new' || params.action === 'new') && !params.crate_name) {
       return 'Crate name is required for cargo_new action.';
     }
 

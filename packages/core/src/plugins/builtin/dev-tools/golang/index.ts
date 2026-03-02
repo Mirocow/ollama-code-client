@@ -50,6 +50,7 @@ export type GolangAction =
   | 'version' // Show Go version
   | 'clean' // Clean build cache
   | 'generate' // Run go generate
+  | 'init' // Alias for mod_init
   | 'custom'; // Custom command
 
 export interface GolangToolParams {
@@ -113,7 +114,7 @@ export class GolangToolInvocation extends BaseToolInvocation<
     _abortSignal: AbortSignal,
   ): Promise<ToolCallConfirmationDetails | false> {
     // Actions that modify the project need confirmation
-    const needsConfirmation = ['mod_init', 'get', 'install', 'clean'].includes(
+    const needsConfirmation = ['mod_init', 'init', 'get', 'install', 'clean'].includes(
       this.params.action,
     );
 
@@ -164,6 +165,7 @@ export class GolangToolInvocation extends BaseToolInvocation<
         return this.buildLintCommand();
 
       case 'mod_init':
+      case 'init': // Alias for mod_init
         return this.buildModInitCommand();
 
       case 'mod_tidy':
@@ -729,6 +731,7 @@ export class GolangTool extends BaseDeclarativeTool<
               'version',
               'clean',
               'generate',
+              'init', // Alias for mod_init
               'custom',
             ],
             description: 'The Go action to perform',
