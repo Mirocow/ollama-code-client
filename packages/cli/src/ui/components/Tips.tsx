@@ -29,7 +29,7 @@ export const Tips: React.FC = () => {
   }, []);
 
   return (
-    <Box marginLeft={2} marginRight={2}>
+    <Box marginLeft={2} marginRight={2} marginBottom={1}>
       <Text color={theme.text.secondary}>
         {t('Tips: ')}
         {t(selectedTip)}
