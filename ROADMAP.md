@@ -2,17 +2,45 @@
 
 > Профессиональный анализ архитектуры и план развития проекта
 
-## Текущее состояние (v0.16.3)
+## Текущее состояние (v0.16.4-dev)
 
-### ✅ Реализованные улучшения (2025-03)
+### 🔄 В процессе: Миграция инструментов в plugins
 
-#### 0. Build Fix v0.16.3
+**Статус:** 🔄 70% завершено
 
-**Статус:** ✅ Исправлено
+Все инструменты перенесены из `tools/` в `plugins/builtin/`:
 
-Исправлена ошибка компиляции TypeScript с пакетом `ajv-formats`:
-- Проблема: ESM модуль не резолвился при `verbatimModuleSyntax`
-- Решение: Изменен импорт на default import с `@ts-ignore`
+| Категория | Инструменты | Статус |
+|----------|-------------|--------|
+| **file-tools** | read-file, write-file, edit, ls, glob, read-many-files | ✅ Перенесено |
+| **search-tools** | grep, ripGrep, web-fetch, web-search | ✅ Перенесено |
+| **shell-tools** | shell | ✅ Перенесено |
+| **dev-tools** | python, nodejs, golang, rust, typescript, java, cpp, swift, php | ✅ Перенесено |
+| **agent-tools** | skill, task | ✅ Перенесено |
+| **productivity-tools** | todoWrite, exitPlanMode | ✅ Перенесено |
+| **memory-tools** | save-memory | ✅ Перенесено |
+| **lsp-tools** | lsp | ✅ Перенесено |
+| **mcp-tools** | mcp-client, mcp-tool, mcp-client-manager, sdk-control-client-transport | ✅ Перенесено |
+| **database-tools** | database, redis, docker | ✅ Перенесено |
+| **git-tools** | git-advanced | ✅ Перенесено |
+| **api-tools** | api-tester | ✅ Перенесено |
+| **utility-tools** | code-analyzer, diagram-generator | ✅ Перенесено |
+
+**Оставшиеся задачи:**
+
+1. ⏳ Исправить импорты в перенесенных файлах (частично)
+2. ⏳ Добавить `default` exports в plugin index files
+3. ⏳ Обновить `pluginRegistry.ts` для работы с `DeclarativeTool` классами
+4. ⏳ Исправить web-search provider imports
+5. ⏳ Протестировать сборку
+
+**Базовые классы остаются в tools/:**
+- tools.ts (BaseDeclarativeTool, BaseToolInvocation)
+- tool-error.ts
+- tool-registry.ts
+- tool-names.ts
+- modifiable-tool.ts
+- diffOptions.ts
 
 ### ⚠️ Откаченные изменения (v0.16.2)
 
