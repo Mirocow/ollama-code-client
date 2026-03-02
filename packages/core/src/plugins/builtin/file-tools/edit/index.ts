@@ -22,7 +22,7 @@ import type { Config } from '../../../../config/config.js';
 import { ApprovalMode } from '../../../../config/config.js';
 import { FileEncoding } from '../../../../services/fileSystemService.js';
 import { DEFAULT_DIFF_OPTIONS, getDiffStat } from '../../../../tools/diffOptions.js';
-import { ReadFileTool } from '../../../../tools/read-file.js';
+import { ReadFileTool } from '../read-file/index.js';
 import { ToolNames, ToolDisplayNames } from '../../../../tools/tool-names.js';
 
 import type {
