@@ -705,9 +705,9 @@ export class IdeClient {
       return;
     }
 
-    // @ts-ignore Zod schema type incompatibility between local zod and @modelcontextprotocol/sdk on some platforms
     this.client.setNotificationHandler(
-      IdeContextNotificationSchema,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      IdeContextNotificationSchema as any,
       (notification) => {
         ideContextStore.set(notification.params);
         const isTrusted = notification.params.workspaceState?.isTrusted;
@@ -733,9 +733,9 @@ export class IdeClient {
         true,
       );
     };
-    // @ts-ignore Zod schema type incompatibility between local zod and @modelcontextprotocol/sdk on some platforms
     this.client.setNotificationHandler(
-      IdeDiffAcceptedNotificationSchema,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      IdeDiffAcceptedNotificationSchema as any,
       (notification) => {
         const { filePath, content } = notification.params;
         const resolver = this.diffResponses.get(filePath);
@@ -748,9 +748,9 @@ export class IdeClient {
       },
     );
 
-    // @ts-ignore Zod schema type incompatibility between local zod and @modelcontextprotocol/sdk on some platforms
     this.client.setNotificationHandler(
-      IdeDiffRejectedNotificationSchema,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      IdeDiffRejectedNotificationSchema as any,
       (notification) => {
         const { filePath } = notification.params;
         const resolver = this.diffResponses.get(filePath);
@@ -765,9 +765,9 @@ export class IdeClient {
 
     // For backwards compatability. Newer extension versions will only send
     // IdeDiffRejectedNotificationSchema.
-    // @ts-ignore Zod schema type incompatibility between local zod and @modelcontextprotocol/sdk on some platforms
     this.client.setNotificationHandler(
-      IdeDiffClosedNotificationSchema,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      IdeDiffClosedNotificationSchema as any,
       (notification) => {
         const { filePath } = notification.params;
         const resolver = this.diffResponses.get(filePath);
