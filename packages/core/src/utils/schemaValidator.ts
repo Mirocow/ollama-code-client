@@ -8,7 +8,9 @@ import AjvPkg, { type AnySchema, type Ajv } from 'ajv';
 // Ajv2020 is the documented way to use draft-2020-12: https://ajv.js.org/json-schema.html#draft-2020-12
 // eslint-disable-next-line import/no-internal-modules
 import Ajv2020Pkg from 'ajv/dist/2020.js';
-import * as addFormats from 'ajv-formats';
+// @ts-ignore - ajv-formats types
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+import addFormats from 'ajv-formats';
 import { createDebugLogger } from './debugLogger.js';
 
 // Ajv's ESM/CJS interop: use 'any' for compatibility as recommended by Ajv docs
@@ -36,10 +38,9 @@ const ajvDefault: Ajv = new AjvClass(ajvOptions);
 // Draft-2020-12 validator for MCP servers using rmcp
 const ajv2020: Ajv = new Ajv2020Class(ajvOptions);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const addFormatsFunc = (addFormats as any).default || addFormats;
-addFormatsFunc(ajvDefault);
-addFormatsFunc(ajv2020);
+// Call addFormats directly - it's a function in ajv-formats
+addFormats(ajvDefault);
+addFormats(ajv2020);
 
 // Canonical draft-2020-12 meta-schema URI (used by rmcp MCP servers)
 const DRAFT_2020_12_SCHEMA = 'https://json-schema.org/draft/2020-12/schema';
