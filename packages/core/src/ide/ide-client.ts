@@ -705,6 +705,7 @@ export class IdeClient {
       return;
     }
 
+    // @ts-ignore Zod schema type incompatibility between local zod and @modelcontextprotocol/sdk on some platforms
     this.client.setNotificationHandler(
       IdeContextNotificationSchema,
       (notification) => {
@@ -732,6 +733,7 @@ export class IdeClient {
         true,
       );
     };
+    // @ts-ignore Zod schema type incompatibility between local zod and @modelcontextprotocol/sdk on some platforms
     this.client.setNotificationHandler(
       IdeDiffAcceptedNotificationSchema,
       (notification) => {
@@ -746,6 +748,7 @@ export class IdeClient {
       },
     );
 
+    // @ts-ignore Zod schema type incompatibility between local zod and @modelcontextprotocol/sdk on some platforms
     this.client.setNotificationHandler(
       IdeDiffRejectedNotificationSchema,
       (notification) => {
@@ -762,6 +765,7 @@ export class IdeClient {
 
     // For backwards compatability. Newer extension versions will only send
     // IdeDiffRejectedNotificationSchema.
+    // @ts-ignore Zod schema type incompatibility between local zod and @modelcontextprotocol/sdk on some platforms
     this.client.setNotificationHandler(
       IdeDiffClosedNotificationSchema,
       (notification) => {
