@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.16.3
+
+*Build Fix*
+
+### Bug Fixes
+
+#### ESM Compatibility Fix for ajv-formats
+
+Fixed ESM module import error with `ajv-formats` package:
+
+**Problem:** TypeScript compilation failed with:
+```
+error TS2307: Cannot find module 'ajv-formats' or its corresponding type declarations.
+```
+
+**Cause:** The `ajv-formats` package v3.0.0 publishes TypeScript source files in `src/` but references `dist/index.js` in `main`, causing module resolution issues with `verbatimModuleSyntax`.
+
+**Solution:** Updated import statement to use default import with `@ts-ignore` directive for compatibility:
+
+```typescript
+// Before:
+import * as addFormats from 'ajv-formats';
+
+// After:
+// @ts-ignore - ajv-formats types
+import addFormats from 'ajv-formats';
+```
+
+**Files Modified:**
+- `packages/core/src/utils/schemaValidator.ts`
+
+### Commits
+
+```
+778dbd65 fix: correct ajv-formats import for ESM compatibility
+```
+
+---
+
 ## 0.16.2
 
 *Bug Fixes & UX Improvements*
