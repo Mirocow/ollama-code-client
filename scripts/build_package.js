@@ -26,8 +26,11 @@ if (!process.cwd().includes('packages')) {
   process.exit(1);
 }
 
-// build typescript files
-execSync('tsc --build', { stdio: 'inherit' });
+// build typescript files with increased memory limit
+execSync('tsc --build', {
+  stdio: 'inherit',
+  env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' }
+});
 
 // copy .{md,json} files
 execSync('node ../../scripts/copy_files.js', { stdio: 'inherit' });

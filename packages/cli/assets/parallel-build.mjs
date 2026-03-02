@@ -55,6 +55,7 @@ const runCommand = ({ command, args, cwd, label }) =>
       cwd,
       stdio: 'inherit',
       shell: process.platform === 'win32',
+      env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' },
     });
 
     child.on('error', reject);

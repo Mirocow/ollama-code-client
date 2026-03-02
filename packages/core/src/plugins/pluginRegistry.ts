@@ -129,69 +129,8 @@ export class PluginRegistry {
       debugLogger.debug('Dev tools plugin not available');
     }
     
-    // Memory tools - context and memory management
-    try {
-      const memoryTools = await import('./builtin/memory-tools/index.js');
-      plugins.push(memoryTools.default);
-    } catch {
-      debugLogger.debug('Memory tools plugin not available');
-    }
-    
-    // Task tools - subagent and todo management
-    try {
-      const taskTools = await import('./builtin/task-tools/index.js');
-      plugins.push(taskTools.default);
-    } catch {
-      debugLogger.debug('Task tools plugin not available');
-    }
-    
-    // Database tools - Redis, SQL, MongoDB
-    try {
-      const databaseTools = await import('./builtin/database-tools/index.js');
-      plugins.push(databaseTools.default);
-    } catch {
-      debugLogger.debug('Database tools plugin not available');
-    }
-    
-    // Docker tools - container management
-    try {
-      const dockerTools = await import('./builtin/docker-tools/index.js');
-      plugins.push(dockerTools.default);
-    } catch {
-      debugLogger.debug('Docker tools plugin not available');
-    }
-    
-    // Git tools - advanced git operations
-    try {
-      const gitTools = await import('./builtin/git-tools/index.js');
-      plugins.push(gitTools.default);
-    } catch {
-      debugLogger.debug('Git tools plugin not available');
-    }
-    
-    // MCP tools - Model Context Protocol
-    try {
-      const mcpTools = await import('./builtin/mcp-tools/index.js');
-      plugins.push(mcpTools.default);
-    } catch {
-      debugLogger.debug('MCP tools plugin not available');
-    }
-    
-    // Code analysis tools - analysis, diagrams, API testing
-    try {
-      const codeAnalysisTools = await import('./builtin/code-analysis-tools/index.js');
-      plugins.push(codeAnalysisTools.default);
-    } catch {
-      debugLogger.debug('Code analysis tools plugin not available');
-    }
-    
-    // Skill tools - skill management and execution
-    try {
-      const skillTools = await import('./builtin/skill-tools/index.js');
-      plugins.push(skillTools.default);
-    } catch {
-      debugLogger.debug('Skill tools plugin not available');
-    }
+    // Note: Additional builtin plugins can be added here as they are developed
+    // Currently available: core-tools, file-tools, shell-tools, search-tools, dev-tools
     
     debugLogger.info(`Loaded ${plugins.length} builtin plugins`);
     return plugins;
@@ -306,14 +245,6 @@ export class PluginRegistry {
       'shell-tools',
       'search-tools',
       'dev-tools',
-      'memory-tools',
-      'task-tools',
-      'database-tools',
-      'docker-tools',
-      'git-tools',
-      'mcp-tools',
-      'code-analysis-tools',
-      'skill-tools',
     ];
   }
 }

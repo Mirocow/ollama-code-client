@@ -20,6 +20,7 @@ mkdirSync(join(rootDir, 'dist'), { recursive: true });
 execSync('tsc --project tsconfig.build.json', {
   stdio: 'inherit',
   cwd: rootDir,
+  env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' },
 });
 
 try {
