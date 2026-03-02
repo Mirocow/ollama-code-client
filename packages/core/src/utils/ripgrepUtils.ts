@@ -19,6 +19,27 @@ const RIPGREP_TEST_TIMEOUT_MS = 5_000;
 const RIPGREP_RUN_TIMEOUT_MS = 10_000;
 const RIPGREP_WSL_TIMEOUT_MS = 60_000;
 
+/**
+ * Regex patterns that require PCRE2 support in ripgrep
+ * Look-around constructs are not supported in ripgrep's default regex engine
+ */
+const PCRE2_PATTERNS = [
+  /\(\?=[^)]*\)/,    // Positive look-ahead: (?=...)
+  /\(\?\![^)]*\)/,   // Negative look-ahead: (?!...)
+  /\(\?\<=[^)]*\)/,  // Positive look-behind: (?<=...)
+  /\(\?\<\![^)]*\)/, // Negative look-behind: (?<!...)
+];
+
+/**
+ * Checks if a regex pattern requires PCRE2 support
+ * PCRE2 is required for look-ahead and look-behind constructs
+ * @param pattern The regex pattern to check
+ * @returns True if the pattern requires PCRE2 support
+ */
+export function requiresPcre2(pattern: string): boolean {
+  return PCRE2_PATTERNS.some(p => p.test(pattern));
+}
+
 type RipgrepMode = 'builtin' | 'system';
 
 interface RipgrepSelection {

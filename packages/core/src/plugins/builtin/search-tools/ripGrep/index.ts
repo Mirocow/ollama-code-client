@@ -12,7 +12,7 @@ import { ToolNames } from '../../../../tools/tool-names.js';
 import { resolveAndValidatePath } from '../../../../utils/paths.js';
 import { getErrorMessage } from '../../../../utils/errors.js';
 import type { Config } from '../../../../config/config.js';
-import { runRipgrep } from '../../../../utils/ripgrepUtils.js';
+import { runRipgrep, requiresPcre2 } from '../../../../utils/ripgrepUtils.js';
 import { SchemaValidator } from '../../../../utils/schemaValidator.js';
 import type { FileFilteringOptions } from '../../../../config/constants.js';
 import { DEFAULT_FILE_FILTERING_OPTIONS } from '../../../../config/constants.js';
@@ -182,9 +182,16 @@ class GrepToolInvocation extends BaseToolInvocation<
       '--no-heading',
       '--with-filename',
       '--ignore-case',
-      '--regexp',
-      pattern,
     ];
+
+    // Add PCRE2 support for look-around patterns
+    // Look-ahead (?=...) and look-behind (?<=...) require --pcre2 flag
+    if (requiresPcre2(pattern)) {
+      rgArgs.push('--pcre2');
+      debugLogger.debug('Using PCRE2 for look-around pattern:', pattern);
+    }
+
+    rgArgs.push('--regexp', pattern);
 
     // Add file exclusions from .gitignore and .ollama-codeignore
     const filteringOptions = this.getFileFilteringOptions();
@@ -260,7 +267,7 @@ export class RipGrepTool extends BaseDeclarativeTool<
     super(
       RipGrepTool.Name,
       'Grep',
-      'A powerful search tool built on ripgrep\n\n  Usage:\n  - ALWAYS use Grep for search tasks. NEVER invoke `grep` or `rg` as a Bash command. The Grep tool has been optimized for correct permissions and access.\n  - Supports full regex syntax (e.g., "log.*Error", "function\\s+\\w+")\n  - Filter files with glob parameter (e.g., "*.js", "**/*.tsx")\n  - Use Task tool for open-ended searches requiring multiple rounds\n  - Pattern syntax: Uses ripgrep (not grep) - special regex characters need escaping (use `interface\\{\\}` to find `interface{}` in Go code)\n',
+      'A powerful search tool built on ripgrep\n\n  Usage:\n  - ALWAYS use Grep for search tasks. NEVER invoke `grep` or `rg` as a Bash command. The Grep tool has been optimized for correct permissions and access.\n  - Supports full regex syntax (e.g., "log.*Error", "function\\s+\\w+")\n  - Supports look-around patterns: (?=...), (?!...), (?<=...), (?<!...) - automatically uses PCRE2\n  - Filter files with glob parameter (e.g., "*.js", "**/*.tsx")\n  - Use Task tool for open-ended searches requiring multiple rounds\n  - Pattern syntax: Uses ripgrep (not grep) - special regex characters need escaping (use `interface\\{\\}` to find `interface{}` in Go code)\n\n  Examples with look-around:\n  - AND search: "(?=.*\\bword1\\b)(?=.*\\bword2\\b)" - matches lines containing both words\n  - Exclusion: "error(?!.*warning)" - matches "error" not followed by "warning"\n  - Prefix search: "(?<=static )import" - matches "import" preceded by "static"\n',
       Kind.Search,
       {
         properties: {

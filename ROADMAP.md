@@ -418,6 +418,78 @@ packages/core/src/plugins/builtin/
 
 ---
 
+### v0.16.2 — Bug Fixes & UX Improvements 🔄
+
+**Цель:** Исправление ошибок и улучшение UX
+
+| Задача                                    | Приоритет | Оценка | Статус       |
+| ----------------------------------------- | --------- | ------ | ------------ |
+| PCRE2 поддержка для look-around regex     | P0        | 2h     | 🔄 В процессе |
+| Языковое правило в CRITICAL секцию        | P0        | 1h     | 🔴 Не начато |
+| Алиас init для dev-tools                  | P0        | 2h     | 🔴 Не начато |
+| Общие алиасы для dev-tools (r, b, t, ...) | P1        | 2h     | 🔴 Не начато |
+| Тесты для новых функционалов              | P1        | 3h     | 🔴 Не начато |
+| Обновление CHANGELOG                      | P2        | 1h     | 🔴 Не начато |
+
+**Детали задач:**
+
+#### 1. PCRE2 поддержка для look-around regex
+**Проблема:** ripgrep не поддерживает look-ahead/look-behind без флага `--pcre2`
+```
+rg: regex parse error:
+    (?=.*\bfactory\b)(?=.*\bmodel\b)
+       ^^^
+error: look-around is not supported
+```
+**Решение:** Автоматически добавлять `--pcre2` при обнаружении look-around паттернов
+
+**Файлы:**
+- `packages/core/src/plugins/builtin/search-tools/ripGrep/index.ts`
+- `packages/core/src/utils/ripgrepUtils.ts`
+
+#### 2. Языковое правило в CRITICAL секцию
+**Проблема:** Модель переключается на английский после tool error
+**Решение:** Добавить правило языка в секцию `[CRITICAL]`
+
+**Файлы:**
+- `packages/core/src/prompts/templates/system-8b.md`
+- `packages/core/src/prompts/templates/system-14b.md`
+- `packages/core/src/prompts/templates/system-32b.md`
+- `packages/core/src/prompts/templates/system-70b.md`
+
+#### 3. Алиас init для dev-tools
+**Проблема:** Модель использует интуитивное `init` вместо `mod_init`, `venv_create`, etc.
+```
+GolangDev {"action":"init"} → Error: action must be one of allowed values
+```
+**Решение:** Добавить алиасы:
+
+| Инструмент | init → | new → |
+|------------|--------|-------|
+| golang_dev | mod_init | - |
+| python_dev | venv_create | - |
+| rust_dev | cargo_init | cargo_new |
+| swift_dev | package_init | - |
+
+**Файлы:**
+- `packages/core/src/plugins/builtin/dev-tools/*/index.ts`
+
+#### 4. Общие алиасы для dev-tools
+**Решение:** Добавить короткие алиасы для частых действий:
+
+| Алиас | Действие | Описание |
+|-------|----------|----------|
+| r | run | Запуск |
+| b | build | Сборка |
+| t | test | Тесты |
+| l | lint | Линтер |
+| fmt | format | Форматирование |
+| v | version | Версия |
+| i | install | Установка |
+| c | clean | Очистка |
+
+---
+
 ### v0.17.0 — Enterprise Features
 
 **Цель:** Enterprise-ready функции
