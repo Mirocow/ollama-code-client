@@ -390,27 +390,20 @@ export * from './plugins/index.js';
 // Export prompt logic
 export * from './prompts/mcp-prompts.js';
 
-// Export specific tool logic
-export * from './tools/read-file.js';
-export * from './tools/ls.js';
-export * from './tools/grep.js';
-export * from './tools/ripGrep.js';
-export * from './tools/glob.js';
-export * from './tools/edit.js';
-export * from './tools/exitPlanMode.js';
-export * from './tools/lsp.js';
-export * from './tools/memoryTool.js';
-export * from './tools/mcp-client.js';
-export * from './tools/mcp-client-manager.js';
-export * from './tools/mcp-tool.js';
-export * from './tools/sdk-control-client-transport.js';
-export * from './tools/shell.js';
-export * from './tools/skill.js';
-export * from './tools/task.js';
-export * from './tools/todoWrite.js';
-export * from './tools/web-fetch.js';
-export * from './tools/web-search/index.js';
-export * from './tools/write-file.js';
+// Export tools from plugins
+export * from './plugins/builtin/file-tools/index.js';
+export * from './plugins/builtin/search-tools/index.js';
+export * from './plugins/builtin/shell-tools/index.js';
+export * from './plugins/builtin/dev-tools/index.js';
+export * from './plugins/builtin/agent-tools/index.js';
+export * from './plugins/builtin/productivity-tools/index.js';
+export * from './plugins/builtin/memory-tools/index.js';
+export * from './plugins/builtin/lsp-tools/index.js';
+export * from './plugins/builtin/mcp-tools/index.js';
+export * from './plugins/builtin/database-tools/index.js';
+export * from './plugins/builtin/git-tools/index.js';
+export * from './plugins/builtin/api-tools/index.js';
+export * from './plugins/builtin/utility-tools/index.js';
 
 // ============================================================================
 // Services

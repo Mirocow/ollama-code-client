@@ -30,17 +30,13 @@ export const DEFAULT_GOLANG_TIMEOUT_MS = 120000;
 
 export type GolangAction =
   | 'run' // Run a Go file
-  | 'r' // Alias for run
   | 'build' // Build a Go program
-  | 'b' // Alias for build
   | 'test' // Run tests
-  | 't' // Alias for test
   | 'test_cover' // Run tests with coverage
   | 'test_bench' // Run benchmarks
   | 'fmt' // Format code
   | 'vet' // Run go vet
   | 'lint' // Run golangci-lint
-  | 'l' // Alias for lint
   | 'mod_init' // Initialize go.mod
   | 'mod_tidy' // Tidy dependencies
   | 'mod_download' // Download dependencies
@@ -48,16 +44,12 @@ export type GolangAction =
   | 'mod_graph' // Show dependency graph
   | 'get' // Get/add a package
   | 'install' // Install a package
-  | 'i' // Alias for install
   | 'list' // List packages
   | 'doc' // Show documentation
   | 'env' // Show Go environment
   | 'version' // Show Go version
-  | 'v' // Alias for version
   | 'clean' // Clean build cache
-  | 'c' // Alias for clean
   | 'generate' // Run go generate
-  | 'init' // Alias for mod_init
   | 'custom'; // Custom command
 
 export interface GolangToolParams {
@@ -121,7 +113,7 @@ export class GolangToolInvocation extends BaseToolInvocation<
     _abortSignal: AbortSignal,
   ): Promise<ToolCallConfirmationDetails | false> {
     // Actions that modify the project need confirmation
-    const needsConfirmation = ['mod_init', 'init', 'get', 'install', 'i', 'clean', 'c'].includes(
+    const needsConfirmation = ['mod_init', 'get', 'install', 'clean'].includes(
       this.params.action,
     );
 
@@ -148,15 +140,12 @@ export class GolangToolInvocation extends BaseToolInvocation<
   private buildCommand(): string {
     switch (this.params.action) {
       case 'run':
-      case 'r': // Alias for run
         return this.buildRunCommand();
 
       case 'build':
-      case 'b': // Alias for build
         return this.buildBuildCommand();
 
       case 'test':
-      case 't': // Alias for test
         return this.buildTestCommand();
 
       case 'test_cover':
@@ -172,11 +161,9 @@ export class GolangToolInvocation extends BaseToolInvocation<
         return this.buildVetCommand();
 
       case 'lint':
-      case 'l': // Alias for lint
         return this.buildLintCommand();
 
       case 'mod_init':
-      case 'init': // Alias for mod_init
         return this.buildModInitCommand();
 
       case 'mod_tidy':
@@ -195,7 +182,6 @@ export class GolangToolInvocation extends BaseToolInvocation<
         return this.buildGetCommand();
 
       case 'install':
-      case 'i': // Alias for install
         return this.buildInstallCommand();
 
       case 'list':
@@ -208,11 +194,9 @@ export class GolangToolInvocation extends BaseToolInvocation<
         return this.buildEnvCommand();
 
       case 'version':
-      case 'v': // Alias for version
         return this.buildVersionCommand();
 
       case 'clean':
-      case 'c': // Alias for clean
         return this.buildCleanCommand();
 
       case 'generate':
@@ -725,17 +709,13 @@ export class GolangTool extends BaseDeclarativeTool<
             type: 'string',
             enum: [
               'run',
-              'r', // Alias for run
               'build',
-              'b', // Alias for build
               'test',
-              't', // Alias for test
               'test_cover',
               'test_bench',
               'fmt',
               'vet',
               'lint',
-              'l', // Alias for lint
               'mod_init',
               'mod_tidy',
               'mod_download',
@@ -743,16 +723,12 @@ export class GolangTool extends BaseDeclarativeTool<
               'mod_graph',
               'get',
               'install',
-              'i', // Alias for install
               'list',
               'doc',
               'env',
               'version',
-              'v', // Alias for version
               'clean',
-              'c', // Alias for clean
               'generate',
-              'init', // Alias for mod_init
               'custom',
             ],
             description: 'The Go action to perform',

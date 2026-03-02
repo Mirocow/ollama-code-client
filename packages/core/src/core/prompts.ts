@@ -10,7 +10,7 @@ import os from 'node:os';
 import { ToolNames } from '../tools/tool-names.js';
 import process from 'node:process';
 import { isGitRepository } from '../utils/gitUtils.js';
-import { OLLAMA_CODE_CONFIG_DIR } from '../tools/memoryTool.js';
+import { OLLAMA_CODE_CONFIG_DIR } from '../plugins/builtin/memory-tools/save-memory/index.js';
 import type { GenerateContentConfig } from '../types/content.js';
 import { createDebugLogger } from '../utils/debugLogger.js';
 import { getToolLearningManager } from '../learning/tool-learning.js';

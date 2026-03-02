@@ -55,7 +55,7 @@ import {
 } from './subagent-statistics.js';
 import type { SubagentHooks } from './subagent-hooks.js';
 
-import { TaskTool } from '../tools/task.js';
+import { TaskTool } from '../plugins/builtin/agent-tools/task/index.js';
 import { DEFAULT_OLLAMA_MODEL } from '../config/models.js';
 
 /**

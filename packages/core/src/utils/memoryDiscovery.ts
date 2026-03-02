@@ -8,7 +8,7 @@ import * as fs from 'node:fs/promises';
 import * as fsSync from 'node:fs';
 import * as path from 'node:path';
 import { homedir } from 'node:os';
-import { getAllOllamaMdFilenames } from '../tools/memoryTool.js';
+import { getAllOllamaMdFilenames } from '../plugins/builtin/memory-tools/save-memory/index.js';
 import type { FileDiscoveryService } from '../services/fileDiscoveryService.js';
 import { processImports } from './memoryImportProcessor.js';
 import { OLLAMA_DIR } from './paths.js';

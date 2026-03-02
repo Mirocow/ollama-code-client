@@ -33,7 +33,6 @@ export type SwiftAction =
   | 'build' // Build with swift build
   | 'test' // Run tests with swift test
   | 'package_init' // Initialize package
-  | 'init' // Alias for package_init
   | 'package_resolve' // Resolve dependencies
   | 'package_update' // Update dependencies
   | 'package_dump' // Dump package info
@@ -103,7 +102,6 @@ export class SwiftToolInvocation extends BaseToolInvocation<
     // Actions that modify the project need confirmation
     const needsConfirmation = [
       'package_init',
-      'init',
       'package_edit',
       'package_reset',
     ].includes(this.params.action);
@@ -142,7 +140,6 @@ export class SwiftToolInvocation extends BaseToolInvocation<
         return this.buildTestCommand();
 
       case 'package_init':
-      case 'init': // Alias for package_init
         return this.buildPackageInitCommand();
 
       case 'package_resolve':
@@ -606,7 +603,6 @@ export class SwiftTool extends BaseDeclarativeTool<
               'build',
               'test',
               'package_init',
-              'init', // Alias for package_init
               'package_resolve',
               'package_update',
               'package_dump',

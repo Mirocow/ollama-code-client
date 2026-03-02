@@ -46,7 +46,7 @@ import {
 import { LoopDetectionService } from '../services/loopDetectionService.js';
 
 // Tools
-import { TaskTool } from '../tools/task.js';
+import { TaskTool } from '../plugins/builtin/agent-tools/task/index.js';
 
 // Utilities
 import {

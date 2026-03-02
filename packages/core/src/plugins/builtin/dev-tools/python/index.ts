@@ -40,7 +40,6 @@ export type PythonAction =
   | 'pip_list' // List installed packages
   | 'pip_freeze' // Freeze requirements
   | 'mypy' // Run mypy type checker
-  | 'init' // Alias for venv_create
   | 'custom'; // Custom Python command
 
 export interface PythonToolParams {
@@ -94,7 +93,7 @@ export class PythonToolInvocation extends BaseToolInvocation<
     _abortSignal: AbortSignal,
   ): Promise<ToolCallConfirmationDetails | false> {
     // Check if action needs confirmation
-    const needsConfirmation = ['pip_install', 'venv_create', 'init'].includes(
+    const needsConfirmation = ['pip_install', 'venv_create'].includes(
       this.params.action,
     );
 
@@ -145,7 +144,6 @@ export class PythonToolInvocation extends BaseToolInvocation<
         return this.buildFormatCommand(effectivePython);
 
       case 'venv_create':
-      case 'init': // Alias for venv_create
         return this.buildVenvCreateCommand(pythonCmd);
 
       case 'venv_activate':
@@ -494,7 +492,6 @@ export class PythonTool extends BaseDeclarativeTool<
               'pip_list',
               'pip_freeze',
               'mypy',
-              'init', // Alias for venv_create
               'custom',
             ],
             description: 'The Python action to perform',
