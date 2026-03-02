@@ -1,5 +1,98 @@
 # Changelog
 
+## 0.16.2
+
+*Bug Fixes & UX Improvements*
+
+### Bug Fixes
+
+#### PCRE2 Support for Look-around Regex in Grep
+
+Added automatic PCRE2 support for look-ahead and look-behind regex patterns:
+
+| Pattern | Description | Example |
+|---------|-------------|---------|
+| `(?=...)` | Positive look-ahead | `(?=.*\bfactory\b)(?=.*\bmodel\b)` |
+| `(?!...)` | Negative look-ahead | `error(?!.*warning)` |
+| `(?<=...)` | Positive look-behind | `(?<=static )import` |
+| `(?<!...)` | Negative look-behind | `(?<!@)import` |
+
+**Files Modified:**
+- `packages/core/src/utils/ripgrepUtils.ts` — Added `requiresPcre2()` function
+- `packages/core/src/plugins/builtin/search-tools/ripGrep/index.ts` — Automatic `--pcre2` flag
+
+#### Language Rule in CRITICAL Section
+
+Fixed model switching to English after tool errors by adding language rule to CRITICAL section in all prompt templates:
+
+| Template | Change |
+|----------|--------|
+| `system-8b.md` | Added `✅ ВСЕГДА отвечай на языке пользователя` |
+| `system-14b.md` | Added to [CRITICAL] section |
+| `system-32b.md` | Added to [CRITICAL] section |
+| `system-70b.md` | Added to Security section |
+
+### UX Improvements
+
+#### Init Alias for Dev-tools
+
+Added intuitive `init` alias for all dev-tools with init/create actions:
+
+| Tool | init → | Additional aliases |
+|------|--------|-------------------|
+| `golang_dev` | `mod_init` | — |
+| `python_dev` | `venv_create` | — |
+| `rust_dev` | `cargo_init` | `new` → `cargo_new` |
+| `swift_dev` | `package_init` | — |
+
+**Example usage:**
+```json
+// Before (confusing):
+{"action": "mod_init", "module_name": "github.com/user/project"}
+
+// After (intuitive):
+{"action": "init", "module_name": "github.com/user/project"}
+```
+
+#### Short Aliases for Golang Dev Tool
+
+Added short aliases for frequently used actions:
+
+| Alias | Action |
+|-------|--------|
+| `r` | `run` |
+| `b` | `build` |
+| `t` | `test` |
+| `l` | `lint` |
+| `i` | `install` |
+| `v` | `version` |
+| `c` | `clean` |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `ROADMAP.md` | Added v0.16.2 section with detailed task descriptions |
+| `packages/core/src/utils/ripgrepUtils.ts` | Added PCRE2 detection |
+| `packages/core/src/utils/ripgrepUtils.test.ts` | Added 28 tests for `requiresPcre2()` |
+| `packages/core/src/plugins/builtin/search-tools/ripGrep/index.ts` | Auto PCRE2 flag |
+| `packages/core/src/prompts/templates/*.md` | Language rule in CRITICAL |
+| `packages/core/src/plugins/builtin/dev-tools/golang/index.ts` | Short aliases |
+| `packages/core/src/plugins/builtin/dev-tools/python/index.ts` | init alias |
+| `packages/core/src/plugins/builtin/dev-tools/rust/index.ts` | init, new aliases |
+| `packages/core/src/plugins/builtin/dev-tools/swift/index.ts` | init alias |
+
+### Commits
+
+```
+dfd443f8 feat(dev-tools): add short aliases for common actions in golang_dev
+33bed3d7 feat(dev-tools): add 'init' alias for all dev-tools with init/create actions
+a5eb94e4 fix(prompts): add language rule to CRITICAL section in all templates
+cea79177 feat(grep): add PCRE2 support for look-around regex patterns
+```
+
+---
+
 ## 0.16.0
 
 *Documentation created with GLM-5 from Z.AI*
