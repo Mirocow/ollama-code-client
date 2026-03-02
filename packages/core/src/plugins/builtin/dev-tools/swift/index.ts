@@ -23,6 +23,7 @@ import { ShellExecutionService } from '../../../../services/shellExecutionServic
 import { createDebugLogger } from '../../../../utils/debugLogger.js';
 import type { AnsiOutput } from '../../../../utils/terminalSerializer.js';
 
+import { abortSignalAny } from '../../../../utils/nodePolyfills.js';
 const debugLogger = createDebugLogger('SWIFT');
 
 export const DEFAULT_SWIFT_TIMEOUT_MS = 120000;
@@ -99,9 +100,11 @@ export class SwiftToolInvocation extends BaseToolInvocation<
     _abortSignal: AbortSignal,
   ): Promise<ToolCallConfirmationDetails | false> {
     // Actions that modify the project need confirmation
-    const needsConfirmation = ['package_init', 'package_edit', 'package_reset'].includes(
-      this.params.action,
-    );
+    const needsConfirmation = [
+      'package_init',
+      'package_edit',
+      'package_reset',
+    ].includes(this.params.action);
 
     if (!needsConfirmation) {
       return false;
@@ -182,163 +185,163 @@ export class SwiftToolInvocation extends BaseToolInvocation<
 
   private buildRunCommand(): string {
     const parts = ['swift', 'run'];
-    
+
     if (this.params.product) {
       parts.push(this.params.product);
     } else if (this.params.target) {
       parts.push(this.params.target);
     }
-    
+
     this.addCommonFlags(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildBuildCommand(): string {
     const parts = ['swift', 'build'];
-    
+
     if (this.params.target) {
       parts.push('--target', this.params.target);
     } else if (this.params.product) {
       parts.push('--product', this.params.product);
     }
-    
+
     this.addCommonFlags(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildTestCommand(): string {
     const parts = ['swift', 'test'];
-    
+
     this.addCommonFlags(parts);
-    
+
     if (this.params.enable_test_discovery) {
       parts.push('--enable-test-discovery');
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     } else {
       parts.push('--parallel');
     }
-    
+
     return parts.join(' ');
   }
 
   private buildPackageInitCommand(): string {
     const parts = ['swift', 'package', 'init'];
-    
+
     if (this.params.package_name) {
       parts.push('--name', this.params.package_name);
     }
-    
+
     if (this.params.package_type) {
       parts.push('--type', this.params.package_type);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildPackageResolveCommand(): string {
     const parts = ['swift', 'package', 'resolve'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildPackageUpdateCommand(): string {
     const parts = ['swift', 'package', 'update'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildPackageDumpCommand(): string {
     const parts = ['swift', 'package', 'dump-package'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildPackageDescCommand(): string {
     const parts = ['swift', 'package', 'describe'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     } else {
       parts.push('--type', 'json');
     }
-    
+
     return parts.join(' ');
   }
 
   private buildPackageCleanCommand(): string {
     const parts = ['swift', 'package', 'clean'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildPackageEditCommand(): string {
     const parts = ['swift', 'package', 'edit'];
-    
+
     if (this.params.package_name) {
       parts.push(this.params.package_name);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildPackageUneditCommand(): string {
     const parts = ['swift', 'package', 'unedit'];
-    
+
     if (this.params.package_name) {
       parts.push(this.params.package_name);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildPackageResetCommand(): string {
     const parts = ['swift', 'package', 'reset'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
@@ -349,7 +352,8 @@ export class SwiftToolInvocation extends BaseToolInvocation<
   ): Promise<ToolResult> {
     if (signal.aborted) {
       return {
-        llmContent: 'Swift command was cancelled by user before it could start.',
+        llmContent:
+          'Swift command was cancelled by user before it could start.',
         returnDisplay: 'Command cancelled by user.',
       };
     }
@@ -370,7 +374,7 @@ export class SwiftToolInvocation extends BaseToolInvocation<
     let combinedSignal = signal;
     if (effectiveTimeout) {
       const timeoutSignal = AbortSignal.timeout(effectiveTimeout);
-      combinedSignal = AbortSignal.any([signal, timeoutSignal]);
+      combinedSignal = abortSignalAny([signal, timeoutSignal]);
     }
 
     const cwd = this.params.directory || this.config.getTargetDir();

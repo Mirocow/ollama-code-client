@@ -27,9 +27,9 @@ if (!process.cwd().includes('packages')) {
 }
 
 // build typescript files with increased memory limit
-execSync('tsc --build', {
+execSync('npx tsc --build', {
   stdio: 'inherit',
-  env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' }
+  env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' },
 });
 
 // copy .{md,json} files

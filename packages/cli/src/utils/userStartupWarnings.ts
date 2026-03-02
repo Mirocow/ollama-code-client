@@ -130,5 +130,5 @@ export async function getUserStartupWarnings(
   const results = await Promise.all(
     WARNING_CHECKS.map((check) => check.check(options)),
   );
-  return results.filter((msg) => msg !== null);
+  return results.filter((msg): msg is string => msg !== null);
 }

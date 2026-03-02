@@ -27,6 +27,7 @@ import {
 } from './tools.js';
 import { getErrorMessage } from '../utils/errors.js';
 import { summarizeToolOutput } from '../utils/summarizer.js';
+import { abortSignalAny } from '../utils/nodePolyfills.js';
 import type {
   ShellExecutionConfig,
   ShellOutputEvent,
@@ -147,7 +148,7 @@ export class ShellToolInvocation extends BaseToolInvocation<
     let combinedSignal = signal;
     if (effectiveTimeout) {
       const timeoutSignal = AbortSignal.timeout(effectiveTimeout);
-      combinedSignal = AbortSignal.any([signal, timeoutSignal]);
+      combinedSignal = abortSignalAny([signal, timeoutSignal]);
     }
 
     const isWindows = os.platform() === 'win32';

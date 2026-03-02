@@ -9,13 +9,13 @@ import type {
   FunctionCall,
   GenerateContentResponseUsageMetadata,
   Part,
-
   Config,
   ToolCallConfirmationDetails,
   ToolResult,
   ChatRecord,
   SubAgentEventEmitter,
-  StreamEvent} from '@ollama-code/ollama-code-core';
+  StreamEvent,
+} from '@ollama-code/ollama-code-core';
 import {
   ApprovalMode,
   convertToFunctionResponse,
@@ -172,7 +172,9 @@ export class Session implements SessionContext {
 
     // Check if the input contains a slash command
     // Extract text from the first text block if present
-    const firstTextBlock = params.prompt.find((block) => block.type === 'text');
+    const firstTextBlock = params.prompt.find(
+      (block) => block.type === 'text',
+    ) as { type: 'text'; text: string } | undefined;
     const inputText = firstTextBlock?.text || '';
 
     let parts: Part[] | null;
@@ -769,12 +771,15 @@ export class Session implements SessionContext {
 
         // Stream all messages to the client
         for await (const msg of result.messages) {
-          await this.client.sendCustomNotification('_ollamacode/slash_command', {
-            sessionId: this.sessionId,
-            command,
-            messageType: msg.messageType,
-            message: msg.content,
-          });
+          await this.client.sendCustomNotification(
+            '_ollamacode/slash_command',
+            {
+              sessionId: this.sessionId,
+              command,
+              messageType: msg.messageType,
+              message: msg.content,
+            },
+          );
 
           // If we encounter an error message, throw after sending
           if (msg.messageType === 'error') {

@@ -843,12 +843,16 @@ export async function start_sandbox(
   });
 
   return new Promise<number>((resolve, reject) => {
+    if (!sandboxProcess) {
+      reject(new Error('Failed to spawn sandbox process'));
+      return;
+    }
     sandboxProcess.on('error', (err) => {
       writeStderrLine(`Sandbox process error: ${err}`);
       reject(err);
     });
 
-    sandboxProcess?.on('close', (code, signal) => {
+    sandboxProcess.on('close', (code, signal) => {
       process.stdin.resume();
       if (code !== 0 && code !== null) {
         writeStderrLine(

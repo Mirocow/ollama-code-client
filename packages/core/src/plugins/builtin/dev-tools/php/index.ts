@@ -23,6 +23,7 @@ import { ShellExecutionService } from '../../../../services/shellExecutionServic
 import { createDebugLogger } from '../../../../utils/debugLogger.js';
 import type { AnsiOutput } from '../../../../utils/terminalSerializer.js';
 
+import { abortSignalAny } from '../../../../utils/nodePolyfills.js';
 const debugLogger = createDebugLogger('PHP');
 
 export const DEFAULT_PHP_TIMEOUT_MS = 120000;
@@ -354,7 +355,7 @@ export class PHPToolInvocation extends BaseToolInvocation<
     let combinedSignal = signal;
     if (effectiveTimeout) {
       const timeoutSignal = AbortSignal.timeout(effectiveTimeout);
-      combinedSignal = AbortSignal.any([signal, timeoutSignal]);
+      combinedSignal = abortSignalAny([signal, timeoutSignal]);
     }
 
     const cwd = this.params.directory || this.config.getTargetDir();
@@ -557,10 +558,7 @@ function getPHPToolDescription(): string {
 `;
 }
 
-export class PHPTool extends BaseDeclarativeTool<
-  PHPToolParams,
-  ToolResult
-> {
+export class PHPTool extends BaseDeclarativeTool<PHPToolParams, ToolResult> {
   static Name: string = 'php_dev';
   private allowlist: Set<string> = new Set();
 

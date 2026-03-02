@@ -10,11 +10,9 @@ import type {
   SkillConfig,
   SubagentConfig,
   ClaudeMarketplaceConfig,
-
-  Config} from '../index.js';
-import {
-  Storage
+  Config,
 } from '../index.js';
+import { Storage } from '../index.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -51,9 +49,7 @@ import type {
   ExtensionSetting,
   ResolvedExtensionSetting,
 } from './extensionSettings.js';
-import type {
-  ExtensionOriginSource,
-} from '../config/config.js';
+import type { ExtensionOriginSource } from '../config/config.js';
 
 import { loadSkillsFromDir } from '../skills/skill-load.js';
 import { loadSubagentFromDir } from '../subagents/subagent-manager.js';
@@ -950,7 +946,7 @@ export class ExtensionManager {
   async uninstallExtension(
     extensionIdentifier: string,
     isUpdate: boolean,
-    cwd?: string,
+    _cwd?: string,
   ): Promise<void> {
     const installedExtensions = this.getLoadedExtensions();
     const extension = installedExtensions.find(
@@ -1123,7 +1119,7 @@ export class ExtensionManager {
             ),
           ),
       )
-    ).filter((updateInfo) => !!updateInfo);
+    ).filter((updateInfo): updateInfo is ExtensionUpdateInfo => !!updateInfo);
   }
 
   async refreshMemory(): Promise<void> {

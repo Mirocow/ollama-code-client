@@ -23,6 +23,7 @@ import { ShellExecutionService } from '../../../../services/shellExecutionServic
 import { createDebugLogger } from '../../../../utils/debugLogger.js';
 import type { AnsiOutput } from '../../../../utils/terminalSerializer.js';
 
+import { abortSignalAny } from '../../../../utils/nodePolyfills.js';
 const debugLogger = createDebugLogger('TYPESCRIPT');
 
 export const DEFAULT_TYPESCRIPT_TIMEOUT_MS = 120000;
@@ -219,93 +220,93 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
 
   private buildCompileCommand(): string {
     const parts = ['tsc'];
-    
+
     this.addProjectFlag(parts);
     this.addCompileOptions(parts);
-    
+
     if (this.params.file) {
       parts.push(this.params.file);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildWatchCommand(): string {
     const parts = ['tsc', '--watch'];
-    
+
     this.addProjectFlag(parts);
     this.addCompileOptions(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildBuildCommand(): string {
     const parts = ['tsc', '--build'];
-    
+
     if (this.params.project) {
       parts.push(this.params.project);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCheckCommand(): string {
     const parts = ['tsc', '--noEmit'];
-    
+
     this.addProjectFlag(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCleanCommand(): string {
     const parts = ['tsc', '--build', '--clean'];
-    
+
     if (this.params.project) {
       parts.push(this.params.project);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildInitCommand(): string {
     const parts = ['tsc', '--init'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildShowConfigCommand(): string {
     const parts = ['tsc', '--showConfig'];
-    
+
     this.addProjectFlag(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
@@ -315,55 +316,55 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
 
   private buildRunCommand(): string {
     const parts = ['ts-node'];
-    
+
     if (this.params.project) {
       parts.push('-P', this.params.project);
     }
-    
+
     if (this.params.file) {
       parts.push(this.params.file);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildRunEsmCommand(): string {
     const parts = ['ts-node-esm'];
-    
+
     if (this.params.project) {
       parts.push('-P', this.params.project);
     }
-    
+
     if (this.params.file) {
       parts.push(this.params.file);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildTranspileCommand(): string {
     const parts = ['ts-node', '--transpile-only'];
-    
+
     if (this.params.project) {
       parts.push('-P', this.params.project);
     }
-    
+
     if (this.params.file) {
       parts.push(this.params.file);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
@@ -374,7 +375,8 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
   ): Promise<ToolResult> {
     if (signal.aborted) {
       return {
-        llmContent: 'TypeScript command was cancelled by user before it could start.',
+        llmContent:
+          'TypeScript command was cancelled by user before it could start.',
         returnDisplay: 'Command cancelled by user.',
       };
     }
@@ -391,11 +393,12 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
       };
     }
 
-    const effectiveTimeout = this.params.timeout ?? DEFAULT_TYPESCRIPT_TIMEOUT_MS;
+    const effectiveTimeout =
+      this.params.timeout ?? DEFAULT_TYPESCRIPT_TIMEOUT_MS;
     let combinedSignal = signal;
     if (effectiveTimeout) {
       const timeoutSignal = AbortSignal.timeout(effectiveTimeout);
-      combinedSignal = AbortSignal.any([signal, timeoutSignal]);
+      combinedSignal = abortSignalAny([signal, timeoutSignal]);
     }
 
     const cwd = this.params.directory || this.config.getTargetDir();

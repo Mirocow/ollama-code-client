@@ -101,6 +101,7 @@ describe('debugLogger', () => {
       logger.info('info message');
       logger.warn('warn message');
       logger.error('error message');
+      logger.log('log message');
 
       await vi.runAllTimersAsync();
 
@@ -109,6 +110,20 @@ describe('debugLogger', () => {
       expect(calls[1]?.[1]).toContain('[INFO]');
       expect(calls[2]?.[1]).toContain('[WARN]');
       expect(calls[3]?.[1]).toContain('[ERROR]');
+      expect(calls[4]?.[1]).toContain('[LOG]');
+    });
+
+    it('writes log level messages', async () => {
+      const logger = createDebugLogger('TEST');
+      logger.log('generic log message');
+
+      await vi.runAllTimersAsync();
+
+      expect(fs.appendFile).toHaveBeenCalledWith(
+        Storage.getDebugLogPath('test-session-123'),
+        '2026-01-24T10:30:00.000Z [LOG] [TEST] generic log message\n',
+        'utf8',
+      );
     });
 
     it('formats multiple arguments', async () => {

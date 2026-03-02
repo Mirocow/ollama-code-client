@@ -23,9 +23,78 @@ import { ShellExecutionService } from '../services/shellExecutionService.js';
 import { createDebugLogger } from '../utils/debugLogger.js';
 import type { AnsiOutput } from '../utils/terminalSerializer.js';
 
+import { abortSignalAny } from '../utils/nodePolyfills.js';
 const debugLogger = createDebugLogger('TYPESCRIPT');
 
 export const DEFAULT_TYPESCRIPT_TIMEOUT_MS = 120000;
+
+/**
+ * TypeScript runner type - tsx is preferred as it's faster and more modern
+ * but we support ts-node for backward compatibility
+ */
+export type TypeScriptRunner = 'tsx' | 'ts-node';
+
+/**
+ * Detects the best available TypeScript runner for the project.
+ * Priority: tsx (faster, modern) > ts-node (legacy)
+ *
+ * This function checks the project's dependencies to determine which
+ * TypeScript runner is available and should be used.
+ */
+export async function detectTypeScriptRunner(
+  config: Config,
+): Promise<TypeScriptRunner> {
+  const targetDir = config.getTargetDir();
+
+  try {
+    // Check package.json for installed runners
+    const { readFileSync, existsSync } = await import('node:fs');
+    const packageJsonPath = path.join(targetDir, 'package.json');
+
+    if (existsSync(packageJsonPath)) {
+      const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+      const allDeps = {
+        ...packageJson.dependencies,
+        ...packageJson.devDependencies,
+      };
+
+      // Prefer tsx if available (faster, more modern)
+      if (allDeps['tsx']) {
+        debugLogger.debug('Using tsx as TypeScript runner');
+        return 'tsx';
+      }
+
+      // Fall back to ts-node
+      if (allDeps['ts-node']) {
+        debugLogger.debug('Using ts-node as TypeScript runner');
+        return 'ts-node';
+      }
+    }
+  } catch (error) {
+    debugLogger.warn(
+      'Failed to detect TypeScript runner, defaulting to tsx:',
+      error,
+    );
+  }
+
+  // Default to tsx as it's the modern standard
+  debugLogger.debug('Defaulting to tsx as TypeScript runner');
+  return 'tsx';
+}
+
+/**
+ * Get the command prefix for running TypeScript files based on the runner
+ */
+export function getRunnerCommand(runner: TypeScriptRunner): string[] {
+  switch (runner) {
+    case 'tsx':
+      return ['npx', 'tsx'];
+    case 'ts-node':
+      return ['npx', 'ts-node'];
+    default:
+      return ['npx', 'tsx'];
+  }
+}
 
 export type TypeScriptAction =
   | 'compile' // Compile with tsc
@@ -36,8 +105,8 @@ export type TypeScriptAction =
   | 'init' // Initialize tsconfig.json
   | 'show_config' // Show resolved config
   | 'version' // Show TypeScript version
-  | 'run' // Run with ts-node
-  | 'run_esm' // Run ESM with ts-node-esm
+  | 'run' // Run TypeScript file
+  | 'run_esm' // Run ESM TypeScript file
   | 'transpile' // Transpile only (no type check)
   | 'custom'; // Custom TypeScript command
 
@@ -67,12 +136,25 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
   TypeScriptToolParams,
   ToolResult
 > {
+  private cachedRunner: TypeScriptRunner | null = null;
+
   constructor(
     private readonly config: Config,
     params: TypeScriptToolParams,
     private readonly allowlist: Set<string>,
   ) {
     super(params);
+  }
+
+  /**
+   * Get the TypeScript runner to use, with caching for performance
+   */
+  private async getRunner(): Promise<TypeScriptRunner> {
+    if (this.cachedRunner) {
+      return this.cachedRunner;
+    }
+    this.cachedRunner = await detectTypeScriptRunner(this.config);
+    return this.cachedRunner;
   }
 
   getDescription(): string {
@@ -107,7 +189,9 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
       return false;
     }
 
-    const command = this.buildCommand();
+    // Detect runner for command building
+    const runner = await this.getRunner();
+    const command = this.buildCommand(runner);
     const confirmationDetails: ToolCallConfirmationDetails = {
       type: 'exec',
       title: `Confirm TypeScript ${this.params.action}`,
@@ -116,7 +200,9 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
       onConfirm: async (outcome: ToolConfirmationOutcome) => {
         if (outcome === ToolConfirmationOutcome.ProceedAlways) {
           this.allowlist.add('tsc');
+          this.allowlist.add('tsx');
           this.allowlist.add('ts-node');
+          this.allowlist.add('npx');
         }
       },
     };
@@ -124,7 +210,7 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
     return confirmationDetails;
   }
 
-  private buildCommand(): string {
+  private buildCommand(runner?: TypeScriptRunner): string {
     switch (this.params.action) {
       case 'compile':
         return this.buildCompileCommand();
@@ -151,13 +237,13 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
         return this.buildVersionCommand();
 
       case 'run':
-        return this.buildRunCommand();
+        return this.buildRunCommand(runner);
 
       case 'run_esm':
-        return this.buildRunEsmCommand();
+        return this.buildRunEsmCommand(runner);
 
       case 'transpile':
-        return this.buildTranspileCommand();
+        return this.buildTranspileCommand(runner);
 
       case 'custom':
         return this.params.command || '';
@@ -219,93 +305,93 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
 
   private buildCompileCommand(): string {
     const parts = ['tsc'];
-    
+
     this.addProjectFlag(parts);
     this.addCompileOptions(parts);
-    
+
     if (this.params.file) {
       parts.push(this.params.file);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildWatchCommand(): string {
     const parts = ['tsc', '--watch'];
-    
+
     this.addProjectFlag(parts);
     this.addCompileOptions(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildBuildCommand(): string {
     const parts = ['tsc', '--build'];
-    
+
     if (this.params.project) {
       parts.push(this.params.project);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCheckCommand(): string {
     const parts = ['tsc', '--noEmit'];
-    
+
     this.addProjectFlag(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCleanCommand(): string {
     const parts = ['tsc', '--build', '--clean'];
-    
+
     if (this.params.project) {
       parts.push(this.params.project);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildInitCommand(): string {
     const parts = ['tsc', '--init'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildShowConfigCommand(): string {
     const parts = ['tsc', '--showConfig'];
-    
+
     this.addProjectFlag(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
@@ -313,57 +399,62 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
     return 'tsc --version';
   }
 
-  private buildRunCommand(): string {
-    const parts = ['ts-node'];
-    
+  private buildRunCommand(runner?: TypeScriptRunner): string {
+    const effectiveRunner = runner || 'tsx';
+    const parts = getRunnerCommand(effectiveRunner);
+
     if (this.params.project) {
-      parts.push('-P', this.params.project);
+      parts.push('--tsconfig', this.params.project);
     }
-    
+
     if (this.params.file) {
       parts.push(this.params.file);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
-  private buildRunEsmCommand(): string {
-    const parts = ['ts-node-esm'];
-    
+  private buildRunEsmCommand(runner?: TypeScriptRunner): string {
+    // tsx natively supports ESM, same as run command
+    const effectiveRunner = runner || 'tsx';
+    const parts = getRunnerCommand(effectiveRunner);
+
     if (this.params.project) {
-      parts.push('-P', this.params.project);
+      parts.push('--tsconfig', this.params.project);
     }
-    
+
     if (this.params.file) {
       parts.push(this.params.file);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
-  private buildTranspileCommand(): string {
-    const parts = ['ts-node', '--transpile-only'];
-    
+  private buildTranspileCommand(runner?: TypeScriptRunner): string {
+    // tsx always does fast transpilation without full type checking
+    const effectiveRunner = runner || 'tsx';
+    const parts = getRunnerCommand(effectiveRunner);
+
     if (this.params.project) {
-      parts.push('-P', this.params.project);
+      parts.push('--tsconfig', this.params.project);
     }
-    
+
     if (this.params.file) {
       parts.push(this.params.file);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
@@ -374,12 +465,15 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
   ): Promise<ToolResult> {
     if (signal.aborted) {
       return {
-        llmContent: 'TypeScript command was cancelled by user before it could start.',
+        llmContent:
+          'TypeScript command was cancelled by user before it could start.',
         returnDisplay: 'Command cancelled by user.',
       };
     }
 
-    const command = this.buildCommand();
+    // Detect the best TypeScript runner for this project
+    const runner = await this.getRunner();
+    const command = this.buildCommand(runner);
     if (!command) {
       return {
         llmContent: 'Invalid TypeScript action or missing required parameters.',
@@ -391,11 +485,12 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
       };
     }
 
-    const effectiveTimeout = this.params.timeout ?? DEFAULT_TYPESCRIPT_TIMEOUT_MS;
+    const effectiveTimeout =
+      this.params.timeout ?? DEFAULT_TYPESCRIPT_TIMEOUT_MS;
     let combinedSignal = signal;
     if (effectiveTimeout) {
       const timeoutSignal = AbortSignal.timeout(effectiveTimeout);
-      combinedSignal = AbortSignal.any([signal, timeoutSignal]);
+      combinedSignal = abortSignalAny([signal, timeoutSignal]);
     }
 
     const cwd = this.params.directory || this.config.getTargetDir();
@@ -507,16 +602,16 @@ function getTypeScriptToolDescription(): string {
 
 8. **version** - Show TypeScript version
 
-9. **run** - Run TypeScript with ts-node
+9. **run** - Run TypeScript with tsx (modern, fast TypeScript runner)
    - Requires: \`file\` (TypeScript file to run)
    - Optional: \`project\` (tsconfig.json path)
    - Optional: \`args\` (program arguments)
 
-10. **run_esm** - Run ESM TypeScript with ts-node-esm
+10. **run_esm** - Run ESM TypeScript with tsx (same as run, tsx natively supports ESM)
     - Requires: \`file\` (TypeScript file to run)
     - Optional: \`args\` (program arguments)
 
-11. **transpile** - Transpile only (faster, no type check)
+11. **transpile** - Fast transpile and run with tsx (no full type check)
     - Requires: \`file\` (TypeScript file to run)
     - Optional: \`args\` (program arguments)
 

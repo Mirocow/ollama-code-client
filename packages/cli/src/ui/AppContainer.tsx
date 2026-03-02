@@ -754,7 +754,7 @@ export const AppContainer = (props: AppContainerProps) => {
     const pendingHistoryItems = [
       ...pendingSlashCommandHistoryItems,
       ...pendingGeminiHistoryItems,
-    ];
+    ].filter((item): item is HistoryItemWithoutId => !!item);
     if (isToolExecuting(pendingHistoryItems)) {
       buffer.setText(''); // Just clear the prompt
       return;
@@ -901,9 +901,9 @@ export const AppContainer = (props: AppContainerProps) => {
   }, []);
   const shouldShowIdePrompt = Boolean(
     currentIDE &&
-    !config.getIdeMode() &&
-    !settings.merged.ide?.hasSeenNudge &&
-    !idePromptAnswered,
+      !config.getIdeMode() &&
+      !settings.merged.ide?.hasSeenNudge &&
+      !idePromptAnswered,
   );
 
   // Command migration nudge
@@ -1380,7 +1380,10 @@ export const AppContainer = (props: AppContainerProps) => {
   });
 
   const pendingHistoryItems = useMemo(
-    () => [...pendingSlashCommandHistoryItems, ...pendingGeminiHistoryItems],
+    () =>
+      [...pendingSlashCommandHistoryItems, ...pendingGeminiHistoryItems].filter(
+        (item): item is HistoryItemWithoutId => !!item,
+      ),
     [pendingSlashCommandHistoryItems, pendingGeminiHistoryItems],
   );
 
@@ -1407,7 +1410,9 @@ export const AppContainer = (props: AppContainerProps) => {
       isApprovalModeDialogOpen,
       isResumeDialogOpen,
       slashCommands,
-      pendingSlashCommandHistoryItems,
+      pendingSlashCommandHistoryItems: pendingSlashCommandHistoryItems.filter(
+        (item): item is HistoryItemWithoutId => !!item,
+      ),
       commandContext,
       shellConfirmationRequest,
       confirmationRequest,
@@ -1418,7 +1423,9 @@ export const AppContainer = (props: AppContainerProps) => {
       geminiMdFileCount,
       streamingState,
       initError,
-      pendingGeminiHistoryItems,
+      pendingGeminiHistoryItems: pendingGeminiHistoryItems.filter(
+        (item): item is HistoryItemWithoutId => !!item,
+      ),
       thought,
       shellModeActive,
       userMessages,

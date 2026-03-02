@@ -254,7 +254,7 @@ export class IdeClient {
           if (parsedResultData.isError) {
             const textPart = parsedResultData.content.find(
               (part) => part.type === 'text',
-            );
+            ) as { type: 'text'; text: string } | undefined;
             const errorMessage =
               textPart?.text ?? `Tool 'openDiff' reported an error.`;
             debugLogger.debug(
@@ -335,7 +335,7 @@ export class IdeClient {
       if (resultData.isError) {
         const textPart = resultData.content.find(
           (part) => part.type === 'text',
-        );
+        ) as { type: 'text'; text: string } | undefined;
         const errorMessage =
           textPart?.text ?? `Tool 'closeDiff' reported an error.`;
         debugLogger.debug(
@@ -345,7 +345,9 @@ export class IdeClient {
         return undefined;
       }
 
-      const textPart = resultData.content.find((part) => part.type === 'text');
+      const textPart = resultData.content.find(
+        (part) => part.type === 'text',
+      ) as { type: 'text'; text: string } | undefined;
 
       if (textPart?.text) {
         try {

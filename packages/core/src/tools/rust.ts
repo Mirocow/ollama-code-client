@@ -23,6 +23,7 @@ import { ShellExecutionService } from '../services/shellExecutionService.js';
 import { createDebugLogger } from '../utils/debugLogger.js';
 import type { AnsiOutput } from '../utils/terminalSerializer.js';
 
+import { abortSignalAny } from '../utils/nodePolyfills.js';
 const debugLogger = createDebugLogger('RUST');
 
 export const DEFAULT_RUST_TIMEOUT_MS = 120000;
@@ -234,137 +235,137 @@ export class RustToolInvocation extends BaseToolInvocation<
 
   private buildRunCommand(): string {
     const parts = ['cargo', 'run'];
-    
+
     if (this.params.bin) {
       parts.push('--bin', this.params.bin);
     } else if (this.params.example) {
       parts.push('--example', this.params.example);
     }
-    
+
     this.addCommonFlags(parts);
-    
+
     if (this.params.args?.length) {
       parts.push('--', ...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildBuildCommand(): string {
     const parts = ['cargo', 'build'];
     this.addCommonFlags(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildTestCommand(): string {
     const parts = ['cargo', 'test'];
-    
+
     if (this.params.test_pattern) {
       parts.push(this.params.test_pattern);
     }
-    
+
     this.addCommonFlags(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildDocCommand(): string {
     const parts = ['cargo', 'doc'];
     this.addCommonFlags(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     } else {
       parts.push('--open');
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCheckCommand(): string {
     const parts = ['cargo', 'check'];
     this.addCommonFlags(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildClippyCommand(): string {
     const parts = ['cargo', 'clippy'];
     this.addCommonFlags(parts);
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     } else {
       parts.push('--', '-D', 'warnings');
     }
-    
+
     return parts.join(' ');
   }
 
   private buildFmtCommand(): string {
     const parts = ['cargo', 'fmt'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCleanCommand(): string {
     const parts = ['cargo', 'clean'];
-    
+
     if (this.params.package) {
       parts.push('-p', this.params.package);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCargoNewCommand(): string {
     const parts = ['cargo', 'new'];
-    
+
     if (this.params.crate_name) {
       parts.push(this.params.crate_name);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCargoInitCommand(): string {
     const parts = ['cargo', 'init'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCargoAddCommand(): string {
     const parts = ['cargo', 'add'];
-    
+
     if (this.params.crate_name) {
       let crateSpec = this.params.crate_name;
       if (this.params.crate_version) {
@@ -372,111 +373,111 @@ export class RustToolInvocation extends BaseToolInvocation<
       }
       parts.push(crateSpec);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCargoRemoveCommand(): string {
     const parts = ['cargo', 'remove'];
-    
+
     if (this.params.crate_name) {
       parts.push(this.params.crate_name);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCargoUpdateCommand(): string {
     const parts = ['cargo', 'update'];
-    
+
     if (this.params.crate_name) {
       parts.push('-p', this.params.crate_name);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCargoTreeCommand(): string {
     const parts = ['cargo', 'tree'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCargoPublishCommand(): string {
     const parts = ['cargo', 'publish'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCargoInstallCommand(): string {
     const parts = ['cargo', 'install'];
-    
+
     if (this.params.crate_name) {
       parts.push(this.params.crate_name);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCargoSearchCommand(): string {
     const parts = ['cargo', 'search'];
-    
+
     if (this.params.crate_name) {
       parts.push(this.params.crate_name);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCargoInfoCommand(): string {
     const parts = ['cargo', 'info'];
-    
+
     if (this.params.crate_name) {
       parts.push(this.params.crate_name);
     }
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
   private buildCargoLockCommand(): string {
     const parts = ['cargo', 'generate-lockfile'];
-    
+
     if (this.params.args?.length) {
       parts.push(...this.params.args);
     }
-    
+
     return parts.join(' ');
   }
 
@@ -508,7 +509,7 @@ export class RustToolInvocation extends BaseToolInvocation<
     let combinedSignal = signal;
     if (effectiveTimeout) {
       const timeoutSignal = AbortSignal.timeout(effectiveTimeout);
-      combinedSignal = AbortSignal.any([signal, timeoutSignal]);
+      combinedSignal = abortSignalAny([signal, timeoutSignal]);
     }
 
     const cwd = this.params.directory || this.config.getTargetDir();
@@ -734,10 +735,7 @@ function getRustToolDescription(): string {
 `;
 }
 
-export class RustTool extends BaseDeclarativeTool<
-  RustToolParams,
-  ToolResult
-> {
+export class RustTool extends BaseDeclarativeTool<RustToolParams, ToolResult> {
   static Name: string = 'rust_dev';
   private allowlist: Set<string> = new Set();
 

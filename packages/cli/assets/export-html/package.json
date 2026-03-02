@@ -9,6 +9,6 @@
     "@ollama-code/webui": "file:../../../webui"
   },
   "devDependencies": {
-    "esbuild": "^0.25.0"
+    "esbuild": "0.25.0"
   }
 }

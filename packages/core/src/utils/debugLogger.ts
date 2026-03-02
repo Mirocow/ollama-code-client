@@ -9,7 +9,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import util from 'node:util';
 import { Storage } from '../config/storage.js';
 
-type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
+type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'LOG';
 
 export interface DebugLogSession {
   getSessionId: () => string;
@@ -20,6 +20,7 @@ export interface DebugLogger {
   info: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
+  log: (...args: unknown[]) => void;
 }
 
 let ensureDebugDirPromise: Promise<void> | null = null;
@@ -168,6 +169,11 @@ export function createDebugLogger(tag?: string): DebugLogger {
       const session = getActiveSession();
       if (!session) return;
       writeLog(session, 'ERROR', tag, args);
+    },
+    log: (...args: unknown[]) => {
+      const session = getActiveSession();
+      if (!session) return;
+      writeLog(session, 'LOG', tag, args);
     },
   };
 }

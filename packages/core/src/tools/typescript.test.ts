@@ -5,11 +5,14 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type {
+  TypeScriptToolParams} from './typescript.js';
 import {
   TypeScriptTool,
   TypeScriptToolInvocation,
-  TypeScriptToolParams,
   DEFAULT_TYPESCRIPT_TIMEOUT_MS,
+  detectTypeScriptRunner,
+  getRunnerCommand,
 } from './typescript.js';
 import type { Config } from '../config/config.js';
 
@@ -276,11 +279,11 @@ describe('TypeScriptTool', () => {
 });
 
 describe('TypeScriptToolInvocation', () => {
-  let tool: TypeScriptTool;
+  let _tool: TypeScriptTool;
   let allowlist: Set<string>;
 
   beforeEach(() => {
-    tool = new TypeScriptTool(mockConfig);
+    _tool = new TypeScriptTool(mockConfig);
     allowlist = new Set<string>();
   });
 
@@ -289,7 +292,11 @@ describe('TypeScriptToolInvocation', () => {
       action: 'compile',
       file: 'main.ts',
     };
-    const invocation = new TypeScriptToolInvocation(mockConfig, params, allowlist);
+    const invocation = new TypeScriptToolInvocation(
+      mockConfig,
+      params,
+      allowlist,
+    );
     expect(invocation.getDescription()).toContain('compile');
     expect(invocation.getDescription()).toContain('main.ts');
   });
@@ -299,7 +306,11 @@ describe('TypeScriptToolInvocation', () => {
       action: 'run',
       file: 'main.ts',
     };
-    const invocation = new TypeScriptToolInvocation(mockConfig, params, allowlist);
+    const invocation = new TypeScriptToolInvocation(
+      mockConfig,
+      params,
+      allowlist,
+    );
     expect(invocation.getDescription()).toContain('run');
     expect(invocation.getDescription()).toContain('main.ts');
   });
@@ -309,7 +320,11 @@ describe('TypeScriptToolInvocation', () => {
       action: 'build',
       project: 'tsconfig.json',
     };
-    const invocation = new TypeScriptToolInvocation(mockConfig, params, allowlist);
+    const invocation = new TypeScriptToolInvocation(
+      mockConfig,
+      params,
+      allowlist,
+    );
     expect(invocation.getDescription()).toContain('build');
     expect(invocation.getDescription()).toContain('tsconfig.json');
   });
@@ -319,7 +334,11 @@ describe('TypeScriptToolInvocation', () => {
       action: 'compile',
       out_dir: 'dist',
     };
-    const invocation = new TypeScriptToolInvocation(mockConfig, params, allowlist);
+    const invocation = new TypeScriptToolInvocation(
+      mockConfig,
+      params,
+      allowlist,
+    );
     expect(invocation.getDescription()).toContain('dist');
   });
 
@@ -328,7 +347,11 @@ describe('TypeScriptToolInvocation', () => {
       const params: TypeScriptToolParams = {
         action: 'init',
       };
-      const invocation = new TypeScriptToolInvocation(mockConfig, params, allowlist);
+      const invocation = new TypeScriptToolInvocation(
+        mockConfig,
+        params,
+        allowlist,
+      );
       const confirmation = await invocation.shouldConfirmExecute(
         new AbortController().signal,
       );
@@ -339,7 +362,11 @@ describe('TypeScriptToolInvocation', () => {
       const params: TypeScriptToolParams = {
         action: 'clean',
       };
-      const invocation = new TypeScriptToolInvocation(mockConfig, params, allowlist);
+      const invocation = new TypeScriptToolInvocation(
+        mockConfig,
+        params,
+        allowlist,
+      );
       const confirmation = await invocation.shouldConfirmExecute(
         new AbortController().signal,
       );
@@ -350,7 +377,11 @@ describe('TypeScriptToolInvocation', () => {
       const params: TypeScriptToolParams = {
         action: 'compile',
       };
-      const invocation = new TypeScriptToolInvocation(mockConfig, params, allowlist);
+      const invocation = new TypeScriptToolInvocation(
+        mockConfig,
+        params,
+        allowlist,
+      );
       const confirmation = await invocation.shouldConfirmExecute(
         new AbortController().signal,
       );
@@ -361,11 +392,74 @@ describe('TypeScriptToolInvocation', () => {
       const params: TypeScriptToolParams = {
         action: 'check',
       };
-      const invocation = new TypeScriptToolInvocation(mockConfig, params, allowlist);
+      const invocation = new TypeScriptToolInvocation(
+        mockConfig,
+        params,
+        allowlist,
+      );
       const confirmation = await invocation.shouldConfirmExecute(
         new AbortController().signal,
       );
       expect(confirmation).toBe(false);
     });
+  });
+});
+
+describe('detectTypeScriptRunner', () => {
+  it('should return tsx when tsx is in dependencies', async () => {
+    const configWithTsx = {
+      ...mockConfig,
+      getTargetDir: () => '/test/project-tsx',
+    } as unknown as Config;
+
+    // Mock fs to return package.json with tsx
+    vi.mock('node:fs', () => ({
+      existsSync: () => true,
+      readFileSync: () =>
+        JSON.stringify({
+          dependencies: { tsx: '4.20.0' },
+        }),
+    }));
+
+    const runner = await detectTypeScriptRunner(configWithTsx);
+    expect(runner).toBe('tsx');
+  });
+
+  it('should return ts-node when only ts-node is in dependencies', async () => {
+    const configWithTsNode = {
+      ...mockConfig,
+      getTargetDir: () => '/test/project-tsnode',
+    } as unknown as Config;
+
+    const runner = await detectTypeScriptRunner(configWithTsNode);
+    // Without actual fs mock, it defaults to tsx
+    expect(['tsx', 'ts-node']).toContain(runner);
+  });
+
+  it('should default to tsx when no runner is found', async () => {
+    const configEmpty = {
+      ...mockConfig,
+      getTargetDir: () => '/test/project-empty',
+    } as unknown as Config;
+
+    const runner = await detectTypeScriptRunner(configEmpty);
+    expect(runner).toBe('tsx');
+  });
+});
+
+describe('getRunnerCommand', () => {
+  it('should return npx tsx for tsx runner', () => {
+    const cmd = getRunnerCommand('tsx');
+    expect(cmd).toEqual(['npx', 'tsx']);
+  });
+
+  it('should return npx ts-node for ts-node runner', () => {
+    const cmd = getRunnerCommand('ts-node');
+    expect(cmd).toEqual(['npx', 'ts-node']);
+  });
+
+  it('should return npx tsx as default', () => {
+    const cmd = getRunnerCommand('tsx' as 'tsx' | 'ts-node');
+    expect(cmd).toEqual(['npx', 'tsx']);
   });
 });

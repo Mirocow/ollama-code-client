@@ -10,65 +10,83 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
-const lockfilePath = join(root, 'package-lock.json');
 
-function readJsonFile(filePath) {
-  try {
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error(`Error reading or parsing ${filePath}:`, error);
-    return null;
-  }
-}
+console.log('Checking lockfile integrity...');
 
-console.log('Checking lockfile...');
+// Check for pnpm-lock.yaml
+const pnpmLockPath = join(root, 'pnpm-lock.yaml');
+const npmLockPath = join(root, 'package-lock.json');
 
-const lockfile = readJsonFile(lockfilePath);
-if (lockfile === null) {
-  process.exit(1);
-}
-const packages = lockfile.packages || {};
-const invalidPackages = [];
+if (fs.existsSync(pnpmLockPath)) {
+  console.log('Found pnpm-lock.yaml');
 
-for (const [location, details] of Object.entries(packages)) {
-  // 1. Skip the root package itself.
-  if (location === '') {
-    continue;
+  // Verify it's not empty
+  const stats = fs.statSync(pnpmLockPath);
+  if (stats.size < 1000) {
+    console.error('❌ pnpm-lock.yaml seems too small, may be corrupted');
+    process.exit(1);
   }
 
-  // 2. Skip local workspace packages.
-  // They are identifiable in two ways:
-  // a) As a symlink within node_modules.
-  // b) As the source package definition, whose path is not in node_modules.
-  if (details.link === true || !location.includes('node_modules')) {
-    continue;
+  // Check that lockfile version is present
+  const content = fs.readFileSync(pnpmLockPath, 'utf-8');
+  if (!content.includes('lockfileVersion:')) {
+    console.error('❌ pnpm-lock.yaml is missing lockfileVersion');
+    process.exit(1);
   }
 
-  // 3. Any remaining package should be a third-party dependency.
-  // 1) Registry package with both "resolved" and "integrity" fields is valid.
-  if (details.resolved && details.integrity) {
-    continue;
-  }
-  // 2) Git and file dependencies only need a "resolved" field.
-  const isGitOrFileDep =
-    details.resolved?.startsWith('git') ||
-    details.resolved?.startsWith('file:');
-  if (isGitOrFileDep) {
-    continue;
+  // Check for importers section (workspace indicator)
+  if (!content.includes('importers:')) {
+    console.error('❌ pnpm-lock.yaml is missing importers section');
+    process.exit(1);
   }
 
-  // Mark the left dependency as invalid.
-  invalidPackages.push(location);
-}
+  console.log('✅ pnpm-lock.yaml is valid');
+  process.exit(0);
+} else if (fs.existsSync(npmLockPath)) {
+  console.log('Found package-lock.json (npm)');
 
-if (invalidPackages.length > 0) {
-  console.error(
-    '\nError: The following dependencies in package-lock.json are missing the "resolved" or "integrity" field:',
-  );
-  invalidPackages.forEach((pkg) => console.error(`- ${pkg}`));
-  process.exitCode = 1;
+  const lockfile = JSON.parse(fs.readFileSync(npmLockPath, 'utf-8'));
+  const packages = lockfile.packages || {};
+  const invalidPackages = [];
+
+  for (const [location, details] of Object.entries(packages)) {
+    // Skip the root package itself
+    if (location === '') {
+      continue;
+    }
+
+    // Skip local workspace packages
+    if (details.link === true || !location.includes('node_modules')) {
+      continue;
+    }
+
+    // Registry package should have both "resolved" and "integrity"
+    if (details.resolved && details.integrity) {
+      continue;
+    }
+
+    // Git and file dependencies only need a "resolved" field
+    const isGitOrFileDep =
+      details.resolved?.startsWith('git') ||
+      details.resolved?.startsWith('file:');
+    if (isGitOrFileDep) {
+      continue;
+    }
+
+    invalidPackages.push(location);
+  }
+
+  if (invalidPackages.length > 0) {
+    console.error(
+      '\n❌ The following dependencies are missing "resolved" or "integrity":',
+    );
+    invalidPackages.forEach((pkg) => console.error(`  - ${pkg}`));
+    process.exit(1);
+  }
+
+  console.log('✅ package-lock.json is valid');
+  process.exit(0);
 } else {
-  console.log('Lockfile check passed.');
-  process.exitCode = 0;
+  console.error('❌ No lockfile found (pnpm-lock.yaml or package-lock.json)');
+  process.exit(1);
 }

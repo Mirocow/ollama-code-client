@@ -6,6 +6,7 @@
 
 import { simpleGit } from 'simple-git';
 import { getErrorMessage } from '../utils/errors.js';
+import { urlParse } from '../utils/nodePolyfills.js';
 import * as os from 'node:os';
 import * as https from 'node:https';
 import * as fs from 'node:fs';
@@ -106,7 +107,7 @@ export function parseGitHubRepoForReleases(source: string): {
   repo: string;
 } {
   // Default to a github repo path, so `source` can be just an org/repo
-  const parsedUrl = URL.parse(source, 'https://github.com');
+  const parsedUrl = urlParse(source, 'https://github.com');
   // The pathname should be "/owner/repo".
   const parts = parsedUrl?.pathname.substring(1).split('/');
   if (parts?.length !== 2 || parsedUrl?.host !== 'github.com') {

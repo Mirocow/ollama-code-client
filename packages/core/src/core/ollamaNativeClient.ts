@@ -23,6 +23,7 @@ import { createDebugLogger } from '../utils/debugLogger.js';
 import { apiLogger } from '../utils/apiLogger.js';
 import { createHttpClient, type AxiosInstance } from '../utils/httpClient.js';
 
+import { abortSignalAny } from '../utils/nodePolyfills.js';
 // Lazy-initialized debug logger to ensure session is set before use
 let _debugLogger: ReturnType<typeof createDebugLogger> | null = null;
 function getDebugLogger() {
@@ -818,7 +819,7 @@ export class OllamaNativeClient {
 
     // Combine external signal with timeout signal
     const combinedSignal = externalSignal
-      ? AbortSignal.any([externalSignal, controller.signal])
+      ? abortSignalAny([externalSignal, controller.signal])
       : controller.signal;
 
     // Clean up internal timeout when external signal aborts (prevents memory leak)
@@ -1709,8 +1710,9 @@ export class OllamaNativeClient {
 
       // Fall back to model handler patterns
       // Import dynamically to avoid circular dependency
-      const { getModelHandlerFactory } =
-        await import('../model-handlers/index.js');
+      const { getModelHandlerFactory } = await import(
+        '../model-handlers/index.js'
+      );
       const factory = getModelHandlerFactory();
       const handlerSupport = factory.supportsTools(modelName);
 
@@ -1734,8 +1736,9 @@ export class OllamaNativeClient {
 
       // Fall back to model handler patterns on error
       try {
-        const { getModelHandlerFactory } =
-          await import('../model-handlers/index.js');
+        const { getModelHandlerFactory } = await import(
+          '../model-handlers/index.js'
+        );
         const factory = getModelHandlerFactory();
         return factory.supportsTools(modelName);
       } catch {

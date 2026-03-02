@@ -24,6 +24,7 @@ import { ShellExecutionService } from '../../../../services/shellExecutionServic
 import { createDebugLogger } from '../../../../utils/debugLogger.js';
 import type { AnsiOutput } from '../../../../utils/terminalSerializer.js';
 
+import { abortSignalAny } from '../../../../utils/nodePolyfills.js';
 const debugLogger = createDebugLogger('CPP');
 
 export const DEFAULT_CPP_TIMEOUT_MS = 120000;
@@ -385,7 +386,7 @@ export class CppToolInvocation extends BaseToolInvocation<
     let combinedSignal = signal;
     if (effectiveTimeout) {
       const timeoutSignal = AbortSignal.timeout(effectiveTimeout);
-      combinedSignal = AbortSignal.any([signal, timeoutSignal]);
+      combinedSignal = abortSignalAny([signal, timeoutSignal]);
     }
 
     const cwd = this.params.directory || this.config.getTargetDir();

@@ -24,6 +24,7 @@ import { ShellExecutionService } from '../../../../services/shellExecutionServic
 import { createDebugLogger } from '../../../../utils/debugLogger.js';
 import type { AnsiOutput } from '../../../../utils/terminalSerializer.js';
 
+import { abortSignalAny } from '../../../../utils/nodePolyfills.js';
 const debugLogger = createDebugLogger('PYTHON');
 
 export const DEFAULT_PYTHON_TIMEOUT_MS = 120000;
@@ -280,7 +281,8 @@ export class PythonToolInvocation extends BaseToolInvocation<
   ): Promise<ToolResult> {
     if (signal.aborted) {
       return {
-        llmContent: 'Python command was cancelled by user before it could start.',
+        llmContent:
+          'Python command was cancelled by user before it could start.',
         returnDisplay: 'Command cancelled by user.',
       };
     }
@@ -301,7 +303,7 @@ export class PythonToolInvocation extends BaseToolInvocation<
     let combinedSignal = signal;
     if (effectiveTimeout) {
       const timeoutSignal = AbortSignal.timeout(effectiveTimeout);
-      combinedSignal = AbortSignal.any([signal, timeoutSignal]);
+      combinedSignal = abortSignalAny([signal, timeoutSignal]);
     }
 
     const cwd = this.params.directory || this.config.getTargetDir();
@@ -315,10 +317,7 @@ export class PythonToolInvocation extends BaseToolInvocation<
         (event) => {
           if (event.type === 'data') {
             cumulativeOutput = event.chunk;
-            if (
-              updateOutput &&
-              Date.now() - lastUpdateTime > 1000
-            ) {
+            if (updateOutput && Date.now() - lastUpdateTime > 1000) {
               updateOutput(
                 typeof cumulativeOutput === 'string'
                   ? cumulativeOutput
@@ -338,9 +337,7 @@ export class PythonToolInvocation extends BaseToolInvocation<
       let llmContent = '';
       if (result.aborted) {
         const wasTimeout =
-          effectiveTimeout &&
-          combinedSignal.aborted &&
-          !signal.aborted;
+          effectiveTimeout && combinedSignal.aborted && !signal.aborted;
         llmContent = wasTimeout
           ? `Python command timed out after ${effectiveTimeout}ms.`
           : 'Python command was cancelled by user.';

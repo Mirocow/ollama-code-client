@@ -121,7 +121,7 @@ const claudeBuildInToolsTransform = (tools: string[]): string[] => {
       } else if (Array.isArray(CLAUDE_TOOLS_MAPPING[tool])) {
         transformedTools.push(...CLAUDE_TOOLS_MAPPING[tool]);
       } else {
-        transformedTools.push(CLAUDE_TOOLS_MAPPING[tool]);
+        transformedTools.push(CLAUDE_TOOLS_MAPPING[tool] as string);
       }
     }
   });

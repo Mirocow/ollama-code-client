@@ -23,6 +23,7 @@ import { ShellExecutionService } from '../../../../services/shellExecutionServic
 import { createDebugLogger } from '../../../../utils/debugLogger.js';
 import type { AnsiOutput } from '../../../../utils/terminalSerializer.js';
 
+import { abortSignalAny } from '../../../../utils/nodePolyfills.js';
 const debugLogger = createDebugLogger('GOLANG');
 
 export const DEFAULT_GOLANG_TIMEOUT_MS = 120000;
@@ -466,7 +467,7 @@ export class GolangToolInvocation extends BaseToolInvocation<
     let combinedSignal = signal;
     if (effectiveTimeout && !this.params.background) {
       const timeoutSignal = AbortSignal.timeout(effectiveTimeout);
-      combinedSignal = AbortSignal.any([signal, timeoutSignal]);
+      combinedSignal = abortSignalAny([signal, timeoutSignal]);
     }
 
     const cwd = this.params.directory || this.config.getTargetDir();
@@ -474,26 +475,27 @@ export class GolangToolInvocation extends BaseToolInvocation<
     let lastUpdateTime = Date.now();
 
     try {
-      const { result: resultPromise, pid } = await ShellExecutionService.execute(
-        command,
-        cwd,
-        (event) => {
-          if (event.type === 'data') {
-            cumulativeOutput = event.chunk;
-            if (updateOutput && Date.now() - lastUpdateTime > 1000) {
-              updateOutput(
-                typeof cumulativeOutput === 'string'
-                  ? cumulativeOutput
-                  : { ansiOutput: cumulativeOutput },
-              );
-              lastUpdateTime = Date.now();
+      const { result: resultPromise, pid } =
+        await ShellExecutionService.execute(
+          command,
+          cwd,
+          (event) => {
+            if (event.type === 'data') {
+              cumulativeOutput = event.chunk;
+              if (updateOutput && Date.now() - lastUpdateTime > 1000) {
+                updateOutput(
+                  typeof cumulativeOutput === 'string'
+                    ? cumulativeOutput
+                    : { ansiOutput: cumulativeOutput },
+                );
+                lastUpdateTime = Date.now();
+              }
             }
-          }
-        },
-        combinedSignal,
-        this.config.getShouldUseNodePtyShell(),
-        shellExecutionConfig ?? {},
-      );
+          },
+          combinedSignal,
+          this.config.getShouldUseNodePtyShell(),
+          shellExecutionConfig ?? {},
+        );
 
       // For background tasks, return immediately
       if (this.params.background) {

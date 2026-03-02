@@ -167,7 +167,9 @@ export class McpPromptLoader implements ICommandLoader {
               promptInputs = {};
             }
 
-            const providedArgNames = Object.keys(promptInputs);
+            const providedArgNames = Object.keys(
+              promptInputs as Record<string, unknown>,
+            );
             const unusedArguments =
               prompt.arguments
                 .filter((arg) => {
@@ -183,7 +185,9 @@ export class McpPromptLoader implements ICommandLoader {
                   // Example /add --numberOne="34" --num
                   // numberTwo would be assigned a value of --num
                   // numberTwo should still be considered unused
-                  const argValue = promptInputs[arg.name];
+                  const argValue = (promptInputs as Record<string, unknown>)[
+                    arg.name
+                  ];
                   return argValue === partialArg;
                 })
                 .map((argument) => `--${argument.name}="`) || [];
