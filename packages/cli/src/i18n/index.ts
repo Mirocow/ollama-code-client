@@ -8,6 +8,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { homedir } from 'node:os';
+import { execSync } from 'node:child_process';
 import { writeStderrLine } from '../utils/stdioHelpers.js';
 import {
   type SupportedLanguage,
@@ -117,6 +118,42 @@ export function detectSystemLanguage(): SupportedLanguage {
     }
   } catch {
     // Ignore errors
+  }
+
+  // Priority 5: macOS - try to detect from defaults command
+  if (process.platform === 'darwin') {
+    try {
+      // Try AppleLocale first
+      let result = execSync('defaults read -g AppleLocale 2>/dev/null', {
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      }).trim();
+      if (result) {
+        const match = result.match(/^([a-z]{2})[_-]?/i);
+        if (match) {
+          const code = match[1].toLowerCase();
+          for (const lang of SUPPORTED_LANGUAGES) {
+            if (code === lang.code) return lang.code;
+          }
+        }
+      }
+      // Try AppleLanguages array
+      result = execSync('defaults read -g AppleLanguages 2>/dev/null | head -1', {
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      }).trim();
+      if (result) {
+        const match = result.match(/"([a-z]{2})[_-]?/i);
+        if (match) {
+          const code = match[1].toLowerCase();
+          for (const lang of SUPPORTED_LANGUAGES) {
+            if (code === lang.code) return lang.code;
+          }
+        }
+      }
+    } catch {
+      // Ignore errors - defaults command may not be available
+    }
   }
 
   return 'en';

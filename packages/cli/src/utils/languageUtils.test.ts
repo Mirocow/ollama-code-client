@@ -167,16 +167,17 @@ describe('languageUtils', () => {
       expect(result).toBe('English');
     });
 
-    it('should NOT use UI language fallback when UI is "auto"', () => {
+    it('should resolve "auto" uiLanguage to detected system language', () => {
       delete process.env['OLLAMA_CODE_LANG'];
-      process.env['LANG'] = 'en_US.UTF-8';
+      process.env['LANG'] = 'ru_RU.UTF-8';
       delete process.env['LANGUAGE'];
       delete process.env['LC_ALL'];
       delete process.env['LC_MESSAGES'];
       delete process.env['LC_CTYPE'];
       
+      // When uiLanguage is 'auto' and system is Russian, should use Russian
       const result = resolveOutputLanguage('auto', 'auto');
-      expect(result).toBe('English');
+      expect(result).toBe('Russian');
     });
 
     it('should NOT use UI language fallback when output is explicitly set', () => {

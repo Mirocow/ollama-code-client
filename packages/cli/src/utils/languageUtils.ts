@@ -61,10 +61,17 @@ export function resolveOutputLanguage(
     
     // If system detection returned English, but UI language is different,
     // prefer the UI language as it's more likely the user's preference
-    if (detectedLocale === 'en' && uiLanguage && uiLanguage !== 'en' && uiLanguage !== 'auto') {
-      const uiLangName = getLanguageNameFromLocale(uiLanguage);
-      if (uiLangName !== 'English') {
-        return uiLangName;
+    if (detectedLocale === 'en' && uiLanguage) {
+      // Resolve 'auto' uiLanguage to actual detected language
+      const resolvedUiLang = isAutoLanguage(uiLanguage) 
+        ? detectSystemLanguage() 
+        : uiLanguage;
+      
+      if (resolvedUiLang !== 'en' && resolvedUiLang !== 'auto') {
+        const uiLangName = getLanguageNameFromLocale(resolvedUiLang);
+        if (uiLangName !== 'English') {
+          return uiLangName;
+        }
       }
     }
     
