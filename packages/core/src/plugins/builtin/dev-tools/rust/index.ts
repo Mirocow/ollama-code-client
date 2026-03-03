@@ -30,16 +30,27 @@ export const DEFAULT_RUST_TIMEOUT_MS = 120000;
 
 export type RustAction =
   | 'run' // Run with cargo run
+  | 'r' // Alias for run
   | 'build' // Build with cargo build
+  | 'b' // Alias for build
   | 'test' // Run tests with cargo test
+  | 't' // Alias for test
   | 'doc' // Generate documentation
   | 'check' // Check code without building
+  | 'c' // Alias for check
   | 'clippy' // Run Clippy linter
+  | 'lint' // Alias for clippy
+  | 'l' // Alias for clippy
   | 'fmt' // Format code with rustfmt
+  | 'f' // Alias for fmt
   | 'clean' // Clean build artifacts
+  | 'init' // Alias for cargo_init - Initialize project in current directory
+  | 'new' // Alias for cargo_new - Create new project
   | 'cargo_new' // Create new project
   | 'cargo_init' // Initialize project in current directory
+  | 'add' // Alias for cargo_add
   | 'cargo_add' // Add dependency
+  | 'remove' // Alias for cargo_remove
   | 'cargo_remove' // Remove dependency
   | 'cargo_update' // Update dependencies
   | 'cargo_tree' // Show dependency tree
@@ -49,6 +60,21 @@ export type RustAction =
   | 'cargo_info' // Show crate info
   | 'cargo_lock' // Generate/update Cargo.lock
   | 'custom'; // Custom Cargo command
+
+// Action aliases mapping
+const ACTION_ALIASES: Record<string, RustAction> = {
+  r: 'run',
+  b: 'build',
+  t: 'test',
+  c: 'check',
+  l: 'clippy',
+  lint: 'clippy',
+  f: 'fmt',
+  init: 'cargo_init',
+  new: 'cargo_new',
+  add: 'cargo_add',
+  remove: 'cargo_remove',
+};
 
 export interface RustToolParams {
   action: RustAction;
@@ -149,7 +175,10 @@ export class RustToolInvocation extends BaseToolInvocation<
   }
 
   private buildCommand(): string {
-    switch (this.params.action) {
+    // Resolve action alias
+    const action = ACTION_ALIASES[this.params.action] || this.params.action;
+
+    switch (action) {
       case 'run':
         return this.buildRunCommand();
 
@@ -752,16 +781,27 @@ export class RustTool extends BaseDeclarativeTool<RustToolParams, ToolResult> {
             type: 'string',
             enum: [
               'run',
+              'r',
               'build',
+              'b',
               'test',
+              't',
               'doc',
               'check',
+              'c',
               'clippy',
+              'lint',
+              'l',
               'fmt',
+              'f',
               'clean',
+              'init',
+              'new',
               'cargo_new',
               'cargo_init',
+              'add',
               'cargo_add',
+              'remove',
               'cargo_remove',
               'cargo_update',
               'cargo_tree',

@@ -33,15 +33,22 @@ export type NodePackageManager = 'npm' | 'yarn' | 'pnpm' | 'bun';
 
 export type NodeJsAction =
   | 'run' // Run a Node.js script
+  | 'r' // Alias for run
   | 'install' // Install dependencies
+  | 'i' // Alias for install
   | 'add' // Add a package
+  | 'a' // Alias for add
   | 'remove' // Remove a package
   | 'update' // Update packages
   | 'run_script' // Run package.json script
   | 'test' // Run tests
+  | 't' // Alias for test
   | 'build' // Run build
+  | 'b' // Alias for build
   | 'dev' // Run dev server
+  | 'd' // Alias for dev
   | 'lint' // Run linter
+  | 'l' // Alias for lint
   | 'exec' // Run npx/yarn dlx command
   | 'info' // Show package info
   | 'list' // List installed packages
@@ -50,6 +57,17 @@ export type NodeJsAction =
   | 'clean' // Clean node_modules and lock file
   | 'init' // Initialize new project
   | 'custom'; // Custom command
+
+// Action aliases mapping
+const ACTION_ALIASES: Record<string, NodeJsAction> = {
+  r: 'run',
+  i: 'install',
+  a: 'add',
+  t: 'test',
+  b: 'build',
+  d: 'dev',
+  l: 'lint',
+};
 
 export interface NodeJsToolParams {
   action: NodeJsAction;
@@ -168,7 +186,10 @@ export class NodeJsToolInvocation extends BaseToolInvocation<
   private buildCommand(): string {
     const pm = this.params.package_manager || this.detectPackageManager();
 
-    switch (this.params.action) {
+    // Resolve action alias
+    const action = ACTION_ALIASES[this.params.action] || this.params.action;
+
+    switch (action) {
       case 'run':
         return this.buildRunCommand();
 
@@ -731,15 +752,22 @@ export class NodeJsTool extends BaseDeclarativeTool<
             type: 'string',
             enum: [
               'run',
+              'r',
               'install',
+              'i',
               'add',
+              'a',
               'remove',
               'update',
               'run_script',
               'test',
+              't',
               'build',
+              'b',
               'dev',
+              'd',
               'lint',
+              'l',
               'exec',
               'info',
               'list',

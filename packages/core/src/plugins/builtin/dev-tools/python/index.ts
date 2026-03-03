@@ -31,16 +31,32 @@ export const DEFAULT_PYTHON_TIMEOUT_MS = 120000;
 
 export type PythonAction =
   | 'run' // Run a Python script
+  | 'r' // Alias for run
   | 'test' // Run pytest
+  | 't' // Alias for test
   | 'lint' // Run pylint/flake8
+  | 'l' // Alias for lint
   | 'format' // Run black/autopep8
+  | 'f' // Alias for format
+  | 'init' // Alias for venv_create - Create virtual environment
   | 'venv_create' // Create virtual environment
   | 'venv_activate' // Get activation command for venv
+  | 'install' // Alias for pip_install
   | 'pip_install' // Install packages
   | 'pip_list' // List installed packages
   | 'pip_freeze' // Freeze requirements
   | 'mypy' // Run mypy type checker
   | 'custom'; // Custom Python command
+
+// Action aliases mapping
+const ACTION_ALIASES: Record<string, PythonAction> = {
+  init: 'venv_create',
+  r: 'run',
+  t: 'test',
+  l: 'lint',
+  f: 'format',
+  install: 'pip_install',
+};
 
 export interface PythonToolParams {
   action: PythonAction;
@@ -130,7 +146,10 @@ export class PythonToolInvocation extends BaseToolInvocation<
       : null;
     const effectivePython = venvPython || pythonCmd;
 
-    switch (this.params.action) {
+    // Resolve action alias
+    const action = ACTION_ALIASES[this.params.action] || this.params.action;
+
+    switch (action) {
       case 'run':
         return this.buildRunCommand(effectivePython);
 
@@ -483,11 +502,17 @@ export class PythonTool extends BaseDeclarativeTool<
             type: 'string',
             enum: [
               'run',
+              'r',
               'test',
+              't',
               'lint',
+              'l',
               'format',
+              'f',
+              'init',
               'venv_create',
               'venv_activate',
+              'install',
               'pip_install',
               'pip_list',
               'pip_freeze',
