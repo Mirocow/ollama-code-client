@@ -434,9 +434,11 @@ export async function main() {
 
   // Initialize output language file before config loads to ensure it's included in context
   // Pass UI language as fallback for 'auto' detection
+  // Convert language to string if it's a number (from settings schema)
+  const uiLanguage = settings.merged.general?.language;
   initializeLlmOutputLanguage(
     settings.merged.general?.outputLanguage,
-    settings.merged.general?.language,
+    typeof uiLanguage === 'string' ? uiLanguage : undefined,
   );
 
   {

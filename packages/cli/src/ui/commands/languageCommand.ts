@@ -43,7 +43,8 @@ function getCurrentOutputLanguage(context?: CommandContext): {
   const settingValue =
     context?.services?.settings?.merged?.general?.outputLanguage ||
     OUTPUT_LANGUAGE_AUTO;
-  const uiLanguage = context?.services?.settings?.merged?.general?.language;
+  const uiLangRaw = context?.services?.settings?.merged?.general?.language;
+  const uiLanguage = typeof uiLangRaw === 'string' ? uiLangRaw : undefined;
   const resolved = resolveOutputLanguage(settingValue, uiLanguage);
   return { setting: settingValue, resolved };
 }
@@ -130,7 +131,8 @@ async function setOutputLanguage(
 ): Promise<MessageActionReturn> {
   try {
     // Get UI language for fallback when resolving 'auto'
-    const uiLanguage = context.services?.settings?.merged?.general?.language;
+    const uiLangRaw = context.services?.settings?.merged?.general?.language;
+    const uiLanguage = typeof uiLangRaw === 'string' ? uiLangRaw : undefined;
     
     const isAuto = isAutoLanguage(language);
     const resolved = resolveOutputLanguage(language, uiLanguage);

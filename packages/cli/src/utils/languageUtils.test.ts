@@ -100,72 +100,72 @@ describe('languageUtils', () => {
   describe('UI language fallback', () => {
     it('should use UI language when system is English but UI is Russian', () => {
       // Set LANG to English so system detection returns English
-      delete process.env.OLLAMA_CODE_LANG;
-      process.env.LANG = 'en_US.UTF-8';
-      delete process.env.LANGUAGE;
-      delete process.env.LC_ALL;
-      delete process.env.LC_MESSAGES;
-      delete process.env.LC_CTYPE;
+      delete process.env['OLLAMA_CODE_LANG'];
+      process.env['LANG'] = 'en_US.UTF-8';
+      delete process.env['LANGUAGE'];
+      delete process.env['LC_ALL'];
+      delete process.env['LC_MESSAGES'];
+      delete process.env['LC_CTYPE'];
       
       const result = resolveOutputLanguage('auto', 'ru');
       expect(result).toBe('Russian');
     });
 
     it('should use UI language when system is English but UI is Chinese', () => {
-      delete process.env.OLLAMA_CODE_LANG;
-      process.env.LANG = 'en_US.UTF-8';
-      delete process.env.LANGUAGE;
-      delete process.env.LC_ALL;
-      delete process.env.LC_MESSAGES;
-      delete process.env.LC_CTYPE;
+      delete process.env['OLLAMA_CODE_LANG'];
+      process.env['LANG'] = 'en_US.UTF-8';
+      delete process.env['LANGUAGE'];
+      delete process.env['LC_ALL'];
+      delete process.env['LC_MESSAGES'];
+      delete process.env['LC_CTYPE'];
       
       const result = resolveOutputLanguage('auto', 'zh');
       expect(result).toBe('Chinese');
     });
 
     it('should NOT use UI language fallback when system is non-English', () => {
-      delete process.env.OLLAMA_CODE_LANG;
-      process.env.LANG = 'de_DE.UTF-8';
-      delete process.env.LANGUAGE;
-      delete process.env.LC_ALL;
-      delete process.env.LC_MESSAGES;
-      delete process.env.LC_CTYPE;
+      delete process.env['OLLAMA_CODE_LANG'];
+      process.env['LANG'] = 'de_DE.UTF-8';
+      delete process.env['LANGUAGE'];
+      delete process.env['LC_ALL'];
+      delete process.env['LC_MESSAGES'];
+      delete process.env['LC_CTYPE'];
       
       const result = resolveOutputLanguage('auto', 'ru');
       expect(result).toBe('German');
     });
 
     it('should NOT use UI language fallback when UI is English', () => {
-      delete process.env.OLLAMA_CODE_LANG;
-      process.env.LANG = 'en_US.UTF-8';
-      delete process.env.LANGUAGE;
-      delete process.env.LC_ALL;
-      delete process.env.LC_MESSAGES;
-      delete process.env.LC_CTYPE;
+      delete process.env['OLLAMA_CODE_LANG'];
+      process.env['LANG'] = 'en_US.UTF-8';
+      delete process.env['LANGUAGE'];
+      delete process.env['LC_ALL'];
+      delete process.env['LC_MESSAGES'];
+      delete process.env['LC_CTYPE'];
       
       const result = resolveOutputLanguage('auto', 'en');
       expect(result).toBe('English');
     });
 
     it('should NOT use UI language fallback when UI is "auto"', () => {
-      delete process.env.OLLAMA_CODE_LANG;
-      process.env.LANG = 'en_US.UTF-8';
-      delete process.env.LANGUAGE;
-      delete process.env.LC_ALL;
-      delete process.env.LC_MESSAGES;
-      delete process.env.LC_CTYPE;
+      delete process.env['OLLAMA_CODE_LANG'];
+      process.env['LANG'] = 'en_US.UTF-8';
+      delete process.env['LANGUAGE'];
+      delete process.env['LC_ALL'];
+      delete process.env['LC_MESSAGES'];
+      delete process.env['LC_CTYPE'];
       
       const result = resolveOutputLanguage('auto', 'auto');
       expect(result).toBe('English');
     });
 
     it('should NOT use UI language fallback when output is explicitly set', () => {
-      delete process.env.OLLAMA_CODE_LANG;
-      process.env.LANG = 'en_US.UTF-8';
-      delete process.env.LANGUAGE;
-      delete process.env.LC_ALL;
-      delete process.env.LC_MESSAGES;
-      delete process.env.LC_CTYPE;
+      delete process.env['OLLAMA_CODE_LANG'];
+      process.env['LANG'] = 'en_US.UTF-8';
+      delete process.env['LANGUAGE'];
+      delete process.env['LC_ALL'];
+      delete process.env['LC_MESSAGES'];
+      delete process.env['LC_CTYPE'];
       
       const result = resolveOutputLanguage('Japanese', 'ru');
       expect(result).toBe('Japanese');
