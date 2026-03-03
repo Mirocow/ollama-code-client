@@ -25,9 +25,9 @@ const RIPGREP_WSL_TIMEOUT_MS = 60_000;
  */
 const PCRE2_PATTERNS = [
   /\(\?=[^)]*\)/,    // Positive look-ahead: (?=...)
-  /\(\?\![^)]*\)/,   // Negative look-ahead: (?!...)
-  /\(\?\<=[^)]*\)/,  // Positive look-behind: (?<=...)
-  /\(\?\<\![^)]*\)/, // Negative look-behind: (?<!...)
+  /\(\?![^)]*\)/,   // Negative look-ahead: (?!...)
+  /\(\?<=[^)]*\)/,  // Positive look-behind: (?<=...)
+  /\(\?<![^)]*\)/, // Negative look-behind: (?<!...)
 ];
 
 /**

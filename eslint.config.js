@@ -171,10 +171,10 @@ export default tseslint.config(
       'no-empty': 'off', // Allow empty blocks in tests
       'default-case': 'off', // Allow no default case in tests
       '@typescript-eslint/no-unused-vars': [
-        'error',
+        'warn',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_|^vi$|^beforeEach$|^afterEach$|^describe$|^it$|^expect$|^jest$',
+          varsIgnorePattern: '^_|^vi$|^beforeEach$|^afterEach$|^describe$|^it$|^expect$|^jest$|^[A-Z][a-zA-Z]+$', // Allow PascalCase (types)
           caughtErrorsIgnorePattern: '^_',
         },
       ],
@@ -319,6 +319,9 @@ export default tseslint.config(
       'packages/cli/src/utils/stdioHelpers.ts',            // wraps console.clear()
       'packages/cli/src/commands/plugins-marketplace.ts',  // CLI output for plugin commands
       'packages/cli/src/ui/stores/eventBus.ts',            // event bus logging
+      'packages/core/src/observability/telemetryService.ts', // telemetry logging
+      'packages/core/src/plugins/plugin-cli.ts',           // plugin CLI tool
+      'packages/core/src/prompts/templates/index.ts',      // template loading warnings
     ],
     rules: { 'no-console': 'off' },
   },

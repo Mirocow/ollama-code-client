@@ -286,7 +286,7 @@ async function showPluginInfo(pluginId: string): Promise<void> {
     } catch {
       console.log(`\nEntry file:  ❌ Not found`);
     }
-  } catch (error) {
+  } catch (_error) {
     console.error(`❌ Plugin '${pluginId}' not found`);
     process.exit(1);
   }

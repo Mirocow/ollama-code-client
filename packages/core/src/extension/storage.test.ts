@@ -39,7 +39,7 @@ describe('ExtensionStorage', () => {
       () =>
         ({
           getExtensionsDir: () => path.join(mockHomeDir, '.ollama-code', 'extensions'),
-        }) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+        }) as any,  
     );
     storage = new ExtensionStorage(extensionName);
   });

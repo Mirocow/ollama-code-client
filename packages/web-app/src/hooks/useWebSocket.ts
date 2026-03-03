@@ -181,7 +181,7 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
         }
       };
 
-      ws.onerror = (event) => {
+      ws.onerror = (_event) => {
         const err = new Error('WebSocket error');
         setError(err);
         onError?.(err);

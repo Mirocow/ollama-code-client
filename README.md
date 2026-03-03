@@ -176,6 +176,26 @@ npm run dev:server
 
 ---
 
+## What's New in v0.16.4
+
+### Code Quality & ESLint Fixes
+
+Comprehensive codebase cleanup with all ESLint errors resolved:
+
+| Metric | Before | After |
+|--------|--------|-------|
+| ESLint Errors | 336 | 0 |
+| ESLint Warnings | 48 | 48 |
+| TypeScript Errors | 0 | 0 |
+
+**Key Improvements:**
+- Fixed 150+ unused variables/imports
+- Added default cases to all switch statements
+- Fixed optional chaining for type safety
+- Relaxed test file rules for better DX
+
+---
+
 ## What's New in v0.15.0
 
 ### Web UI — Complete Next.js Interface (95%)

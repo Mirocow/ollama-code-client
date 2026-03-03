@@ -560,7 +560,7 @@ class DiagramGeneratorInvocation extends BaseToolInvocation<
    * Executes the diagram generation
    */
   async execute(
-    signal: AbortSignal,
+    _signal: AbortSignal,
     _updateOutput?: (output: ToolResultDisplay) => void,
   ): Promise<DiagramGeneratorResult> {
     const { content, type, output, format = 'svg' } = this.params;

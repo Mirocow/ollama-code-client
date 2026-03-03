@@ -5,10 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  SdkControlClientTransport,
+import type {
   SdkControlClientTransportOptions,
-  SendMcpMessageCallback,
+  SendMcpMessageCallback} from './sdk-control-client-transport.js';
+import {
+  SdkControlClientTransport
 } from './sdk-control-client-transport.js';
 import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js';
 
@@ -195,6 +196,7 @@ describe('SdkControlClientTransport', () => {
 
     it('should handle non-Error objects in error callback', async () => {
       mockSendMcpMessage = vi.fn(async () => {
+        // eslint-disable-next-line no-restricted-syntax -- Testing non-Error throw
         throw 'String error';
       });
       transport = new SdkControlClientTransport({

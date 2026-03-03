@@ -760,6 +760,10 @@ export class GitAdvancedTool extends BaseDeclarativeTool<
           return 'remote_set_url requires both "name" and "url" arguments';
         }
         break;
+
+      default:
+        // Other operations don't require specific validation
+        break;
     }
 
     return null;

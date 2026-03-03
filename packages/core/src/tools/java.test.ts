@@ -5,10 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type {
+  JavaToolParams} from './java.js';
 import {
   JavaTool,
   JavaToolInvocation,
-  JavaToolParams,
   DEFAULT_JAVA_TIMEOUT_MS,
 } from './java.js';
 import type { Config } from '../config/config.js';

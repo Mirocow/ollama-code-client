@@ -12,7 +12,8 @@
 
 import { ChunkValidator, type ValidatedChunk, type ChunkValidationConfig } from './chunkValidator.js';
 import { BackpressureController, type BackpressureConfig, type PressureState } from './backpressureController.js';
-import { CancellationToken, CancellationTokenSource, type CancellationTokenConfig, CancellationError } from './cancellation.js';
+import type { CancellationToken} from './cancellation.js';
+import { CancellationTokenSource, type CancellationTokenConfig, CancellationError } from './cancellation.js';
 import { StreamBuffer, type BufferConfig } from './streamBuffer.js';
 
 // ============================================================================

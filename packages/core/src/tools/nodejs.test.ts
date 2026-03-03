@@ -5,7 +5,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { NodeJsTool, NodeJsToolParams } from './nodejs.js';
+import type { NodeJsToolParams } from './nodejs.js';
+import { NodeJsTool } from './nodejs.js';
 import type { Config } from '../config/config.js';
 
 // Mock Config

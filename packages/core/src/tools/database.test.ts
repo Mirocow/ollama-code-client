@@ -5,13 +5,14 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import databaseTool, {
+import type {
   DatabaseToolParams,
   DatabaseType,
   DatabaseOperation,
   QueryResult,
   TableSchema,
 } from './database.js';
+import databaseTool from './database.js';
 
 describe('DatabaseTool', () => {
   describe('Tool Definition', () => {

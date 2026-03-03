@@ -5,15 +5,16 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import type {
+  ApiTesterToolParams,
+  HttpMethod,
+  PerformanceMetrics,
+  ValidationResult} from './api-tester.js';
 import {
   ApiTesterTool,
-  ApiTesterToolParams,
   ApiTesterResult,
-  HttpMethod,
   AuthConfig,
   ValidationConfig,
-  PerformanceMetrics,
-  ValidationResult,
   createApiTesterTool,
 } from './api-tester.js';
 import type { Config } from '../config/config.js';

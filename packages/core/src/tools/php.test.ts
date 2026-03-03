@@ -5,7 +5,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PHPTool, PHPToolParams } from './php.js';
+import type { PHPToolParams } from './php.js';
+import { PHPTool } from './php.js';
 import type { Config } from '../config/config.js';
 
 // Mock Config

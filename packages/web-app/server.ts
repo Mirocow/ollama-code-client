@@ -49,7 +49,7 @@ async function main() {
     });
 
     // Handle server upgrade for WebSocket
-    server.on('upgrade', (req, socket, head) => {
+    server.on('upgrade', (req, _socket, _head) => {
       const { pathname } = parse(req.url!, true);
 
       // Terminal WebSocket is handled by TerminalServer

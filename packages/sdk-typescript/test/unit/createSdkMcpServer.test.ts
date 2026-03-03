@@ -57,7 +57,7 @@ describe('createSdkMcpServer', () => {
         createSdkMcpServer({
           name: 'test',
           version: '1.0.0',
-          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+           
           tools: {} as unknown as SdkMcpToolDefinition<any>[],
         }),
       ).toThrow('Tools must be an array');
@@ -134,7 +134,7 @@ describe('createSdkMcpServer', () => {
         createSdkMcpServer({
           name: 'test-server',
           version: '1.0.0',
-          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+           
           tools: [invalidTool as unknown as SdkMcpToolDefinition<any>],
         }),
       ).toThrow('Tool name');

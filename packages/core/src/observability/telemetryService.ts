@@ -11,7 +11,8 @@
  */
 
 import { MetricsCollector, type MetricsConfig } from './metricsCollector.js';
-import { Tracer, type TracerConfig, Span as TracerSpan, SpanContext } from './tracer.js';
+import type { Span as TracerSpan} from './tracer.js';
+import { Tracer, type TracerConfig, SpanContext } from './tracer.js';
 import { PrometheusExporter, type PrometheusConfig } from './prometheusExporter.js';
 
 // Re-export Span from tracer for backward compatibility

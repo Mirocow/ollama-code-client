@@ -5,7 +5,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PythonTool, PythonToolParams } from './python.js';
+import type { PythonToolParams } from './python.js';
+import { PythonTool } from './python.js';
 import type { Config } from '../config/config.js';
 import type { ToolResult } from './tools.js';
 

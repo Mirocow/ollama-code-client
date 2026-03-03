@@ -5,10 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type {
+  CppToolParams} from './cpp.js';
 import {
   CppTool,
   CppToolInvocation,
-  CppToolParams,
   DEFAULT_CPP_TIMEOUT_MS,
 } from './cpp.js';
 import type { Config } from '../config/config.js';

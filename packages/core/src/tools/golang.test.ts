@@ -5,7 +5,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { GolangTool, GolangToolParams } from './golang.js';
+import type { GolangToolParams } from './golang.js';
+import { GolangTool } from './golang.js';
 import type { Config } from '../config/config.js';
 
 // Mock Config

@@ -5,11 +5,12 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import redisTool, {
+import type {
   RedisToolParams,
   RedisOperation,
   RedisConfig,
 } from './redis.js';
+import redisTool from './redis.js';
 
 // Mock execSync
 vi.mock('node:child_process', () => ({

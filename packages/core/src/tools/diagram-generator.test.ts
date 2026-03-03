@@ -5,11 +5,12 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  DiagramGeneratorTool,
+import type {
   DiagramGeneratorParams,
   DiagramType,
-  OutputFormat,
+  OutputFormat} from './diagram-generator.js';
+import {
+  DiagramGeneratorTool,
   createDiagramGeneratorTool,
 } from './diagram-generator.js';
 import type { Config } from '../config/config.js';

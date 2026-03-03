@@ -152,7 +152,7 @@ const DEFAULT_CONFIG: BackpressureConfig = {
  */
 export class BackpressureController<T = unknown> {
   private config: BackpressureConfig;
-  private buffer: BufferItem<T>[] = [];
+  private buffer: Array<BufferItem<T>> = [];
   private currentBufferSize = 0;
   private state: PressureState = 'normal';
   private stats: BackpressureStats;

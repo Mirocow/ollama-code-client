@@ -48,7 +48,7 @@ export function ChatInterface() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // WebSocket connection
-  const { isConnected, send } = useWebSocket({
+  const { isConnected, send: _send } = useWebSocket({
     url: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:11434/api/ws',
     onMessage: (chunk) => {
       if (chunk.type === 'chunk' && chunk.content) {
@@ -144,7 +144,6 @@ export function ChatInterface() {
       if (!reader) throw new Error('No response body');
 
       const decoder = new TextDecoder();
-      let accumulatedContent = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -157,7 +156,6 @@ export function ChatInterface() {
           try {
             const parsed = JSON.parse(line);
             if (parsed.message?.content) {
-              accumulatedContent += parsed.message.content;
               appendStreamContent(parsed.message.content);
             }
           } catch {

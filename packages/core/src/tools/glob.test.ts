@@ -5,7 +5,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { GlobTool, GlobToolParams, sortFileEntries, GlobPath } from './glob.js';
+import type { GlobToolParams, GlobPath } from './glob.js';
+import { GlobTool, sortFileEntries } from './glob.js';
 import type { Config } from '../config/config.js';
 
 // Mock Config

@@ -8,7 +8,7 @@
  *   npx tsx integration-tests/terminal-capture/run.ts integration-tests/terminal-capture/scenarios/about.ts
  *   npx tsx integration-tests/terminal-capture/run.ts integration-tests/terminal-capture/scenarios/
  */
-import { TerminalCapture, THEMES } from './terminal-capture.js';
+import { TerminalCapture } from './terminal-capture.js';
 import { dirname, resolve, isAbsolute } from 'node:path';
 /** Dynamically load configuration from .ts file (supports single object or array) */
 export async function loadScenarios(tsPath) {

@@ -5,10 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  ReadManyFilesTool,
+import type {
   ReadManyFilesToolParams,
-  FileReadInfo,
+  FileReadInfo} from './read-many-files.js';
+import {
+  ReadManyFilesTool
 } from './read-many-files.js';
 import type { Config } from '../config/config.js';
 import type { ToolResult } from './tools.js';

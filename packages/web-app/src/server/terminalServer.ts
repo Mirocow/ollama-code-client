@@ -14,7 +14,7 @@
 
 import { WebSocketServer, WebSocket } from 'ws';
 import * as pty from '@lydell/node-pty';
-import { Server as HttpServer } from 'http';
+import type { Server as HttpServer } from 'http';
 
 type IPty = pty.IPty;
 

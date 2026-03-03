@@ -374,7 +374,7 @@ describe('OllamaContentConverter', () => {
 
       expect(candidate?.content?.parts).toHaveLength(1);
       expect((candidate?.content?.parts as any)?.[0]).toHaveProperty('functionCall');
-      const functionCall = ((candidate?.content?.parts as any)?.[0]).functionCall;
+      const functionCall = ((candidate?.content?.parts as any)?.[0])?.functionCall;
       expect(functionCall.name).toBe('get_weather');
       expect(functionCall.args).toEqual({ location: 'San Francisco' });
     });

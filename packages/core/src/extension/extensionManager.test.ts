@@ -634,7 +634,7 @@ describe('extension tests', () => {
         };
 
         const manager = createExtensionManager();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         (manager as any).config = mockConfig;
 
         await manager.refreshTools();
@@ -672,7 +672,7 @@ describe('extension tests', () => {
         };
 
         const manager = createExtensionManager();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         (manager as any).config = mockConfig;
 
         await manager.refreshMemory();

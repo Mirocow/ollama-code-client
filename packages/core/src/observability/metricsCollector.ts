@@ -175,6 +175,10 @@ export class MetricsCollector {
       case 'summary':
         this.summaries.set(name, new Map());
         break;
+      default:
+        // Unknown metric type - default to counter
+        this.counters.set(name, new Map());
+        break;
     }
   }
 
@@ -201,6 +205,10 @@ export class MetricsCollector {
           break;
         case 'summary':
           this.observeSummary(prefixedName, value, labelKey);
+          break;
+        default:
+          // Unknown type - default to counter
+          this.incrementCounterInternal(prefixedName, value, labelKey);
           break;
       }
     } else {
@@ -419,7 +427,7 @@ export class MetricsCollector {
     name: string,
     value: number,
     labelKey: string,
-    buckets?: number[],
+    _buckets?: number[],
   ): void {
     if (!this.histograms.has(name)) {
       this.histograms.set(name, new Map());

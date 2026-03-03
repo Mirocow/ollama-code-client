@@ -5,10 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type {
+  RustToolParams} from './rust.js';
 import {
   RustTool,
   RustToolInvocation,
-  RustToolParams,
   DEFAULT_RUST_TIMEOUT_MS,
 } from './rust.js';
 import type { Config } from '../config/config.js';

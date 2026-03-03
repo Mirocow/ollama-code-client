@@ -10,7 +10,8 @@
  * Handles text generation requests with streaming support.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server';
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 

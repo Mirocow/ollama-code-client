@@ -5,7 +5,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { GitAdvancedTool, GitAdvancedToolParams, GitOperation } from './git-advanced.js';
+import type { GitAdvancedToolParams, GitOperation } from './git-advanced.js';
+import { GitAdvancedTool } from './git-advanced.js';
 import type { Config } from '../config/config.js';
 
 // Mock Config

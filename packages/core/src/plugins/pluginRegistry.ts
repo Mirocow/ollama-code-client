@@ -188,14 +188,14 @@ export class PluginRegistry {
   /**
    * Get all loaded plugins
    */
-  getLoadedPlugins(): import('./types.js').PluginInstance[] {
+  getLoadedPlugins(): Array<import('./types.js').PluginInstance> {
     return pluginManager.getAllPlugins();
   }
   
   /**
    * Get enabled plugins
    */
-  getEnabledPlugins(): import('./types.js').PluginInstance[] {
+  getEnabledPlugins(): Array<import('./types.js').PluginInstance> {
     return pluginManager.getEnabledPlugins();
   }
   

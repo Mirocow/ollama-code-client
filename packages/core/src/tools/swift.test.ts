@@ -5,10 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type {
+  SwiftToolParams} from './swift.js';
 import {
   SwiftTool,
   SwiftToolInvocation,
-  SwiftToolParams,
   DEFAULT_SWIFT_TIMEOUT_MS,
 } from './swift.js';
 import type { Config } from '../config/config.js';

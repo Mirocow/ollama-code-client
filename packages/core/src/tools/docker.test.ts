@@ -5,12 +5,13 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import dockerTool, {
+import type {
   DockerToolParams,
   DockerOperation,
   ContainerInfo,
   ImageInfo,
 } from './docker.js';
+import dockerTool from './docker.js';
 
 // Mock execSync
 vi.mock('node:child_process', () => ({

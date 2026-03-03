@@ -264,7 +264,7 @@ export function toFetchLikeResponse(response: AxiosResponse): Response {
     headers: new Headers(
       Object.entries(response.headers)
         .filter(([, value]) => value !== undefined)
-        .map(([key, value]) => [key, String(value)]) as [string, string][]
+        .map(([key, value]) => [key, String(value)]) as Array<[string, string]>
     ),
   });
 }

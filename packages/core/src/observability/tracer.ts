@@ -59,10 +59,10 @@ export interface SpanEvent {
  */
 export class SpanContext {
   constructor(
-    public readonly traceId: string,
-    public readonly spanId: string,
-    public readonly traceFlags: number = 1,
-    public readonly traceState: string = '',
+    readonly traceId: string,
+    readonly spanId: string,
+    readonly traceFlags: number = 1,
+    readonly traceState: string = '',
   ) {}
 
   static fromString(str: string): SpanContext | null {

@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import codeAnalyzerTool, {
+import type {
   CodeAnalyzerParams,
   AnalysisType,
   Severity,
@@ -15,6 +15,7 @@ import codeAnalyzerTool, {
   PatternResult,
   CodeAnalysisResult,
 } from './code-analyzer.js';
+import codeAnalyzerTool from './code-analyzer.js';
 
 // Mock fs module
 vi.mock('node:fs', () => ({

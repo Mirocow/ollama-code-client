@@ -211,7 +211,7 @@ describe('mcp-client', () => {
         );
 
         expect(transport).toBeInstanceOf(StreamableHTTPClientTransport);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         expect((transport as any)._url).toEqual(new URL('http://test-server'));
       });
 
@@ -226,9 +226,9 @@ describe('mcp-client', () => {
         );
 
         expect(transport).toBeInstanceOf(StreamableHTTPClientTransport);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         expect((transport as any)._url).toEqual(new URL('http://test-server'));
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         expect((transport as any)._requestInit?.headers).toEqual({
           Authorization: 'derp',
         });
@@ -245,7 +245,7 @@ describe('mcp-client', () => {
           false,
         );
         expect(transport).toBeInstanceOf(SSEClientTransport);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         expect((transport as any)._url).toEqual(new URL('http://test-server'));
       });
 
@@ -260,9 +260,9 @@ describe('mcp-client', () => {
         );
 
         expect(transport).toBeInstanceOf(SSEClientTransport);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         expect((transport as any)._url).toEqual(new URL('http://test-server'));
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         expect((transport as any)._requestInit?.headers).toEqual({
           Authorization: 'derp',
         });
@@ -309,7 +309,7 @@ describe('mcp-client', () => {
         );
 
         expect(transport).toBeInstanceOf(StreamableHTTPClientTransport);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const authProvider = (transport as any)._authProvider;
         expect(authProvider).toBeInstanceOf(GoogleCredentialProvider);
       });
@@ -328,7 +328,7 @@ describe('mcp-client', () => {
         );
 
         expect(transport).toBeInstanceOf(SSEClientTransport);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const authProvider = (transport as any)._authProvider;
         expect(authProvider).toBeInstanceOf(GoogleCredentialProvider);
       });

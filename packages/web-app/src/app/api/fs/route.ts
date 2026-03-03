@@ -10,7 +10,8 @@
  * Provides secure file system access for the web UI.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -95,7 +96,6 @@ export async function GET(request: NextRequest) {
     } else {
       // Read file
       const content = await fs.readFile(securePath, 'utf-8');
-      const relativePath = path.relative(BASE_DIR, securePath);
 
       return NextResponse.json({
         path: requestPath,

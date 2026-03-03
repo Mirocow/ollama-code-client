@@ -19,7 +19,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import { createDebugLogger } from '../utils/debugLogger.js';
 import type { PluginDefinition, PluginManifest } from './types.js';
-import { PluginManager } from './pluginManager.js';
+import type { PluginManager } from './pluginManager.js';
 
 const debugLogger = createDebugLogger('PLUGIN_LOADER');
 

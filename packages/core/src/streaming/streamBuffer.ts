@@ -57,7 +57,7 @@ export interface BufferItem<T = unknown> {
   /** Whether item is aggregated */
   aggregated?: boolean;
   /** Original items if aggregated */
-  originalItems?: BufferItem<T>[];
+  originalItems?: Array<BufferItem<T>>;
 }
 
 /**
@@ -125,12 +125,12 @@ const DEFAULT_CONFIG: BufferConfig = {
  */
 export class StreamBuffer<T = unknown> {
   private config: BufferConfig;
-  private buffer: BufferItem<T>[] = [];
+  private buffer: Array<BufferItem<T>> = [];
   private currentSize = 0;
   private sequence = 0;
   private stats: BufferStats;
   private aggregationTimer?: NodeJS.Timeout;
-  private aggregationBuffer: BufferItem<T>[] = [];
+  private aggregationBuffer: Array<BufferItem<T>> = [];
 
   constructor(config: Partial<BufferConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -248,7 +248,7 @@ export class StreamBuffer<T = unknown> {
   /**
    * Get all items (clears buffer)
    */
-  getAll(): BufferItem<T>[] {
+  getAll(): Array<BufferItem<T>> {
     this.pruneExpired();
     this.flushAggregation();
 
@@ -371,7 +371,7 @@ export class StreamBuffer<T = unknown> {
     }
   }
 
-  private updateStats(action: 'add' | 'expire', size: number): void {
+  private updateStats(action: 'add' | 'expire', _size: number): void {
     if (action === 'add') {
       this.stats.totalAdded++;
       this.stats.size = this.currentSize;
@@ -485,7 +485,7 @@ export class StreamBuffer<T = unknown> {
     this.aggregationBuffer = [];
   }
 
-  private aggregateData(items: BufferItem<T>[]): T {
+  private aggregateData(items: Array<BufferItem<T>>): T {
     // Check if items are strings
     if (
       items.every((i) => typeof i.data === 'string') &&
