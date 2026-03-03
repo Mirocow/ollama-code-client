@@ -434,11 +434,16 @@ export async function main() {
 
   // Initialize output language file
   const uiLanguage = settings.merged.general?.language;
+  const userOutputLang = settings.user.originalSettings.general?.outputLanguage;
+  const workspaceOutputLang = settings.workspace.originalSettings.general?.outputLanguage;
   const explicitOutputLanguage = 
-    settings.user.originalSettings.general?.outputLanguage ??
-    settings.workspace.originalSettings.general?.outputLanguage;
+    (typeof userOutputLang === 'string' ? userOutputLang : undefined) ??
+    (typeof workspaceOutputLang === 'string' ? workspaceOutputLang : undefined);
   
-  initializeLlmOutputLanguage(explicitOutputLanguage, uiLanguage);
+  initializeLlmOutputLanguage(
+    explicitOutputLanguage,
+    typeof uiLanguage === 'string' ? uiLanguage : undefined,
+  );
 
   {
     const config = await loadCliConfig(
