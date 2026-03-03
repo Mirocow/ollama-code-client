@@ -124,6 +124,15 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      // Enforce bracket notation for index signature access (matches noPropertyAccessFromIndexSignature)
+      '@typescript-eslint/dot-notation': [
+        'error',
+        {
+          allowIndexSignaturePropertyAccess: false,
+          allowPrivateClassPropertyAccess: false,
+          allowProtectedClassPropertyAccess: false,
+        },
+      ],
       'import/no-internal-modules': 'off', // Disable this rule as it causes too many issues
       'import/no-relative-packages': 'error',
       'no-cond-assign': 'error',
@@ -174,8 +183,17 @@ export default tseslint.config(
         'warn',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_|^vi$|^beforeEach$|^afterEach$|^describe$|^it$|^expect$|^jest$|^[A-Z][a-zA-Z]+$', // Allow PascalCase (types)
+          varsIgnorePattern: '^_|^beforeEach$|^afterEach$|^describe$|^it$|^expect$|^jest$', // Only allow common test globals
           caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      // Enforce bracket notation for index signature access in tests too
+      '@typescript-eslint/dot-notation': [
+        'error',
+        {
+          allowIndexSignaturePropertyAccess: false,
+          allowPrivateClassPropertyAccess: false,
+          allowProtectedClassPropertyAccess: false,
         },
       ],
       '@typescript-eslint/no-explicit-any': 'off', // Allow any in tests
