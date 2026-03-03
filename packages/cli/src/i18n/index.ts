@@ -123,56 +123,78 @@ export function detectSystemLanguage(): SupportedLanguage {
   // Priority 5: macOS - try to detect from defaults command
   if (process.platform === 'darwin') {
     try {
-      // Try AppleLanguages first - this gives the actual UI language preference
-      let result = execSync('defaults read -g AppleLanguages 2>/dev/null', {
+      // Get AppleLocale first to determine region
+      const localeResult = execSync('defaults read -g AppleLocale 2>/dev/null', {
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'pipe']
       }).trim();
-      if (result) {
-        // Parse array like: ( "ru-RU", "en-US", ... ) or ( ru, en, ... )
-        const match = result.match(/\(\s*"([a-z]{2})/i);
-        if (match) {
+      
+      // Check AppleLanguages for all preferred languages
+      const langResult = execSync('defaults read -g AppleLanguages 2>/dev/null', {
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      }).trim();
+      
+      // Extract all language codes from AppleLanguages array
+      const langCodes: string[] = [];
+      if (langResult) {
+        const matches = langResult.matchAll(/"([a-z]{2})[-_]/gi);
+        for (const match of matches) {
           const code = match[1].toLowerCase();
-          for (const lang of SUPPORTED_LANGUAGES) {
-            if (code === lang.code) return lang.code;
+          if (!langCodes.includes(code)) {
+            langCodes.push(code);
           }
         }
       }
       
-      // Try AppleLocale - format like "ru_RU" or "en_RU"
-      result = execSync('defaults read -g AppleLocale 2>/dev/null', {
-        encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'pipe']
-      }).trim();
-      if (result) {
-        // Extract language code
-        let match = result.match(/^([a-z]{2})[_-]?/i);
-        if (match) {
-          const code = match[1].toLowerCase();
+      // Determine region from AppleLocale
+      let regionCode: string | null = null;
+      if (localeResult) {
+        const regionMatch = localeResult.match(/_([A-Z]{2})$/);
+        if (regionMatch) {
+          regionCode = regionMatch[1].toUpperCase();
+        }
+      }
+      
+      // Map regions to likely preferred languages
+      const regionToLang: Record<string, string> = {
+        'RU': 'ru', 'CN': 'zh', 'TW': 'zh', 'HK': 'zh',
+        'DE': 'de', 'AT': 'de', 'CH': 'de',
+        'JP': 'ja', 'BR': 'pt', 'PT': 'pt',
+        'FR': 'fr', 'ES': 'es', 'IT': 'it',
+        'KR': 'ko', 'UA': 'uk', 'CZ': 'cs',
+        'PL': 'pl', 'TR': 'tr', 'VN': 'vi',
+        'TH': 'th', 'ID': 'id', 'MY': 'ms',
+      };
+      
+      // English-speaking regions
+      const englishRegions = ['US', 'GB', 'AU', 'CA', 'NZ', 'IE'];
+      
+      // If we have a region and it's non-English, prefer that language
+      // even if English is first in AppleLanguages (common setup for non-native English speakers)
+      if (regionCode && !englishRegions.includes(regionCode)) {
+        const preferredLang = regionToLang[regionCode];
+        if (preferredLang && langCodes.includes(preferredLang)) {
+          // Check if it's a supported language
           for (const lang of SUPPORTED_LANGUAGES) {
-            if (code === lang.code) return lang.code;
+            if (preferredLang === lang.code) return lang.code;
           }
         }
-        
-        // If language is "en" but region is non-English (e.g., "en_RU"),
-        // use the region as a hint for the user's preferred language
-        match = result.match(/^en_([A-Z]{2})$/i);
-        if (match) {
-          const regionToLang: Record<string, string> = {
-            'RU': 'ru', 'CN': 'zh', 'TW': 'zh', 'HK': 'zh',
-            'DE': 'de', 'AT': 'de', 'CH': 'de',
-            'JP': 'ja', 'BR': 'pt', 'PT': 'pt',
-            'FR': 'fr', 'ES': 'es', 'IT': 'it',
-            'KR': 'ko', 'UA': 'uk', 'CZ': 'cs',
-            'PL': 'pl', 'TR': 'tr', 'VN': 'vi',
-            'TH': 'th', 'ID': 'id', 'MY': 'ms',
-          };
-          const regionCode = match[1].toUpperCase();
-          const langCode = regionToLang[regionCode];
-          if (langCode) {
-            for (const lang of SUPPORTED_LANGUAGES) {
-              if (langCode === lang.code) return lang.code;
-            }
+      }
+      
+      // Fallback: use first language from AppleLanguages that we support
+      for (const code of langCodes) {
+        for (const lang of SUPPORTED_LANGUAGES) {
+          if (code === lang.code) return lang.code;
+        }
+      }
+      
+      // Fallback: use region-based language even if not in AppleLanguages
+      if (regionCode) {
+        const preferredLang = regionToLang[regionCode];
+        if (preferredLang) {
+          for (const lang of SUPPORTED_LANGUAGES) {
+            if (preferredLang === lang.code) return lang.code;
           }
         }
       }
