@@ -2,7 +2,7 @@
 
 ## 0.16.7
 
-_UX Improvements & TypeScript Fixes_
+_UX Improvements, TypeScript Fixes & Test Migration_
 
 ### UX Improvements
 
@@ -19,15 +19,48 @@ Added spacing after Tips message in CLI for better readability:
 
 #### TypeScript Strict Mode Compatibility
 
-Fixed TS7006 errors by adding explicit type annotations:
+Fixed TS7006/TS7053 errors by adding explicit type annotations:
 
 | File | Changes |
 | ---- | ------- |
 | `ide-client.ts` | Added types for `part`, `tool` parameters |
 | `McpPromptLoader.ts` | Added `PromptArgument` types |
-| `acpAgent.ts` | Added types for `mode`, `item`, `model` parameters |
+| `acpAgent.ts` | Added types for `mode`, `item`, `model` parameters, fixed APPROVAL_MODES casting |
 | `ToolCallEmitter.ts` | Added type for `loc` parameter |
 | `consent.ts` | Added `ClaudeMarketplacePluginConfig` type |
+
+### Refactoring
+
+#### Test Migration — 100% Complete
+
+All tests migrated from `tools/` to `plugins/builtin/`:
+
+| Category | Tests Migrated |
+| -------- | -------------- |
+| dev-tools | python, nodejs, golang, rust, java, cpp, swift, php, typescript |
+| file-tools | edit, glob, ls, read-file, read-many-files, write-file |
+| search-tools | grep, ripGrep, web-fetch |
+| database-tools | database, docker, redis |
+| mcp-tools | mcp-client, mcp-tool, mcp-client-manager, sdk-control-client-transport |
+| agent-tools | skill, task |
+| productivity-tools | todoWrite, exitPlanMode |
+| utility-tools | code-analyzer, diagram-generator |
+| Other | git-advanced, lsp, shell, api-tester, save-memory |
+
+**Tests remaining in `tools/` (base class tests):**
+- diffOptions.test.ts
+- modifiable-tool.test.ts
+- tool-error.test.ts
+- tool-names.test.ts
+- tool-registry.test.ts
+- tools.test.ts
+
+### Dependency Updates
+
+| Package | Change | Reason |
+| ------- | ------ | ------ |
+| `zod` | 3.24.0 → 3.25.0 | MCP SDK 1.25.1+ requires zod ^3.25 for v3/v4 exports |
+| `ajv-formats` | 3.0.0 → 2.1.1 | ESM compatibility fix |
 
 ### Files Modified
 
@@ -39,7 +72,11 @@ Fixed TS7006 errors by adding explicit type annotations:
 | `packages/cli/src/acp-integration/acpAgent.ts` | Type annotations |
 | `packages/cli/src/acp-integration/session/emitters/ToolCallEmitter.ts` | Type annotations |
 | `packages/cli/src/commands/extensions/consent.ts` | Type annotations |
+| `packages/core/package.json` | ajv-formats downgrade |
+| `package.json` | zod upgrade |
 | `ROADMAP.md` | Updated migration status to 100% |
+| `CHANGELOG.md` | Added v0.16.7 |
+| `CHANGELOG.ru.md` | Added v0.16.7 (Russian) |
 
 ---
 

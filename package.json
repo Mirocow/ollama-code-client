@@ -62,7 +62,7 @@
     "pre-commit": "node scripts/pre-commit.js"
   },
   "overrides": {
-    "zod": "^3.25.0",
+    "zod": "3.25.0",
     "wrap-ansi": "9.0.2",
     "ansi-regex": "6.2.2",
     "cliui": {
@@ -78,7 +78,7 @@
   },
   "pnpm": {
     "overrides": {
-      "zod": "^3.25.0",
+      "zod": "3.25.0",
       "@typescript-eslint/eslint-plugin": "8.30.1",
       "@typescript-eslint/parser": "8.30.1",
       "@typescript-eslint/type-utils": "8.30.1",
@@ -197,7 +197,7 @@
     "simple-git": "3.28.0",
     "strip-json-comments": "5.0.1",
     "undici": "7.22.0",
-    "zod": "^3.25.0"
+    "zod": "3.25.0"
   },
   "optionalDependencies": {
     "@lydell/node-pty": "1.1.0",

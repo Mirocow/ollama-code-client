@@ -184,6 +184,32 @@ npm run dev:server
 
 ---
 
+## What's New in v0.16.7
+
+### Test Migration — 100% Complete
+
+All tests migrated from `tools/` to `plugins/builtin/`:
+
+| Category | Tests |
+|----------|-------|
+| dev-tools | python, nodejs, golang, rust, java, cpp, swift, php, typescript |
+| file-tools | edit, glob, ls, read-file, read-many-files, write-file |
+| search-tools | grep, ripGrep, web-fetch |
+| database-tools | database, docker, redis |
+| mcp-tools | mcp-client, mcp-tool, mcp-client-manager |
+| Other | skill, task, todoWrite, exitPlanMode, lsp, shell, git-advanced, etc. |
+
+### TypeScript Strict Mode
+
+Fixed all TypeScript strict mode errors with explicit type annotations.
+
+### Dependency Updates
+
+- `zod` upgraded to 3.25.0 for MCP SDK compatibility
+- `ajv-formats` downgraded to 2.1.1 for ESM compatibility
+
+---
+
 ## What's New in v0.16.4
 
 ### Code Quality & ESLint Fixes

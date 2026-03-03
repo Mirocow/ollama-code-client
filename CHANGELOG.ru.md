@@ -1,5 +1,85 @@
 # Журнал изменений
 
+## 0.16.7
+
+_Улучшения UX, исправления TypeScript и миграция тестов_
+
+### Улучшения UX
+
+#### Форматирование сообщения Tips
+
+Добавлен отступ после сообщения Tips в CLI для лучшей читаемости:
+
+| Компонент | Изменение |
+| --------- | --------- |
+| `Tips.tsx` | Добавлен `marginBottom={1}` для визуального отступа |
+| `Tips.tsx` | Добавлен `flexDirection="column"` для правильной компоновки |
+
+### Исправления ошибок
+
+#### Совместимость со строгим режимом TypeScript
+
+Исправлены ошибки TS7006/TS7053 добавлением явных аннотаций типов:
+
+| Файл | Изменения |
+| ---- | --------- |
+| `ide-client.ts` | Добавлены типы для параметров `part`, `tool` |
+| `McpPromptLoader.ts` | Добавлены типы `PromptArgument` |
+| `acpAgent.ts` | Добавлены типы для параметров `mode`, `item`, `model`, исправлено приведение APPROVAL_MODES |
+| `ToolCallEmitter.ts` | Добавлен тип для параметра `loc` |
+| `consent.ts` | Добавлен тип `ClaudeMarketplacePluginConfig` |
+
+### Рефакторинг
+
+#### Миграция тестов — 100% завершено
+
+Все тесты перенесены из `tools/` в `plugins/builtin/`:
+
+| Категория | Перенесённые тесты |
+| --------- | ----------------- |
+| dev-tools | python, nodejs, golang, rust, java, cpp, swift, php, typescript |
+| file-tools | edit, glob, ls, read-file, read-many-files, write-file |
+| search-tools | grep, ripGrep, web-fetch |
+| database-tools | database, docker, redis |
+| mcp-tools | mcp-client, mcp-tool, mcp-client-manager, sdk-control-client-transport |
+| agent-tools | skill, task |
+| productivity-tools | todoWrite, exitPlanMode |
+| utility-tools | code-analyzer, diagram-generator |
+| Прочие | git-advanced, lsp, shell, api-tester, save-memory |
+
+**Тесты, оставшиеся в `tools/` (тесты базовых классов):**
+- diffOptions.test.ts
+- modifiable-tool.test.ts
+- tool-error.test.ts
+- tool-names.test.ts
+- tool-registry.test.ts
+- tools.test.ts
+
+### Обновления зависимостей
+
+| Пакет | Изменение | Причина |
+| ----- | --------- | ------- |
+| `zod` | 3.24.0 → 3.25.0 | MCP SDK 1.25.1+ требует zod ^3.25 для экспортов v3/v4 |
+| `ajv-formats` | 3.0.0 → 2.1.1 | Исправление совместимости ESM |
+
+### Изменённые файлы
+
+| Файл | Изменения |
+| ---- | --------- |
+| `packages/cli/src/ui/components/Tips.tsx` | Отступ после сообщения Tips |
+| `packages/core/src/ide/ide-client.ts` | Аннотации типов |
+| `packages/cli/src/services/McpPromptLoader.ts` | Аннотации типов |
+| `packages/cli/src/acp-integration/acpAgent.ts` | Аннотации типов |
+| `packages/cli/src/acp-integration/session/emitters/ToolCallEmitter.ts` | Аннотации типов |
+| `packages/cli/src/commands/extensions/consent.ts` | Аннотации типов |
+| `packages/core/package.json` | понижение версии ajv-formats |
+| `package.json` | обновление zod |
+| `ROADMAP.md` | Обновлён статус миграции на 100% |
+| `CHANGELOG.md` | Добавлен v0.16.7 |
+| `CHANGELOG.ru.md` | Добавлен v0.16.7 (русский) |
+
+---
+
 ## 0.16.6
 
 _Исправление совместимости с Node.js_

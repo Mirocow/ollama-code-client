@@ -184,6 +184,32 @@ npm run dev:server
 
 ---
 
+## Новые возможности v0.16.7
+
+### Миграция тестов — 100% завершено
+
+Все тесты перенесены из `tools/` в `plugins/builtin/`:
+
+| Категория | Тесты |
+|-----------|-------|
+| dev-tools | python, nodejs, golang, rust, java, cpp, swift, php, typescript |
+| file-tools | edit, glob, ls, read-file, read-many-files, write-file |
+| search-tools | grep, ripGrep, web-fetch |
+| database-tools | database, docker, redis |
+| mcp-tools | mcp-client, mcp-tool, mcp-client-manager |
+| Прочие | skill, task, todoWrite, exitPlanMode, lsp, shell, git-advanced и др. |
+
+### Строгий режим TypeScript
+
+Исправлены все ошибки строгого режима TypeScript с явными аннотациями типов.
+
+### Обновления зависимостей
+
+- `zod` обновлён до 3.25.0 для совместимости с MCP SDK
+- `ajv-formats` понижен до 2.1.1 для совместимости ESM
+
+---
+
 ## Новые возможности v0.13.0
 
 ### Web UI — Полноценный Next.js интерфейс
