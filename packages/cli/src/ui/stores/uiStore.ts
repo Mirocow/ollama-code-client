@@ -13,13 +13,13 @@ import { subscribeWithSelector, persist } from 'zustand/middleware';
 export interface UIStoreState {
   // Theme
   themeName: string;
-  
+
   // Dialogs
   activeDialog: string | null;
-  
+
   // Focus
   focusedComponent: string | null;
-  
+
   // Notifications
   notifications: Array<{
     id: string;
@@ -27,20 +27,22 @@ export interface UIStoreState {
     message: string;
     timestamp: number;
   }>;
-  
+
   // Vim mode
   vimModeEnabled: boolean;
   vimMode: 'normal' | 'insert' | 'visual' | 'command';
-  
+
   // Debug
   debugMode: boolean;
-  
+
   // Actions
   setTheme: (themeName: string) => void;
   openDialog: (dialogId: string) => void;
   closeDialog: () => void;
   setFocusedComponent: (componentId: string | null) => void;
-  addNotification: (notification: Omit<UIStoreState['notifications'][0], 'id' | 'timestamp'>) => void;
+  addNotification: (
+    notification: Omit<UIStoreState['notifications'][0], 'id' | 'timestamp'>,
+  ) => void;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
   setVimMode: (mode: UIStoreState['vimMode']) => void;
@@ -51,14 +53,14 @@ export interface UIStoreState {
 
 /**
  * UI Store - Manages general UI state
- * 
+ *
  * Uses persist middleware for theme and preferences that should
  * survive app restarts.
- * 
+ *
  * @example
  * // Subscribe to theme
  * const theme = useUIStore(state => state.themeName);
- * 
+ *
  * @example
  * // Subscribe to notifications
  * const notifications = useUIStore(state => state.notifications);
@@ -66,7 +68,7 @@ export interface UIStoreState {
 export const uiStore = create<UIStoreState>()(
   subscribeWithSelector(
     persist(
-      (set, get) => ({
+      (set, _get) => ({
         // Initial state
         themeName: 'default',
         activeDialog: null,
@@ -99,14 +101,14 @@ export const uiStore = create<UIStoreState>()(
             id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             timestamp: Date.now(),
           };
-          set(state => ({
+          set((state) => ({
             notifications: [...state.notifications, newNotification],
           }));
         },
 
         removeNotification: (id: string) => {
-          set(state => ({
-            notifications: state.notifications.filter(n => n.id !== id),
+          set((state) => ({
+            notifications: state.notifications.filter((n) => n.id !== id),
           }));
         },
 
@@ -119,7 +121,7 @@ export const uiStore = create<UIStoreState>()(
         },
 
         toggleVimMode: () => {
-          set(state => ({
+          set((state) => ({
             vimModeEnabled: !state.vimModeEnabled,
             vimMode: !state.vimModeEnabled ? 'normal' : 'insert',
           }));
@@ -130,7 +132,7 @@ export const uiStore = create<UIStoreState>()(
         },
 
         toggleDebugMode: () => {
-          set(state => ({ debugMode: !state.debugMode }));
+          set((state) => ({ debugMode: !state.debugMode }));
         },
       }),
       {
@@ -140,9 +142,9 @@ export const uiStore = create<UIStoreState>()(
           vimModeEnabled: state.vimModeEnabled,
           debugMode: state.debugMode,
         }),
-      }
-    )
-  )
+      },
+    ),
+  ),
 );
 
 /**

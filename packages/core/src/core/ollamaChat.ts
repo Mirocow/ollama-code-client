@@ -13,7 +13,8 @@ import type {
 } from '../types/content.js';
 import type { Config } from '../config/config.js';
 import type { RetryInfo } from '../utils/rateLimit.js';
-import { ContextCacheManager, contextCacheManager } from '../cache/contextCacheManager.js';
+import type { ContextCacheManager } from '../cache/contextCacheManager.js';
+import { contextCacheManager } from '../cache/contextCacheManager.js';
 import { createDebugLogger } from '../utils/debugLogger.js';
 
 const debugLogger = createDebugLogger('OLLAMA_CHAT');
@@ -40,10 +41,10 @@ export interface StreamEvent {
 
 /**
  * OllamaChat with Context Caching Support
- * 
+ *
  * This class manages conversation history and can optionally use
  * Ollama's native context token caching for improved performance.
- * 
+ *
  * When context caching is enabled:
  * - Uses /api/generate endpoint with cached context tokens
  * - Falls back to /api/chat when tools are needed
@@ -72,7 +73,7 @@ export class OllamaChat {
     this.enableContextCaching = options.enableContextCaching ?? false;
     this.sessionId = options.sessionId ?? `session-${Date.now()}`;
     this._contextCache = contextCacheManager;
-    
+
     debugLogger.info('OllamaChat initialized', {
       enableContextCaching: this.enableContextCaching,
       sessionId: this.sessionId,
@@ -83,7 +84,7 @@ export class OllamaChat {
   addHistory(content: Content): void {
     this.history.push(content);
     this.messageCount++;
-    
+
     // Invalidate cached context when history changes externally
     if (this.enableContextCaching) {
       this.cachedContext = null;
@@ -98,7 +99,7 @@ export class OllamaChat {
   setHistory(history: Content[]): void {
     this.history = history;
     this.messageCount = history.length;
-    
+
     // Invalidate cached context
     if (this.enableContextCaching) {
       this.cachedContext = null;
@@ -110,9 +111,12 @@ export class OllamaChat {
     // Remove thought parts from history
     this.history = this.history.map((content) => ({
       ...content,
-      parts: content.parts?.filter((part) => typeof part === 'string' || !('thought' in part)) || [],
+      parts:
+        content.parts?.filter(
+          (part) => typeof part === 'string' || !('thought' in part),
+        ) || [],
     }));
-    
+
     // Invalidate cached context after stripping thoughts
     if (this.enableContextCaching) {
       this.cachedContext = null;
@@ -130,13 +134,15 @@ export class OllamaChat {
    */
   private shouldUseContextCaching(): boolean {
     if (!this.enableContextCaching) return false;
-    
+
     // Don't use context caching if tools are present (requires /api/chat)
     if (this.tools && this.tools.length > 0) {
-      debugLogger.debug('Tools present - using /api/chat instead of /api/generate');
+      debugLogger.debug(
+        'Tools present - using /api/chat instead of /api/generate',
+      );
       return false;
     }
-    
+
     return true;
   }
 

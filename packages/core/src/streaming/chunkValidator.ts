@@ -61,7 +61,10 @@ export interface OllamaGenerateChunk extends BaseChunk {
 /**
  * Generic chunk type
  */
-export type StreamChunk = OllamaChatChunk | OllamaGenerateChunk | Record<string, unknown>;
+export type StreamChunk =
+  | OllamaChatChunk
+  | OllamaGenerateChunk
+  | Record<string, unknown>;
 
 /**
  * Validated chunk wrapper
@@ -139,14 +142,21 @@ export interface ChunkValidationConfig {
  * Chunk validation error
  */
 export class ChunkValidationError extends Error {
+  readonly code: ChunkValidationErrorCode;
+  readonly chunk?: StreamChunk;
+  readonly details?: Record<string, unknown>;
+
   constructor(
     message: string,
-    public readonly code: ChunkValidationErrorCode,
-    public readonly chunk?: StreamChunk,
-    public readonly details?: Record<string, unknown>,
+    code: ChunkValidationErrorCode,
+    chunk?: StreamChunk,
+    details?: Record<string, unknown>,
   ) {
     super(message);
     this.name = 'ChunkValidationError';
+    this.code = code;
+    this.chunk = chunk;
+    this.details = details;
   }
 }
 
@@ -360,7 +370,7 @@ export class ChunkValidator<T = StreamChunk> {
   /**
    * Validate a batch of chunks
    */
-  validateBatch(chunks: unknown[]): ChunkValidationResult<T>[] {
+  validateBatch(chunks: unknown[]): Array<ChunkValidationResult<T>> {
     return chunks.map((chunk) => this.validate(chunk));
   }
 

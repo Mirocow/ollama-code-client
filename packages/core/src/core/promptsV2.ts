@@ -129,7 +129,7 @@ You are running under macos seatbelt with limited access to files outside the pr
     return `# Sandbox
 You are running in a sandbox container with limited access to files outside the project directory or system temp directory, and with limited access to host system resources such as ports. If you encounter failures that could be due to sandboxing (e.g. if a command fails with 'Operation not permitted' or similar error), when you report the error to the user, also explain why you think it could be due to sandboxing, and how the user may need to adjust their sandbox configuration.`;
   }
-  
+
   return `# Outside of Sandbox
 You are running outside of a sandbox container, directly on the user's system. For critical commands that are particularly likely to modify the user's system outside of the project directory or system temp directory, as you explain the command to the user (per the Explain Critical Commands rule above), also remind the user to consider enabling sandboxing.`;
 }
@@ -201,14 +201,14 @@ These are NOT valid tool names!`;
 
 /**
  * Get the new template-based system prompt
- * 
+ *
  * This function loads a template based on model size and fills in dynamic placeholders.
  * Templates are optimized for different model capacities:
  * - small (<=10B): Compact, essential rules only
  * - medium (<=30B): Standard detail level
  * - large (<=60B): Extended instructions
  * - xlarge (>60B): Full detail with all features
- * 
+ *
  * @param userMemory - Optional user memory to append
  * @param model - Model name for template selection
  * @returns Complete system prompt
@@ -219,7 +219,7 @@ export function getCoreSystemPromptV2(
 ): string {
   // Get the appropriate template based on model size
   const template = getSystemPromptTemplate(model);
-  
+
   // Build placeholders
   const placeholders: Partial<TemplatePlaceholders> = {
     ENVIRONMENT_INFO: getEnvironmentInfo(),
@@ -229,10 +229,10 @@ export function getCoreSystemPromptV2(
     GIT_INFO: getGitInfo(),
     ROOT: process.cwd(),
   };
-  
+
   // Fill template
-  let prompt = fillTemplatePlaceholders(template, placeholders);
-  
+  const prompt = fillTemplatePlaceholders(template, placeholders);
+
   // Append user memory
   const memorySuffix =
     userMemory && userMemory.trim().length > 0
@@ -247,12 +247,12 @@ export function getCoreSystemPromptV2(
  */
 export function shouldUseTemplates(): boolean {
   const envValue = process.env['OLLAMA_CODE_USE_TEMPLATES'];
-  
+
   // Default to true if not set
   if (envValue === undefined || envValue === '') {
     return true;
   }
-  
+
   // Check for false values
   return !['0', 'false', 'no', 'off'].includes(envValue.toLowerCase());
 }

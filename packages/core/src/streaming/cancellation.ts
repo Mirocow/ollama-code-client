@@ -33,7 +33,12 @@ export interface CancellationTokenConfig {
 /**
  * Cancellation reason
  */
-export type CancellationReason = 'user' | 'timeout' | 'linked' | 'error' | 'unknown';
+export type CancellationReason =
+  | 'user'
+  | 'timeout'
+  | 'linked'
+  | 'error'
+  | 'unknown';
 
 /**
  * Registration for cancellation callback
@@ -50,13 +55,18 @@ export interface CancellationRegistration {
  * Base cancellation error
  */
 export class CancellationError extends Error {
+  readonly reason: CancellationReason;
+  readonly token?: CancellationToken;
+
   constructor(
     message: string,
-    public readonly reason: CancellationReason,
-    public readonly token?: CancellationToken,
+    reason: CancellationReason,
+    token?: CancellationToken,
   ) {
     super(message);
     this.name = 'CancellationError';
+    this.reason = reason;
+    this.token = token;
   }
 }
 
@@ -74,17 +84,16 @@ export class OperationCanceledError extends CancellationError {
  * Error thrown when operation times out
  */
 export class TimeoutError extends CancellationError {
-  constructor(
-    public readonly timeoutMs: number,
-    message?: string,
-    token?: CancellationToken,
-  ) {
+  readonly timeoutMs: number;
+
+  constructor(timeoutMs: number, message?: string, token?: CancellationToken) {
     super(
       message ?? `Operation timed out after ${timeoutMs}ms`,
       'timeout',
       token,
     );
     this.name = 'TimeoutError';
+    this.timeoutMs = timeoutMs;
   }
 }
 
@@ -240,7 +249,10 @@ export class CancellationToken {
   /**
    * Create a token that times out after specified duration
    */
-  static timeout(ms: number, config?: Partial<CancellationTokenConfig>): CancellationToken {
+  static timeout(
+    ms: number,
+    config?: Partial<CancellationTokenConfig>,
+  ): CancellationToken {
     const token = new CancellationToken({ ...config, timeout: ms });
 
     token._timeoutId = setTimeout(() => {
@@ -390,7 +402,10 @@ export class CancellationTokenSource {
       return;
     }
 
-    this._token._cancel(cancelReason ?? 'user', reason ?? 'Operation cancelled');
+    this._token._cancel(
+      cancelReason ?? 'user',
+      reason ?? 'Operation cancelled',
+    );
   }
 
   /**

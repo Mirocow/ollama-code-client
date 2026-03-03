@@ -37,6 +37,7 @@ export type GolangAction =
   | 'fmt' // Format code
   | 'vet' // Run go vet
   | 'lint' // Run golangci-lint
+  | 'init' // Alias for mod_init - Initialize go.mod
   | 'mod_init' // Initialize go.mod
   | 'mod_tidy' // Tidy dependencies
   | 'mod_download' // Download dependencies
@@ -51,6 +52,11 @@ export type GolangAction =
   | 'clean' // Clean build cache
   | 'generate' // Run go generate
   | 'custom'; // Custom command
+
+// Action aliases mapping
+const ACTION_ALIASES: Record<string, GolangAction> = {
+  init: 'mod_init',
+};
 
 export interface GolangToolParams {
   action: GolangAction;
@@ -113,9 +119,13 @@ export class GolangToolInvocation extends BaseToolInvocation<
     _abortSignal: AbortSignal,
   ): Promise<ToolCallConfirmationDetails | false> {
     // Actions that modify the project need confirmation
-    const needsConfirmation = ['mod_init', 'get', 'install', 'clean'].includes(
-      this.params.action,
-    );
+    const needsConfirmation = [
+      'init',
+      'mod_init',
+      'get',
+      'install',
+      'clean',
+    ].includes(this.params.action);
 
     if (!needsConfirmation) {
       return false;
@@ -138,7 +148,10 @@ export class GolangToolInvocation extends BaseToolInvocation<
   }
 
   private buildCommand(): string {
-    switch (this.params.action) {
+    // Resolve action alias
+    const action = ACTION_ALIASES[this.params.action] || this.params.action;
+
+    switch (action) {
       case 'run':
         return this.buildRunCommand();
 
@@ -163,6 +176,7 @@ export class GolangToolInvocation extends BaseToolInvocation<
       case 'lint':
         return this.buildLintCommand();
 
+      case 'init':
       case 'mod_init':
         return this.buildModInitCommand();
 
@@ -595,8 +609,9 @@ function getGolangToolDescription(): string {
    - Optional: \`file\` (file to lint)
    - Optional: \`args\` (additional lint arguments)
 
-9. **mod_init** - Initialize go.mod
+9. **init** or **mod_init** - Initialize go.mod
    - Optional: \`module_name\` (module path)
+   - \`init\` is an alias for \`mod_init\`
 
 10. **mod_tidy** - Tidy dependencies in go.mod
 
@@ -716,6 +731,7 @@ export class GolangTool extends BaseDeclarativeTool<
               'fmt',
               'vet',
               'lint',
+              'init',
               'mod_init',
               'mod_tidy',
               'mod_download',

@@ -5,8 +5,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
+import type { SystemPromptOptimizer } from './promptOptimizer.js';
 import {
-  SystemPromptOptimizer,
   getPromptOptimizer,
   getOptimizedToolsForMessage,
   ToolCategories,
@@ -98,13 +98,17 @@ Dynamic environment info here.`;
 
   describe('detectTaskCategories', () => {
     it('should detect web-related tasks', () => {
-      const categories = optimizer.detectTaskCategories('fetch data from API endpoint');
+      const categories = optimizer.detectTaskCategories(
+        'fetch data from API endpoint',
+      );
 
       expect(categories).toContain('web');
     });
 
     it('should detect database-related tasks', () => {
-      const categories = optimizer.detectTaskCategories('query the SQL database');
+      const categories = optimizer.detectTaskCategories(
+        'query the SQL database',
+      );
 
       expect(categories).toContain('database');
     });
@@ -116,7 +120,9 @@ Dynamic environment info here.`;
     });
 
     it('should detect Node.js tasks', () => {
-      const categories = optimizer.detectTaskCategories('create a React component');
+      const categories = optimizer.detectTaskCategories(
+        'create a React component',
+      );
 
       expect(categories).toContain('nodejs');
     });
@@ -130,7 +136,7 @@ Dynamic environment info here.`;
 
     it('should detect multiple categories', () => {
       const categories = optimizer.detectTaskCategories(
-        'fetch API data and save to database'
+        'fetch API data and save to database',
       );
 
       expect(categories).toContain('web');
@@ -171,7 +177,10 @@ Dynamic environment info here.`;
     ];
 
     it('should return subset of tools based on context', () => {
-      const tools = optimizer.getOptimizedToolNames('fetch data from API', allTools);
+      const tools = optimizer.getOptimizedToolNames(
+        'fetch data from API',
+        allTools,
+      );
 
       expect(tools.length).toBeLessThan(allTools.length);
       expect(tools).toContain('web_fetch');
