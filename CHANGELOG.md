@@ -1,5 +1,55 @@
 # Changelog
 
+## 0.16.6
+
+_Node.js Compatibility Fix_
+
+### Bug Fixes
+
+#### Node.js Version Requirements Clarification
+
+Updated documentation to clearly specify supported Node.js versions:
+
+| Node.js Version | Status      | Notes                                    |
+| --------------- | ----------- | ---------------------------------------- |
+| 18.x            | ✅ Supported | LTS Maintenance                          |
+| 20.x            | ✅ Supported | LTS Current (Recommended)                |
+| 22.x            | ✅ Supported | LTS Latest                               |
+| 23.x            | ❌ Not Supported | node-pty compilation issues          |
+| 24.x            | ❌ Not Supported | Experimental, node-pty issues         |
+| 25.x            | ❌ Not Supported | Experimental, node-pty issues         |
+
+**Problem:** Node.js 25.x caused `node-pty` compilation failure:
+```
+error: expected expression
+I::ReadExternalPointerField<{internal::kFirstEmbedderDataTag,
+```
+
+**Solution:** Updated README to specify Node.js 20.x or 22.x LTS as required versions.
+
+### Documentation Updates
+
+| File          | Changes                                          |
+| ------------- | ------------------------------------------------ |
+| `README.md`   | Added Node.js compatibility warning with fix guide |
+| `package.json`| Already had correct engines requirement (>=20.0.0) |
+
+### Installation Fix
+
+If you encounter `node-pty` compilation errors, switch to Node.js 22 LTS:
+
+```bash
+# Using asdf
+asdf install nodejs 22.14.0
+asdf local nodejs 22.14.0
+
+# Clean and reinstall
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+```
+
+---
+
 ## 0.16.5
 
 _Tools Migration Complete_
