@@ -123,13 +123,14 @@ export function detectSystemLanguage(): SupportedLanguage {
   // Priority 5: macOS - try to detect from defaults command
   if (process.platform === 'darwin') {
     try {
-      // Try AppleLocale first
-      let result = execSync('defaults read -g AppleLocale 2>/dev/null', {
+      // Try AppleLanguages first - this gives the actual UI language preference
+      let result = execSync('defaults read -g AppleLanguages 2>/dev/null', {
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'pipe']
       }).trim();
       if (result) {
-        const match = result.match(/^([a-z]{2})[_-]?/i);
+        // Parse array like: ( "ru-RU", "en-US", ... ) or ( ru, en, ... )
+        const match = result.match(/\(\s*"([a-z]{2})/i);
         if (match) {
           const code = match[1].toLowerCase();
           for (const lang of SUPPORTED_LANGUAGES) {
@@ -137,17 +138,41 @@ export function detectSystemLanguage(): SupportedLanguage {
           }
         }
       }
-      // Try AppleLanguages array
-      result = execSync('defaults read -g AppleLanguages 2>/dev/null | head -1', {
+      
+      // Try AppleLocale - format like "ru_RU" or "en_RU"
+      result = execSync('defaults read -g AppleLocale 2>/dev/null', {
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'pipe']
       }).trim();
       if (result) {
-        const match = result.match(/"([a-z]{2})[_-]?/i);
+        // Extract language code
+        let match = result.match(/^([a-z]{2})[_-]?/i);
         if (match) {
           const code = match[1].toLowerCase();
           for (const lang of SUPPORTED_LANGUAGES) {
             if (code === lang.code) return lang.code;
+          }
+        }
+        
+        // If language is "en" but region is non-English (e.g., "en_RU"),
+        // use the region as a hint for the user's preferred language
+        match = result.match(/^en_([A-Z]{2})$/i);
+        if (match) {
+          const regionToLang: Record<string, string> = {
+            'RU': 'ru', 'CN': 'zh', 'TW': 'zh', 'HK': 'zh',
+            'DE': 'de', 'AT': 'de', 'CH': 'de',
+            'JP': 'ja', 'BR': 'pt', 'PT': 'pt',
+            'FR': 'fr', 'ES': 'es', 'IT': 'it',
+            'KR': 'ko', 'UA': 'uk', 'CZ': 'cs',
+            'PL': 'pl', 'TR': 'tr', 'VN': 'vi',
+            'TH': 'th', 'ID': 'id', 'MY': 'ms',
+          };
+          const regionCode = match[1].toUpperCase();
+          const langCode = regionToLang[regionCode];
+          if (langCode) {
+            for (const lang of SUPPORTED_LANGUAGES) {
+              if (langCode === lang.code) return lang.code;
+            }
           }
         }
       }

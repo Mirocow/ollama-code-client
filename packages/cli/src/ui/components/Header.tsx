@@ -19,7 +19,7 @@ import { theme } from '../semantic-colors.js';
 import { shortAsciiLogo } from './AsciiArt.js';
 import { getAsciiArtWidth, getCachedStringWidth } from '../utils/textUtils.js';
 import { useTerminalSize } from '../hooks/useTerminalSize.js';
-import { t } from '../../i18n/index.js';
+import { t, getCurrentLanguage } from '../../i18n/index.js';
 
 /**
  * Extract model size from model name (e.g., "14b" from "qwen2.5-coder:14b")
@@ -340,6 +340,8 @@ export const Header: React.FC<HeaderProps> = memo(
                 <Text color={theme.text.accent}>{modelSize}</Text>
               </>
             )}
+            <Text color={theme.text.secondary}> | {t('Language')}: </Text>
+            <Text color={theme.text.accent}>{getCurrentLanguage().toUpperCase()}</Text>
           </Text>
           {/* Context usage progress bar - full width */}
           <Text>
