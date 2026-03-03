@@ -156,26 +156,30 @@ export function detectSystemLanguage(): SupportedLanguage {
         }
       }
       
-      // Map regions to likely preferred languages
+      // Map regions to likely preferred languages (only supported languages)
+      // For unsupported languages, fallback to English or AppleLanguages
       const regionToLang: Record<string, string> = {
-        'RU': 'ru', 'CN': 'zh', 'TW': 'zh', 'HK': 'zh',
-        'DE': 'de', 'AT': 'de', 'CH': 'de',
-        'JP': 'ja', 'BR': 'pt', 'PT': 'pt',
-        'FR': 'fr', 'ES': 'es', 'IT': 'it',
-        'KR': 'ko', 'UA': 'uk', 'CZ': 'cs',
-        'PL': 'pl', 'TR': 'tr', 'VN': 'vi',
-        'TH': 'th', 'ID': 'id', 'MY': 'ms',
+        // Russian
+        'RU': 'ru', 'UA': 'ru', 'BY': 'ru', 'KZ': 'ru', 'KG': 'ru',
+        // Chinese
+        'CN': 'zh', 'TW': 'zh', 'HK': 'zh', 'SG': 'zh',
+        // German
+        'DE': 'de', 'AT': 'de', 'CH': 'de', 'LI': 'de',
+        // Japanese
+        'JP': 'ja',
+        // Portuguese
+        'BR': 'pt', 'PT': 'pt', 'AO': 'pt', 'MZ': 'pt', 'CV': 'pt', 'GW': 'pt', 'TL': 'pt',
       };
       
       // English-speaking regions
-      const englishRegions = ['US', 'GB', 'AU', 'CA', 'NZ', 'IE'];
+      const englishRegions = ['US', 'GB', 'AU', 'CA', 'NZ', 'IE', 'ZA', 'PH', 'MT', 'IN', 'PK', 'NG', 'KE', 'GH'];
       
-      // If we have a region and it's non-English, prefer that language
-      // even if English is first in AppleLanguages (common setup for non-native English speakers)
+      // For non-English regions, prefer the region's language
+      // This handles cases like: AppleLanguages = [en-GB, ru-RU], AppleLocale = en_RU
+      // User likely speaks Russian despite English being first
       if (regionCode && !englishRegions.includes(regionCode)) {
         const preferredLang = regionToLang[regionCode];
-        if (preferredLang && langCodes.includes(preferredLang)) {
-          // Check if it's a supported language
+        if (preferredLang) {
           for (const lang of SUPPORTED_LANGUAGES) {
             if (preferredLang === lang.code) return lang.code;
           }
@@ -189,7 +193,7 @@ export function detectSystemLanguage(): SupportedLanguage {
         }
       }
       
-      // Fallback: use region-based language even if not in AppleLanguages
+      // Last fallback: use region-based language
       if (regionCode) {
         const preferredLang = regionToLang[regionCode];
         if (preferredLang) {
