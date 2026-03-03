@@ -253,7 +253,7 @@ export class IdeClient {
         .then((parsedResultData) => {
           if (parsedResultData.isError) {
             const textPart = parsedResultData.content.find(
-              (part) => part.type === 'text',
+              (part: { type: string }) => part.type === 'text',
             ) as { type: 'text'; text: string } | undefined;
             const errorMessage =
               textPart?.text ?? `Tool 'openDiff' reported an error.`;
@@ -334,7 +334,7 @@ export class IdeClient {
 
       if (resultData.isError) {
         const textPart = resultData.content.find(
-          (part) => part.type === 'text',
+          (part: { type: string }) => part.type === 'text',
         ) as { type: 'text'; text: string } | undefined;
         const errorMessage =
           textPart?.text ?? `Tool 'closeDiff' reported an error.`;
@@ -346,7 +346,7 @@ export class IdeClient {
       }
 
       const textPart = resultData.content.find(
-        (part) => part.type === 'text',
+        (part: { type: string }) => part.type === 'text',
       ) as { type: 'text'; text: string } | undefined;
 
       if (textPart?.text) {
@@ -439,7 +439,7 @@ export class IdeClient {
       );
 
       // Map the array of tool objects to an array of tool names (strings)
-      this.availableTools = response.tools.map((tool) => tool.name);
+      this.availableTools = response.tools.map((tool: { name: string }) => tool.name);
 
       if (this.availableTools.length > 0) {
         debugLogger.debug(

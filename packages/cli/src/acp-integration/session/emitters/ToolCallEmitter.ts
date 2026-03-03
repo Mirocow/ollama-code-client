@@ -214,7 +214,7 @@ export class ToolCallEmitter extends BaseEmitter {
         const invocation = tool.build(args);
         title = `${title}: ${invocation.getDescription()}`;
         // Map locations to ensure line is null instead of undefined (for ACP consistency)
-        locations = invocation.toolLocations().map((loc) => ({
+        locations = invocation.toolLocations().map((loc: { path: string; line?: number }) => ({
           path: loc.path,
           line: loc.line ?? null,
         }));

@@ -14,6 +14,7 @@ import {
   MCPServerConfig,
   SessionService,
   tokenLimit,
+  type AvailableModel,
   type Config,
   type ConversationRecord,
 } from '@ollama-code/ollama-code-core';
@@ -76,7 +77,7 @@ class OllamaAgent {
     const currentApprovalMode = this.config.getApprovalMode();
 
     // Build available modes from shared APPROVAL_MODE_INFO
-    const availableModes = APPROVAL_MODES.map((mode) => ({
+    const availableModes = APPROVAL_MODES.map((mode: string) => ({
       id: mode as ApprovalModeValue,
       name: APPROVAL_MODE_INFO[mode].name,
       description: APPROVAL_MODE_INFO[mode].description,
@@ -227,7 +228,7 @@ class OllamaAgent {
     });
 
     return {
-      items: result.items.map((item) => ({
+      items: result.items.map((item: { sessionId: string; cwd: string; startTime: number; mtime: number; prompt: string; gitBranch?: string; filePath?: string; messageCount: number }) => ({
         sessionId: item.sessionId,
         cwd: item.cwd,
         startTime: item.startTime,
@@ -363,7 +364,7 @@ class OllamaAgent {
 
     const availableModels = allConfiguredModels;
 
-    const mappedAvailableModels = availableModels.map((model) => {
+    const mappedAvailableModels = availableModels.map((model: AvailableModel) => {
       const effectiveModelId =
         model.isRuntimeModel && model.runtimeSnapshotId
           ? model.runtimeSnapshotId

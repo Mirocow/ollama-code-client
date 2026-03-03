@@ -1,5 +1,6 @@
 import type {
   ClaudeMarketplaceConfig,
+  ClaudeMarketplacePluginConfig,
   ExtensionConfig,
   ExtensionRequestOptions,
   SkillConfig,
@@ -50,7 +51,7 @@ export async function requestChoicePluginNonInteractive(
 
   // Build choices for prompts select
 
-  const choices = plugins.map((plugin) => ({
+  const choices = plugins.map((plugin: ClaudeMarketplacePluginConfig) => ({
     title: chalk.green(chalk.bold(`[${plugin.name}]`)),
     value: plugin.name,
   }));
