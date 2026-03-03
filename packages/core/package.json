@@ -41,7 +41,7 @@
     "fast-uri": "3.0.6",
     "fdir": "6.4.6",
     "fzf": "0.5.2",
-    "glob": "10.5.0",
+    "glob": "13.0.6",
     "google-auth-library": "10.5.0",
     "html-to-text": "9.0.5",
     "https-proxy-agent": "7.0.6",
@@ -56,7 +56,7 @@
     "shell-quote": "1.8.3",
     "simple-git": "3.28.0",
     "strip-ansi": "7.1.0",
-    "tar": "7.5.2",
+    "tar": "7.5.9",
     "undici": "7.22.0",
     "uuid": "9.0.1",
     "ws": "8.18.0"

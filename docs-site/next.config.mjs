@@ -13,6 +13,7 @@ const nextConfig = {
   basePath: isGitHubPages ? `/${repoName}` : '',
   images: isGitHubPages ? { unoptimized: true } : undefined,
   trailingSlash: true,
+  turbopack: {},
 };
 
 export default withNextra(nextConfig);

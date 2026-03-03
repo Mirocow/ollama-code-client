@@ -7,10 +7,10 @@
 'use client';
 
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { Terminal as XTerm } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit';
-import { WebLinksAddon } from 'xterm-addon-web-links';
-import 'xterm/css/xterm.css';
+import { Terminal as XTerm } from '@xterm/xterm';
+import { FitAddon } from '@xterm/addon-fit';
+import { WebLinksAddon } from '@xterm/addon-web-links';
+import '@xterm/xterm/css/xterm.css';
 
 /**
  * Terminal emulator component using xterm.js
@@ -73,11 +73,19 @@ export function TerminalEmulator() {
     fitAddonRef.current = fitAddon;
 
     // Write welcome message
-    xterm.writeln('\x1b[1;36m╔══════════════════════════════════════════════╗\x1b[0m');
-    xterm.writeln('\x1b[1;36m║     Ollama Code - Terminal Emulator          ║\x1b[0m');
-    xterm.writeln('\x1b[1;36m╚══════════════════════════════════════════════╝\x1b[0m');
+    xterm.writeln(
+      '\x1b[1;36m╔══════════════════════════════════════════════╗\x1b[0m',
+    );
+    xterm.writeln(
+      '\x1b[1;36m║     Ollama Code - Terminal Emulator          ║\x1b[0m',
+    );
+    xterm.writeln(
+      '\x1b[1;36m╚══════════════════════════════════════════════╝\x1b[0m',
+    );
     xterm.writeln('');
-    xterm.writeln('\x1b[90mConnect to a shell session using the button above.\x1b[0m');
+    xterm.writeln(
+      '\x1b[90mConnect to a shell session using the button above.\x1b[0m',
+    );
     xterm.writeln('');
 
     // Handle resize
@@ -87,11 +95,13 @@ export function TerminalEmulator() {
       if (socketRef.current?.readyState === WebSocket.OPEN) {
         const dims = fitAddon.proposeDimensions();
         if (dims) {
-          socketRef.current.send(JSON.stringify({
-            type: 'resize',
-            cols: dims.cols,
-            rows: dims.rows,
-          }));
+          socketRef.current.send(
+            JSON.stringify({
+              type: 'resize',
+              cols: dims.cols,
+              rows: dims.rows,
+            }),
+          );
         }
       }
     };
@@ -135,11 +145,13 @@ export function TerminalEmulator() {
       if (fitAddonRef.current && xtermRef.current) {
         const dims = fitAddonRef.current.proposeDimensions();
         if (dims) {
-          socket.send(JSON.stringify({
-            type: 'resize',
-            cols: dims.cols,
-            rows: dims.rows,
-          }));
+          socket.send(
+            JSON.stringify({
+              type: 'resize',
+              cols: dims.cols,
+              rows: dims.rows,
+            }),
+          );
         }
       }
     };
@@ -153,7 +165,9 @@ export function TerminalEmulator() {
             break;
           case 'exit':
             xtermRef.current?.writeln('');
-            xtermRef.current?.writeln(`\x1b[33mProcess exited with code ${message.code}\x1b[0m`);
+            xtermRef.current?.writeln(
+              `\x1b[33mProcess exited with code ${message.code}\x1b[0m`,
+            );
             setIsConnected(false);
             break;
           case 'error':
@@ -233,7 +247,11 @@ export function TerminalEmulator() {
             disabled={isConnecting}
             className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50"
           >
-            {isConnecting ? 'Connecting...' : isConnected ? 'Disconnect' : 'Connect'}
+            {isConnecting
+              ? 'Connecting...'
+              : isConnected
+                ? 'Disconnect'
+                : 'Connect'}
           </button>
           <button
             onClick={clearTerminal}

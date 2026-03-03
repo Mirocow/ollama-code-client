@@ -6,11 +6,6 @@ const nextConfig = {
   // Transpile workspace packages
   transpilePackages: ['@ollama-code/webui', '@ollama-code/ollama-code-core'],
 
-  // Disable ESLint during build (handled by root package)
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   // Disable TypeScript checking during build (handled separately)
   typescript: {
     ignoreBuildErrors: false,
@@ -31,6 +26,9 @@ const nextConfig = {
     };
     return config;
   },
+
+  // Enable Turbopack (Next.js 16 default)
+  turbopack: {},
 };
 
 export default nextConfig;
