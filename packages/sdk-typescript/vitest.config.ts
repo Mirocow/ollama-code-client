@@ -5,6 +5,9 @@ const timeoutMinutes = Number(process.env['E2E_TIMEOUT_MINUTES'] || '3');
 const testTimeoutMs = timeoutMinutes * 60 * 1000;
 
 export default defineConfig({
+  css: {
+    postcss: false,
+  },
   test: {
     globals: false,
     environment: 'node',

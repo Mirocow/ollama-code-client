@@ -256,7 +256,10 @@ export const authenticateUpdateSchema = z.object({
 
 export type AuthenticateUpdate = z.infer<typeof authenticateUpdateSchema>;
 
-export const acpMetaSchema = z.record(z.unknown()).nullable().optional();
+export const acpMetaSchema = z
+  .record(z.string(), z.unknown())
+  .nullable()
+  .optional();
 
 export const modelIdSchema = z.string();
 
@@ -410,7 +413,7 @@ export const agentCapabilitiesSchema = z.object({
 export const authMethodSchema = z.object({
   args: z.array(z.string()).optional(),
   description: z.string().nullable(),
-  env: z.record(z.string()).optional(),
+  env: z.record(z.string(), z.string()).optional(),
   id: z.string(),
   name: z.string(),
   type: z.string().optional(),

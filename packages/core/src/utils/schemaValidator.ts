@@ -6,10 +6,9 @@
 
 import AjvPkg, { type AnySchema, type Ajv } from 'ajv';
 // Ajv2020 is the documented way to use draft-2020-12: https://ajv.js.org/json-schema.html#draft-2020-12
- 
+
 import Ajv2020Pkg from 'ajv/dist/2020.js';
-// @ts-expect-error - ajv-formats types
-import addFormats from 'ajv-formats';
+import addFormatsPkg from 'ajv-formats';
 import { createDebugLogger } from './debugLogger.js';
 
 // Ajv's ESM/CJS interop: use 'any' for compatibility as recommended by Ajv docs
@@ -17,6 +16,8 @@ import { createDebugLogger } from './debugLogger.js';
 const AjvClass = (AjvPkg as any).default || AjvPkg;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Ajv2020Class = (Ajv2020Pkg as any).default || Ajv2020Pkg;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const addFormats = (addFormatsPkg as any).default || addFormatsPkg;
 
 const debugLogger = createDebugLogger('SchemaValidator');
 
@@ -91,7 +92,6 @@ export class SchemaValidator {
       // Skip validation rather than blocking tool usage.
       debugLogger.warn(
         `Failed to compile schema (${
-           
           (schema as Record<string, unknown>)?.['$schema'] ?? '<no $schema>'
         }): ${error instanceof Error ? error.message : String(error)}. ` +
           'Skipping parameter validation.',

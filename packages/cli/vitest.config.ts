@@ -9,6 +9,9 @@ import { defineConfig } from 'vitest/config';
 import path from 'node:path';
 
 export default defineConfig({
+  css: {
+    postcss: false,
+  },
   resolve: {
     alias: {
       '@ollama-code/ollama-code-core': path.resolve(

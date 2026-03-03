@@ -115,7 +115,7 @@ export function query({
 function validateOptions(options: QueryOptions): SpawnInfo | undefined {
   const validationResult = QueryOptionsSchema.safeParse(options);
   if (!validationResult.success) {
-    const errors = validationResult.error.errors
+    const errors = validationResult.error.issues
       .map((err) => `${err.path.join('.')}: ${err.message}`)
       .join('; ');
     throw new Error(`Invalid QueryOptions: ${errors}`);

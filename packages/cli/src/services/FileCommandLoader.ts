@@ -40,8 +40,7 @@ const debugLogger = createDebugLogger('FILE_COMMAND_LOADER');
  */
 const TomlCommandDefSchema = z.object({
   prompt: z.string({
-    required_error: "The 'prompt' field is required.",
-    invalid_type_error: "The 'prompt' field must be a string.",
+    message: "The 'prompt' field is required and must be a string.",
   }),
   description: z.string().optional(),
 });

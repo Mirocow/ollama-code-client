@@ -18,8 +18,7 @@ export const MarkdownCommandDefSchema = z.object({
     })
     .optional(),
   prompt: z.string({
-    required_error: 'The prompt content is required.',
-    invalid_type_error: 'The prompt content must be a string.',
+    message: 'The prompt content is required and must be a string.',
   }),
 });
 

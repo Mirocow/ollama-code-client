@@ -7,6 +7,9 @@
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  css: {
+    postcss: false,
+  },
   test: {
     reporters: ['default', 'junit'],
     silent: true,
