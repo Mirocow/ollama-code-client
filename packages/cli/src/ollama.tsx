@@ -432,23 +432,13 @@ export async function main() {
   // to run Ollama Code. It is now safe to perform expensive initialization that
   // may have side effects.
 
-  // Initialize output language file before config loads to ensure it's included in context
-  // Pass UI language as fallback for 'auto' detection
-  // Convert language to string if it's a number (from settings schema)
+  // Initialize output language file
   const uiLanguage = settings.merged.general?.language;
+  const explicitOutputLanguage = 
+    settings.user.originalSettings.general?.outputLanguage ??
+    settings.workspace.originalSettings.general?.outputLanguage;
   
-  // Check if outputLanguage was explicitly set in settings (not just the default 'auto')
-  // We need to check original settings to distinguish between:
-  // - User explicitly set 'auto' -> use auto detection
-  // - No setting in file (default 'auto') -> preserve existing output-language.md if it exists
-  const userOutputLang = settings.user.originalSettings.general?.outputLanguage;
-  const workspaceOutputLang = settings.workspace.originalSettings.general?.outputLanguage;
-  const explicitOutputLanguage = userOutputLang ?? workspaceOutputLang;
-  
-  initializeLlmOutputLanguage(
-    explicitOutputLanguage,
-    typeof uiLanguage === 'string' ? uiLanguage : undefined,
-  );
+  initializeLlmOutputLanguage(explicitOutputLanguage, uiLanguage);
 
   {
     const config = await loadCliConfig(
