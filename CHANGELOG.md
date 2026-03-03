@@ -1,5 +1,73 @@
 # Changelog
 
+## 0.16.8
+
+_Dependency Updates & Zod v4 Migration_
+
+### Dependency Updates
+
+All dependencies updated to latest versions for compatibility and security:
+
+| Package                     | Old Version              | New Version | Reason                                |
+| --------------------------- | ------------------------ | ----------- | ------------------------------------- |
+| `zod`                       | 3.23.8 / 3.24.0 / 3.25.0 | **4.3.6**   | Required by @modelcontextprotocol/sdk |
+| `@modelcontextprotocol/sdk` | 1.25.1                   | **1.27.1**  | Latest MCP SDK features               |
+| `ajv-formats`               | 3.0.0                    | **3.0.1**   | TypeScript type declarations          |
+| `msw`                       | 2.3.4                    | **2.12.10** | Peer dependency fix                   |
+
+### Breaking Changes
+
+#### Zod v4 API Changes
+
+Zod v4 introduces breaking API changes that required code updates:
+
+| Change              | Old API                                  | New API                             |
+| ------------------- | ---------------------------------------- | ----------------------------------- |
+| `z.record()`        | `z.record(z.unknown())`                  | `z.record(z.string(), z.unknown())` |
+| `z.string()` params | `{ required_error, invalid_type_error }` | `{ message }`                       |
+| `ZodObject` generic | `ZodObject<Shape, 'strip', ZodTypeAny>`  | `ZodObject<Shape>`                  |
+| Validation errors   | `error.errors`                           | `error.issues`                      |
+
+### Files Modified
+
+| File                                                   | Changes                                             |
+| ------------------------------------------------------ | --------------------------------------------------- |
+| `package.json`                                         | Updated zod to 4.3.6                                |
+| `packages/cli/package.json`                            | Updated zod, @modelcontextprotocol/sdk              |
+| `packages/core/package.json`                           | Updated @modelcontextprotocol/sdk, ajv-formats, msw |
+| `packages/sdk-typescript/package.json`                 | Updated zod, @modelcontextprotocol/sdk              |
+| `packages/cli/src/acp-integration/schema.ts`           | Fixed `z.record()` calls                            |
+| `packages/cli/src/services/FileCommandLoader.ts`       | Fixed `z.string()` params                           |
+| `packages/cli/src/services/markdown-command-parser.ts` | Fixed `z.string()` params                           |
+| `packages/sdk-typescript/src/mcp/tool.ts`              | Fixed `ZodObject` generic                           |
+| `packages/sdk-typescript/src/query/createQuery.ts`     | Fixed error property access                         |
+| `packages/*/vitest.config.ts`                          | Disabled PostCSS for tests                          |
+| `packages/*/postcss.config.js`                         | Added empty configs                                 |
+
+### Technical Details
+
+#### Zod v4 Compatibility Fixes
+
+1. **Record type arguments**: `z.record()` now requires explicit key and value type arguments
+2. **Error messages**: Unified `message` parameter for validation errors
+3. **Type inference**: Simplified `ZodObject` generic parameters
+4. **Error structure**: Validation errors now use `.issues` instead of `.errors`
+
+#### Vitest Configuration
+
+Fixed PostCSS configuration conflicts by:
+
+- Adding `css: { postcss: false }` to all vitest configs
+- Creating empty `postcss.config.js` files in each package
+
+### Verification
+
+- ✅ TypeScript compilation passes
+- ✅ Build succeeds
+- ✅ Bundle created successfully
+
+---
+
 ## 0.16.7
 
 _UX Improvements, TypeScript Fixes & Test Migration_
@@ -10,9 +78,9 @@ _UX Improvements, TypeScript Fixes & Test Migration_
 
 Added spacing after Tips message in CLI for better readability:
 
-| Component | Change |
-| --------- | ------ |
-| `Tips.tsx` | Added `marginBottom={1}` for visual spacing |
+| Component  | Change                                           |
+| ---------- | ------------------------------------------------ |
+| `Tips.tsx` | Added `marginBottom={1}` for visual spacing      |
 | `Tips.tsx` | Added `flexDirection="column"` for proper layout |
 
 ### Bug Fixes
@@ -21,13 +89,13 @@ Added spacing after Tips message in CLI for better readability:
 
 Fixed TS7006/TS7053 errors by adding explicit type annotations:
 
-| File | Changes |
-| ---- | ------- |
-| `ide-client.ts` | Added types for `part`, `tool` parameters |
-| `McpPromptLoader.ts` | Added `PromptArgument` types |
-| `acpAgent.ts` | Added types for `mode`, `item`, `model` parameters, fixed APPROVAL_MODES casting |
-| `ToolCallEmitter.ts` | Added type for `loc` parameter |
-| `consent.ts` | Added `ClaudeMarketplacePluginConfig` type |
+| File                 | Changes                                                                          |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `ide-client.ts`      | Added types for `part`, `tool` parameters                                        |
+| `McpPromptLoader.ts` | Added `PromptArgument` types                                                     |
+| `acpAgent.ts`        | Added types for `mode`, `item`, `model` parameters, fixed APPROVAL_MODES casting |
+| `ToolCallEmitter.ts` | Added type for `loc` parameter                                                   |
+| `consent.ts`         | Added `ClaudeMarketplacePluginConfig` type                                       |
 
 ### Refactoring
 
@@ -35,19 +103,20 @@ Fixed TS7006/TS7053 errors by adding explicit type annotations:
 
 All tests migrated from `tools/` to `plugins/builtin/`:
 
-| Category | Tests Migrated |
-| -------- | -------------- |
-| dev-tools | python, nodejs, golang, rust, java, cpp, swift, php, typescript |
-| file-tools | edit, glob, ls, read-file, read-many-files, write-file |
-| search-tools | grep, ripGrep, web-fetch |
-| database-tools | database, docker, redis |
-| mcp-tools | mcp-client, mcp-tool, mcp-client-manager, sdk-control-client-transport |
-| agent-tools | skill, task |
-| productivity-tools | todoWrite, exitPlanMode |
-| utility-tools | code-analyzer, diagram-generator |
-| Other | git-advanced, lsp, shell, api-tester, save-memory |
+| Category           | Tests Migrated                                                         |
+| ------------------ | ---------------------------------------------------------------------- |
+| dev-tools          | python, nodejs, golang, rust, java, cpp, swift, php, typescript        |
+| file-tools         | edit, glob, ls, read-file, read-many-files, write-file                 |
+| search-tools       | grep, ripGrep, web-fetch                                               |
+| database-tools     | database, docker, redis                                                |
+| mcp-tools          | mcp-client, mcp-tool, mcp-client-manager, sdk-control-client-transport |
+| agent-tools        | skill, task                                                            |
+| productivity-tools | todoWrite, exitPlanMode                                                |
+| utility-tools      | code-analyzer, diagram-generator                                       |
+| Other              | git-advanced, lsp, shell, api-tester, save-memory                      |
 
 **Tests remaining in `tools/` (base class tests):**
+
 - diffOptions.test.ts
 - modifiable-tool.test.ts
 - tool-error.test.ts
@@ -57,26 +126,26 @@ All tests migrated from `tools/` to `plugins/builtin/`:
 
 ### Dependency Updates
 
-| Package | Change | Reason |
-| ------- | ------ | ------ |
-| `zod` | 3.24.0 → 3.25.0 | MCP SDK 1.25.1+ requires zod ^3.25 for v3/v4 exports |
-| `ajv-formats` | 3.0.0 → 2.1.1 | ESM compatibility fix |
+| Package       | Change          | Reason                                               |
+| ------------- | --------------- | ---------------------------------------------------- |
+| `zod`         | 3.24.0 → 3.25.0 | MCP SDK 1.25.1+ requires zod ^3.25 for v3/v4 exports |
+| `ajv-formats` | 3.0.0 → 2.1.1   | ESM compatibility fix                                |
 
 ### Files Modified
 
-| File | Changes |
-| ---- | ------- |
-| `packages/cli/src/ui/components/Tips.tsx` | Spacing after Tips message |
-| `packages/core/src/ide/ide-client.ts` | Type annotations |
-| `packages/cli/src/services/McpPromptLoader.ts` | Type annotations |
-| `packages/cli/src/acp-integration/acpAgent.ts` | Type annotations |
-| `packages/cli/src/acp-integration/session/emitters/ToolCallEmitter.ts` | Type annotations |
-| `packages/cli/src/commands/extensions/consent.ts` | Type annotations |
-| `packages/core/package.json` | ajv-formats downgrade |
-| `package.json` | zod upgrade |
-| `ROADMAP.md` | Updated migration status to 100% |
-| `CHANGELOG.md` | Added v0.16.7 |
-| `CHANGELOG.ru.md` | Added v0.16.7 (Russian) |
+| File                                                                   | Changes                          |
+| ---------------------------------------------------------------------- | -------------------------------- |
+| `packages/cli/src/ui/components/Tips.tsx`                              | Spacing after Tips message       |
+| `packages/core/src/ide/ide-client.ts`                                  | Type annotations                 |
+| `packages/cli/src/services/McpPromptLoader.ts`                         | Type annotations                 |
+| `packages/cli/src/acp-integration/acpAgent.ts`                         | Type annotations                 |
+| `packages/cli/src/acp-integration/session/emitters/ToolCallEmitter.ts` | Type annotations                 |
+| `packages/cli/src/commands/extensions/consent.ts`                      | Type annotations                 |
+| `packages/core/package.json`                                           | ajv-formats downgrade            |
+| `package.json`                                                         | zod upgrade                      |
+| `ROADMAP.md`                                                           | Updated migration status to 100% |
+| `CHANGELOG.md`                                                         | Added v0.16.7                    |
+| `CHANGELOG.ru.md`                                                      | Added v0.16.7 (Russian)          |
 
 ---
 
@@ -90,16 +159,17 @@ _Node.js Compatibility Fix_
 
 Updated documentation to clearly specify supported Node.js versions:
 
-| Node.js Version | Status      | Notes                                    |
-| --------------- | ----------- | ---------------------------------------- |
-| 18.x            | ✅ Supported | LTS Maintenance                          |
-| 20.x            | ✅ Supported | LTS Current (Recommended)                |
-| 22.x            | ✅ Supported | LTS Latest                               |
-| 23.x            | ❌ Not Supported | node-pty compilation issues          |
-| 24.x            | ❌ Not Supported | Experimental, node-pty issues         |
-| 25.x            | ❌ Not Supported | Experimental, node-pty issues         |
+| Node.js Version | Status           | Notes                         |
+| --------------- | ---------------- | ----------------------------- |
+| 18.x            | ✅ Supported     | LTS Maintenance               |
+| 20.x            | ✅ Supported     | LTS Current (Recommended)     |
+| 22.x            | ✅ Supported     | LTS Latest                    |
+| 23.x            | ❌ Not Supported | node-pty compilation issues   |
+| 24.x            | ❌ Not Supported | Experimental, node-pty issues |
+| 25.x            | ❌ Not Supported | Experimental, node-pty issues |
 
 **Problem:** Node.js 25.x caused `node-pty` compilation failure:
+
 ```
 error: expected expression
 I::ReadExternalPointerField<{internal::kFirstEmbedderDataTag,
@@ -109,10 +179,10 @@ I::ReadExternalPointerField<{internal::kFirstEmbedderDataTag,
 
 ### Documentation Updates
 
-| File          | Changes                                          |
-| ------------- | ------------------------------------------------ |
-| `README.md`   | Added Node.js compatibility warning with fix guide |
-| `package.json`| Already had correct engines requirement (>=20.0.0) |
+| File           | Changes                                            |
+| -------------- | -------------------------------------------------- |
+| `README.md`    | Added Node.js compatibility warning with fix guide |
+| `package.json` | Already had correct engines requirement (>=20.0.0) |
 
 ### Installation Fix
 

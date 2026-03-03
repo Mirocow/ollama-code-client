@@ -2,7 +2,27 @@
 
 > Профессиональный анализ архитектуры и план развития проекта
 
-## Текущее состояние (v0.16.7)
+## Текущее состояние (v0.16.8)
+
+### ✅ Завершено: Обновление зависимостей
+
+**Статус:** ✅ 100% завершено
+
+Все основные зависимости обновлены до актуальных версий:
+
+| Пакет                       | Старая версия            | Новая версия |
+| --------------------------- | ------------------------ | ------------ |
+| `zod`                       | 3.23.8 / 3.24.0 / 3.25.0 | 4.3.6        |
+| `@modelcontextprotocol/sdk` | 1.25.1                   | 1.27.1       |
+| `ajv-formats`               | 3.0.0                    | 3.0.1        |
+| `msw`                       | 2.3.4                    | 2.12.10      |
+
+**Ключевые изменения Zod v4:**
+
+- `z.record()` теперь требует явные аргументы типа
+- `z.string()` использует упрощённый параметр `{ message }`
+- `ZodObject` имеет упрощённые generic-параметры
+- Ошибки валидации используют `.issues` вместо `.errors`
 
 ### ✅ Завершено: Миграция инструментов в plugins
 
@@ -10,21 +30,21 @@
 
 Все инструменты перенесены из `tools/` в `plugins/builtin/`:
 
-| Категория | Инструменты | Статус |
-|----------|-------------|--------|
-| **file-tools** | read-file, write-file, edit, ls, glob, read-many-files | ✅ Перенесено |
-| **search-tools** | grep, ripGrep, web-fetch, web-search | ✅ Перенесено |
-| **shell-tools** | shell | ✅ Перенесено |
-| **dev-tools** | python, nodejs, golang, rust, typescript, java, cpp, swift, php | ✅ Перенесено |
-| **agent-tools** | skill, task | ✅ Перенесено |
-| **productivity-tools** | todoWrite, exitPlanMode | ✅ Перенесено |
-| **memory-tools** | save-memory | ✅ Перенесено |
-| **lsp-tools** | lsp | ✅ Перенесено |
-| **mcp-tools** | mcp-client, mcp-tool, mcp-client-manager, sdk-control-client-transport | ✅ Перенесено |
-| **database-tools** | database, redis, docker | ✅ Перенесено |
-| **git-tools** | git-advanced | ✅ Перенесено |
-| **api-tools** | api-tester | ✅ Перенесено |
-| **utility-tools** | code-analyzer, diagram-generator | ✅ Перенесено |
+| Категория              | Инструменты                                                            | Статус        |
+| ---------------------- | ---------------------------------------------------------------------- | ------------- |
+| **file-tools**         | read-file, write-file, edit, ls, glob, read-many-files                 | ✅ Перенесено |
+| **search-tools**       | grep, ripGrep, web-fetch, web-search                                   | ✅ Перенесено |
+| **shell-tools**        | shell                                                                  | ✅ Перенесено |
+| **dev-tools**          | python, nodejs, golang, rust, typescript, java, cpp, swift, php        | ✅ Перенесено |
+| **agent-tools**        | skill, task                                                            | ✅ Перенесено |
+| **productivity-tools** | todoWrite, exitPlanMode                                                | ✅ Перенесено |
+| **memory-tools**       | save-memory                                                            | ✅ Перенесено |
+| **lsp-tools**          | lsp                                                                    | ✅ Перенесено |
+| **mcp-tools**          | mcp-client, mcp-tool, mcp-client-manager, sdk-control-client-transport | ✅ Перенесено |
+| **database-tools**     | database, redis, docker                                                | ✅ Перенесено |
+| **git-tools**          | git-advanced                                                           | ✅ Перенесено |
+| **api-tools**          | api-tester                                                             | ✅ Перенесено |
+| **utility-tools**      | code-analyzer, diagram-generator                                       | ✅ Перенесено |
 
 **Выполненные задачи:**
 
@@ -36,13 +56,14 @@
 6. ✅ Добавить explicit type annotations для TypeScript strict mode
 
 **Базовые классы остаются в tools/:**
+
 - tools.ts (BaseDeclarativeTool, BaseToolInvocation)
 - tool-error.ts
 - tool-registry.ts
 - tool-names.ts
 - modifiable-tool.ts
 - diffOptions.ts
-- *.test.ts (тесты остаются в tools/, тестируют plugins/builtin/)
+- \*.test.ts (тесты остаются в tools/, тестируют plugins/builtin/)
 
 ### ⚠️ Откаченные изменения (v0.16.2)
 
@@ -50,16 +71,17 @@
 
 Попытка миграции всех инструментов в систему плагинов вызвала критические ошибки:
 
-| Проблема | Описание |
-|----------|----------|
-| Удаление файлов | Инструменты были удалены из `tools/` без правильного переноса |
+| Проблема             | Описание                                                         |
+| -------------------- | ---------------------------------------------------------------- |
+| Удаление файлов      | Инструменты были удалены из `tools/` без правильного переноса    |
 | Неправильные импорты | Плагины использовали относительные пути `../` вместо `../../../` |
-| MCP инструменты | MCP файлы были перемещены некорректно |
-| Сборка сломана | 330+ ошибок компиляции TypeScript |
+| MCP инструменты      | MCP файлы были перемещены некорректно                            |
+| Сборка сломана       | 330+ ошибок компиляции TypeScript                                |
 
 **Решение:** Откат к стабильной версии c7441536 (v0.16.2)
 
 **Уроки:**
+
 1. Инструменты в `tools/` должны оставаться там, плагины только реэкспортируют их
 2. MCP инструменты должны оставаться в `tools/` - это special case
 3. Любая миграция требует полного прохождения тестов
@@ -70,23 +92,23 @@
 
 Все основные инструменты перенесены в систему плагинов:
 
-| Плагин | Инструменты | Статус |
-|--------|-------------|--------|
-| **core-tools** | echo, timestamp, get_env | ✅ |
-| **dev-tools** | python_dev, nodejs_dev, golang_dev, rust_dev, typescript_dev, java_dev, cpp_dev, swift_dev, php_dev | ✅ |
-| **file-tools** | read_file, write_file, edit, list_directory, glob, read_many_files | ✅ |
-| **search-tools** | grep, web_search, web_fetch | ✅ |
-| **shell-tools** | run_shell_command, bash | ✅ |
-| **database-tools** | redis, database | ✅ |
-| **docker-tools** | docker (build, run, logs, stop, etc.) | ✅ |
-| **code-analysis-tools** | code_analyzer, diagram_generator, api_tester | ✅ |
-| **git-tools** | git_advanced (stash, cherry-pick, rebase, bisect) | ✅ |
-| **mcp-tools** | mcp_client, mcp_tool, mcp_client_manager | ✅ |
-| **memory-tools** | save_memory, recall_memory | ✅ |
-| **skill-tools** | skill (load, execute, manage) | ✅ |
-| **task-tools** | task (subagents, parallel execution) | ✅ |
-| **lsp-tools** | lsp, lsp_diagnostics | ✅ NEW |
-| **plan-tools** | exit_plan_mode, todo_write, workflow_status | ✅ NEW |
+| Плагин                  | Инструменты                                                                                         | Статус |
+| ----------------------- | --------------------------------------------------------------------------------------------------- | ------ |
+| **core-tools**          | echo, timestamp, get_env                                                                            | ✅     |
+| **dev-tools**           | python_dev, nodejs_dev, golang_dev, rust_dev, typescript_dev, java_dev, cpp_dev, swift_dev, php_dev | ✅     |
+| **file-tools**          | read_file, write_file, edit, list_directory, glob, read_many_files                                  | ✅     |
+| **search-tools**        | grep, web_search, web_fetch                                                                         | ✅     |
+| **shell-tools**         | run_shell_command, bash                                                                             | ✅     |
+| **database-tools**      | redis, database                                                                                     | ✅     |
+| **docker-tools**        | docker (build, run, logs, stop, etc.)                                                               | ✅     |
+| **code-analysis-tools** | code_analyzer, diagram_generator, api_tester                                                        | ✅     |
+| **git-tools**           | git_advanced (stash, cherry-pick, rebase, bisect)                                                   | ✅     |
+| **mcp-tools**           | mcp_client, mcp_tool, mcp_client_manager                                                            | ✅     |
+| **memory-tools**        | save_memory, recall_memory                                                                          | ✅     |
+| **skill-tools**         | skill (load, execute, manage)                                                                       | ✅     |
+| **task-tools**          | task (subagents, parallel execution)                                                                | ✅     |
+| **lsp-tools**           | lsp, lsp_diagnostics                                                                                | ✅ NEW |
+| **plan-tools**          | exit_plan_mode, todo_write, workflow_status                                                         | ✅ NEW |
 
 **Всего плагинов:** 15
 **Всего инструментов:** 45+
@@ -95,10 +117,10 @@
 
 **Статус:** ✅ Исправлено
 
-| Проблема | Решение | Файл |
-|----------|---------|------|
-| `{{root}}` template not resolved | Добавлена поддержка шаблона `{{root}}` в `resolvePath()` | `packages/core/src/utils/paths.ts` |
-| Plugin imports broken | Исправлены импорты в search-tools, file-tools, dev-tools | `packages/core/src/plugins/builtin/*/` |
+| Проблема                         | Решение                                                  | Файл                                   |
+| -------------------------------- | -------------------------------------------------------- | -------------------------------------- |
+| `{{root}}` template not resolved | Добавлена поддержка шаблона `{{root}}` в `resolvePath()` | `packages/core/src/utils/paths.ts`     |
+| Plugin imports broken            | Исправлены импорты в search-tools, file-tools, dev-tools | `packages/core/src/plugins/builtin/*/` |
 
 ```typescript
 // До: {{root}} передавался буквально
@@ -115,25 +137,26 @@ Grep {"pattern":"class Model","path":"{{root}}/src"}
 
 Реструктуризация плагинов - каждый инструмент в своей папке:
 
-| Плагин | Статус импортов |
-|--------|-----------------|
-| **search-tools** | ✅ Исправлено (grep, ripGrep, web-fetch) |
-| **file-tools** | ✅ Исправлено (read-file, write-file, edit, ls, glob, read-many-files) |
-| **dev-tools** | ✅ Исправлено (python, nodejs, golang, rust, typescript, java, cpp, swift, php) |
-| **shell-tools** | ⏳ Ожидает |
-| **database-tools** | ⏳ Ожидает |
-| **mcp-tools** | ⏳ Ожидает |
-| **memory-tools** | ⏳ Ожидает |
-| **skill-tools** | ⏳ Ожидает |
-| **task-tools** | ⏳ Ожидает |
-| **lsp-tools** | ⏳ Ожидает |
-| **plan-tools** | ⏳ Ожидает |
+| Плагин             | Статус импортов                                                                 |
+| ------------------ | ------------------------------------------------------------------------------- |
+| **search-tools**   | ✅ Исправлено (grep, ripGrep, web-fetch)                                        |
+| **file-tools**     | ✅ Исправлено (read-file, write-file, edit, ls, glob, read-many-files)          |
+| **dev-tools**      | ✅ Исправлено (python, nodejs, golang, rust, typescript, java, cpp, swift, php) |
+| **shell-tools**    | ⏳ Ожидает                                                                      |
+| **database-tools** | ⏳ Ожидает                                                                      |
+| **mcp-tools**      | ⏳ Ожидает                                                                      |
+| **memory-tools**   | ⏳ Ожидает                                                                      |
+| **skill-tools**    | ⏳ Ожидает                                                                      |
+| **task-tools**     | ⏳ Ожидает                                                                      |
+| **lsp-tools**      | ⏳ Ожидает                                                                      |
+| **plan-tools**     | ⏳ Ожидает                                                                      |
 
 **Проблема:** Инструменты в `/plugins/builtin/*/` имеют неправильные относительные импорты.
 
 **Решение:** Обновить все импорты с `../utils/` на `../../../../utils/` и т.д.
 
 **Пример исправления:**
+
 ```typescript
 // Было (неправильно):
 import { BaseDeclarativeTool } from './tools.js';
@@ -465,14 +488,14 @@ packages/core/src/plugins/builtin/
 
 **Цель:** Полная интеграция всех инструментов в плагины
 
-| Задача                          | Приоритет | Оценка | Статус       |
-| ------------------------------- | --------- | ------ | ------------ |
-| Интеграция dev-tools            | P0        | 3d     | ✅ Завершено |
-| Интеграция file-tools           | P0        | 2d     | ✅ Завершено |
-| Интеграция search-tools         | P0        | 2d     | ✅ Завершено |
-| Создание lsp-tools плагина      | P1        | 2d     | ✅ Завершено |
-| Создание plan-tools плагина     | P1        | 2d     | ✅ Завершено |
-| Документация плагинов           | P1        | 3d     | ✅ Завершено |
+| Задача                      | Приоритет | Оценка | Статус       |
+| --------------------------- | --------- | ------ | ------------ |
+| Интеграция dev-tools        | P0        | 3d     | ✅ Завершено |
+| Интеграция file-tools       | P0        | 2d     | ✅ Завершено |
+| Интеграция search-tools     | P0        | 2d     | ✅ Завершено |
+| Создание lsp-tools плагина  | P1        | 2d     | ✅ Завершено |
+| Создание plan-tools плагина | P1        | 2d     | ✅ Завершено |
+| Документация плагинов       | P1        | 3d     | ✅ Завершено |
 
 ---
 
@@ -492,59 +515,70 @@ packages/core/src/plugins/builtin/
 **Детали задач:**
 
 #### 1. PCRE2 поддержка для look-around regex
+
 **Проблема:** ripgrep не поддерживает look-ahead/look-behind без флага `--pcre2`
+
 ```
 rg: regex parse error:
     (?=.*\bfactory\b)(?=.*\bmodel\b)
        ^^^
 error: look-around is not supported
 ```
+
 **Решение:** Автоматически добавлять `--pcre2` при обнаружении look-around паттернов
 
 **Файлы:**
+
 - `packages/core/src/plugins/builtin/search-tools/ripGrep/index.ts`
 - `packages/core/src/utils/ripgrepUtils.ts`
 
 #### 2. Языковое правило в CRITICAL секцию
+
 **Проблема:** Модель переключается на английский после tool error
 **Решение:** Добавить правило языка в секцию `[CRITICAL]`
 
 **Файлы:**
+
 - `packages/core/src/prompts/templates/system-8b.md`
 - `packages/core/src/prompts/templates/system-14b.md`
 - `packages/core/src/prompts/templates/system-32b.md`
 - `packages/core/src/prompts/templates/system-70b.md`
 
 #### 3. Алиас init для dev-tools
+
 **Проблема:** Модель использует интуитивное `init` вместо `mod_init`, `venv_create`, etc.
+
 ```
 GolangDev {"action":"init"} → Error: action must be one of allowed values
 ```
+
 **Решение:** Добавить алиасы:
 
-| Инструмент | init → | new → |
-|------------|--------|-------|
-| golang_dev | mod_init | - |
-| python_dev | venv_create | - |
-| rust_dev | cargo_init | cargo_new |
-| swift_dev | package_init | - |
+| Инструмент | init →       | new →     |
+| ---------- | ------------ | --------- |
+| golang_dev | mod_init     | -         |
+| python_dev | venv_create  | -         |
+| rust_dev   | cargo_init   | cargo_new |
+| swift_dev  | package_init | -         |
 
 **Файлы:**
+
 - `packages/core/src/plugins/builtin/dev-tools/*/index.ts`
 
 #### 4. Общие алиасы для dev-tools
+
 **Решение:** Добавить короткие алиасы для частых действий:
 
-| Алиас | Действие | Описание |
-|-------|----------|----------|
-| r | run | Запуск |
-| b | build | Сборка |
-| t | test | Тесты |
-| l | lint | Линтер |
-| fmt | format | Форматирование |
-| v | version | Версия |
-| i | install | Установка |
-| c | clean | Очистка |
+| Алиас | Действие | Описание       |
+| ----- | -------- | -------------- |
+| r     | run      | Запуск         |
+| b     | build    | Сборка         |
+| t     | test     | Тесты          |
+| l     | lint     | Линтер         |
+| fmt   | format   | Форматирование |
+| v     | version  | Версия         |
+| i     | install  | Установка      |
+| c     | clean    | Очистка        |
 
 ---
 
@@ -552,13 +586,13 @@ GolangDev {"action":"init"} → Error: action must be one of allowed values
 
 **Цель:** Enterprise-ready функции
 
-| Задача                      | Приоритет | Оценка | Статус       |
-| --------------------------- | --------- | ------ | ------------ |
-| Authentication system       | P0        | 5d     | 🔴 Не начато |
-| Role-based access control   | P0        | 4d     | 🔴 Не начато |
-| Audit logging               | P1        | 3d     | 🔴 Не начато |
-| Multi-tenant support        | P1        | 5d     | 🔴 Не начато |
-| SSO integration             | P2        | 4d     | 🔴 Не начато |
+| Задача                    | Приоритет | Оценка | Статус       |
+| ------------------------- | --------- | ------ | ------------ |
+| Authentication system     | P0        | 5d     | 🔴 Не начато |
+| Role-based access control | P0        | 4d     | 🔴 Не начато |
+| Audit logging             | P1        | 3d     | 🔴 Не начато |
+| Multi-tenant support      | P1        | 5d     | 🔴 Не начато |
+| SSO integration           | P2        | 4d     | 🔴 Не начато |
 
 ---
 
@@ -578,18 +612,18 @@ GolangDev {"action":"init"} → Error: action must be one of allowed values
 
 ## Сравнение с конкурентами
 
-| Функция          | Ollama Code    | Claude Code | Aider       | Cursor      |
-| ---------------- | -------------- | ----------- | ----------- | ----------- |
-| Локальные модели | ✅             | ❌          | ✅          | ❌          |
-| Open Source      | ✅             | ❌          | ✅          | ❌          |
-| CLI интерфейс    | ✅             | ✅          | ✅          | ❌          |
-| Web UI           | ✅             | ✅          | ❌          | ✅          |
+| Функция          | Ollama Code         | Claude Code | Aider       | Cursor      |
+| ---------------- | ------------------- | ----------- | ----------- | ----------- |
+| Локальные модели | ✅                  | ❌          | ✅          | ❌          |
+| Open Source      | ✅                  | ❌          | ✅          | ❌          |
+| CLI интерфейс    | ✅                  | ✅          | ✅          | ❌          |
+| Web UI           | ✅                  | ✅          | ❌          | ✅          |
 | Plugin System    | ✅ v3 (15 плагинов) | ✅          | ✅          | ✅          |
-| IDE Integration  | ✅ VSCode      | ✅ VSCode   | ✅ Multi    | ✅ Built-in |
-| MCP Support      | ✅             | ✅          | ❌          | ❌          |
-| Context Caching  | ✅             | ✅          | ⚠️ Частично | ✅          |
-| Undo/Redo        | ✅             | ✅          | ❌          | ✅          |
-| LSP Integration  | ✅             | ✅          | ⚠️ Частично | ✅          |
+| IDE Integration  | ✅ VSCode           | ✅ VSCode   | ✅ Multi    | ✅ Built-in |
+| MCP Support      | ✅                  | ✅          | ❌          | ❌          |
+| Context Caching  | ✅                  | ✅          | ⚠️ Частично | ✅          |
+| Undo/Redo        | ✅                  | ✅          | ❌          | ✅          |
+| LSP Integration  | ✅                  | ✅          | ⚠️ Частично | ✅          |
 
 ---
 
@@ -625,19 +659,19 @@ GolangDev {"action":"init"} → Error: action must be one of allowed values
 
 ### Высокий приоритет
 
-| Область        | Проблема                | Решение           | Статус |
-| -------------- | ----------------------- | ----------------- | ------ |
-| Memory leaks   | AbortController cleanup | Cleanup handlers  | ✅     |
-| Token counting | Fallback для прогресса  | Estimate fallback | ✅     |
-| Plugin docs    | Не все плагины задокументированы | TSDoc | ✅ |
+| Область        | Проблема                         | Решение           | Статус |
+| -------------- | -------------------------------- | ----------------- | ------ |
+| Memory leaks   | AbortController cleanup          | Cleanup handlers  | ✅     |
+| Token counting | Fallback для прогресса           | Estimate fallback | ✅     |
+| Plugin docs    | Не все плагины задокументированы | TSDoc             | ✅     |
 
 ### Средний приоритет
 
-| Область       | Проблема                     | Решение            | Оценка |
-| ------------- | ---------------------------- | ------------------ | ------ |
-| Logging       | Несогласованный формат       | Structured logging | 2d     |
-| Config        | Много источников             | Единый schema      | 3d     |
-| Tests         | Покрытие плагинов            | Unit tests         | 3d     |
+| Область | Проблема               | Решение            | Оценка |
+| ------- | ---------------------- | ------------------ | ------ |
+| Logging | Несогласованный формат | Structured logging | 2d     |
+| Config  | Много источников       | Единый schema      | 3d     |
+| Tests   | Покрытие плагинов      | Unit tests         | 3d     |
 
 ---
 
@@ -650,8 +684,8 @@ GolangDev {"action":"init"} → Error: action must be one of allowed values
 | Startup Time      | ~2s     | <1s       |
 | Memory Usage      | ~200MB  | <100MB    |
 | Response Latency  | ~100ms  | <50ms     |
-| Plugins          | 15      | 20+       |
-| Tools            | 45+     | 60+       |
+| Plugins           | 15      | 20+       |
+| Tools             | 45+     | 60+       |
 | GitHub Stars      | 500+    | 5000+     |
 | Contributors      | 10+     | 100+      |
 
@@ -677,7 +711,7 @@ Ollama Code v0.16.0 включает ключевые архитектурные
 
 ---
 
-*Document version: 4.0.0*
-*Last updated: 2025-03*
-*Author: Architecture Team*
-*Created with GLM-5 from Z.AI*
+_Document version: 4.0.0_
+_Last updated: 2025-03_
+_Author: Architecture Team_
+_Created with GLM-5 from Z.AI_

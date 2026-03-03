@@ -51,6 +51,7 @@
 - **Ollama** installed and running (https://ollama.ai)
 
 > ⚠️ **Important**: Node.js 23+ is not supported. The `node-pty` native module requires Node.js 20.x or 22.x LTS. If you have Node.js 23+, please downgrade:
+>
 > ```bash
 > # Using asdf
 > asdf install nodejs 22.14.0
@@ -63,61 +64,61 @@ Different models require different amounts of VRAM. Below is a guide for NVIDIA 
 
 ### Minimum GPU Requirements by Model Size
 
-| Model Size | Min VRAM | Recommended GPU | Notes |
-|------------|----------|-----------------|-------|
-| 3B | 4 GB | RTX 3050, GTX 1660, RTX 5060 | Basic models, quantization recommended |
-| 7B | 6 GB | RTX 3060, RTX 4060, RTX 5060 | Good balance of speed and quality |
-| 8B | 8 GB | RTX 3070, RTX 4060 Ti, RTX 5070 | DeepSeek R1, Llama 3.1 |
-| 14B | 12 GB | RTX 3080, RTX 4070, RTX 5070 Ti | Qwen2.5-Coder 14B |
-| 30B | 20 GB | RTX 3090, RTX 4090, RTX 5080 | Qwen3-Coder 30B |
-| 70B | 32 GB | RTX 5090, 2x RTX 3090 | DeepSeek R1 70B, Llama 3.1 70B |
-| 120B+ | 48+ GB | 2x RTX 5090, A100 | Requires multi-GPU or cloud |
+| Model Size | Min VRAM | Recommended GPU                 | Notes                                  |
+| ---------- | -------- | ------------------------------- | -------------------------------------- |
+| 3B         | 4 GB     | RTX 3050, GTX 1660, RTX 5060    | Basic models, quantization recommended |
+| 7B         | 6 GB     | RTX 3060, RTX 4060, RTX 5060    | Good balance of speed and quality      |
+| 8B         | 8 GB     | RTX 3070, RTX 4060 Ti, RTX 5070 | DeepSeek R1, Llama 3.1                 |
+| 14B        | 12 GB    | RTX 3080, RTX 4070, RTX 5070 Ti | Qwen2.5-Coder 14B                      |
+| 30B        | 20 GB    | RTX 3090, RTX 4090, RTX 5080    | Qwen3-Coder 30B                        |
+| 70B        | 32 GB    | RTX 5090, 2x RTX 3090           | DeepSeek R1 70B, Llama 3.1 70B         |
+| 120B+      | 48+ GB   | 2x RTX 5090, A100               | Requires multi-GPU or cloud            |
 
 ### Model Performance Test Results
 
 Performance tests conducted with standard tasks (code generation, refactoring, debugging):
 
-| GPU | VRAM | Model | Quantization | Speed (tok/s) | Quality Score |
-|-----|------|-------|--------------|---------------|---------------|
-| RTX 3060 | 12 GB | llama3.2:3b | Q4_K_M | 45-55 | Good |
-| RTX 3060 | 12 GB | qwen2.5-coder:7b | Q4_K_M | 28-35 | Very Good |
-| RTX 3060 | 12 GB | deepseek-r1:8b | Q4_K_M | 22-28 | Excellent |
-| RTX 3060 | 12 GB | qwen2.5-coder:14b | Q3_K_M | 12-18 | Excellent |
-| RTX 3070 | 8 GB | llama3.2:3b | Q4_K_M | 55-65 | Good |
-| RTX 3070 | 8 GB | qwen2.5-coder:7b | Q4_K_M | 35-42 | Very Good |
-| RTX 3070 | 8 GB | deepseek-r1:8b | Q4_K_M | 28-35 | Excellent |
-| RTX 3080 | 10 GB | qwen2.5-coder:7b | Q8_0 | 40-48 | Excellent |
-| RTX 3080 | 10 GB | qwen2.5-coder:14b | Q4_K_M | 25-32 | Excellent |
-| RTX 3080 | 10 GB | deepseek-r1:8b | Q8_0 | 32-40 | Excellent |
-| RTX 3090 | 24 GB | qwen2.5-coder:14b | Q8_0 | 38-45 | Excellent |
-| RTX 3090 | 24 GB | qwen3-coder:30b | Q4_K_M | 18-25 | Outstanding |
-| RTX 3090 | 24 GB | deepseek-r1:32b | Q4_K_M | 12-18 | Outstanding |
-| RTX 4070 | 12 GB | qwen2.5-coder:14b | Q5_K_M | 35-42 | Excellent |
-| RTX 4070 Ti | 16 GB | qwen3-coder:30b | Q4_K_M | 22-28 | Outstanding |
-| RTX 4080 | 16 GB | qwen3-coder:30b | Q5_K_M | 28-35 | Outstanding |
-| RTX 4080 | 16 GB | deepseek-r1:32b | Q4_K_M | 20-28 | Outstanding |
-| RTX 4090 | 24 GB | qwen3-coder:30b | Q8_0 | 45-55 | Outstanding |
-| RTX 4090 | 24 GB | deepseek-r1:32b | Q5_K_M | 35-45 | Outstanding |
-| RTX 4090 | 24 GB | deepseek-r1:70b | Q3_K_M | 8-12 | Exceptional |
-| RTX 5070 | 12 GB | qwen2.5-coder:14b | Q6_K | 45-55 | Excellent |
-| RTX 5070 Ti | 16 GB | qwen3-coder:30b | Q5_K_M | 35-45 | Outstanding |
-| RTX 5080 | 16 GB | qwen3-coder:30b | Q6_K | 45-55 | Outstanding |
-| RTX 5080 | 16 GB | deepseek-r1:32b | Q5_K_M | 38-48 | Outstanding |
-| RTX 5090 | 32 GB | qwen3-coder:30b | FP16 | 80-100 | Exceptional |
-| RTX 5090 | 32 GB | deepseek-r1:70b | Q4_K_M | 25-35 | Exceptional |
-| RTX 5090 | 32 GB | llama3.1:70b | Q5_K_M | 30-40 | Exceptional |
+| GPU         | VRAM  | Model             | Quantization | Speed (tok/s) | Quality Score |
+| ----------- | ----- | ----------------- | ------------ | ------------- | ------------- |
+| RTX 3060    | 12 GB | llama3.2:3b       | Q4_K_M       | 45-55         | Good          |
+| RTX 3060    | 12 GB | qwen2.5-coder:7b  | Q4_K_M       | 28-35         | Very Good     |
+| RTX 3060    | 12 GB | deepseek-r1:8b    | Q4_K_M       | 22-28         | Excellent     |
+| RTX 3060    | 12 GB | qwen2.5-coder:14b | Q3_K_M       | 12-18         | Excellent     |
+| RTX 3070    | 8 GB  | llama3.2:3b       | Q4_K_M       | 55-65         | Good          |
+| RTX 3070    | 8 GB  | qwen2.5-coder:7b  | Q4_K_M       | 35-42         | Very Good     |
+| RTX 3070    | 8 GB  | deepseek-r1:8b    | Q4_K_M       | 28-35         | Excellent     |
+| RTX 3080    | 10 GB | qwen2.5-coder:7b  | Q8_0         | 40-48         | Excellent     |
+| RTX 3080    | 10 GB | qwen2.5-coder:14b | Q4_K_M       | 25-32         | Excellent     |
+| RTX 3080    | 10 GB | deepseek-r1:8b    | Q8_0         | 32-40         | Excellent     |
+| RTX 3090    | 24 GB | qwen2.5-coder:14b | Q8_0         | 38-45         | Excellent     |
+| RTX 3090    | 24 GB | qwen3-coder:30b   | Q4_K_M       | 18-25         | Outstanding   |
+| RTX 3090    | 24 GB | deepseek-r1:32b   | Q4_K_M       | 12-18         | Outstanding   |
+| RTX 4070    | 12 GB | qwen2.5-coder:14b | Q5_K_M       | 35-42         | Excellent     |
+| RTX 4070 Ti | 16 GB | qwen3-coder:30b   | Q4_K_M       | 22-28         | Outstanding   |
+| RTX 4080    | 16 GB | qwen3-coder:30b   | Q5_K_M       | 28-35         | Outstanding   |
+| RTX 4080    | 16 GB | deepseek-r1:32b   | Q4_K_M       | 20-28         | Outstanding   |
+| RTX 4090    | 24 GB | qwen3-coder:30b   | Q8_0         | 45-55         | Outstanding   |
+| RTX 4090    | 24 GB | deepseek-r1:32b   | Q5_K_M       | 35-45         | Outstanding   |
+| RTX 4090    | 24 GB | deepseek-r1:70b   | Q3_K_M       | 8-12          | Exceptional   |
+| RTX 5070    | 12 GB | qwen2.5-coder:14b | Q6_K         | 45-55         | Excellent     |
+| RTX 5070 Ti | 16 GB | qwen3-coder:30b   | Q5_K_M       | 35-45         | Outstanding   |
+| RTX 5080    | 16 GB | qwen3-coder:30b   | Q6_K         | 45-55         | Outstanding   |
+| RTX 5080    | 16 GB | deepseek-r1:32b   | Q5_K_M       | 38-48         | Outstanding   |
+| RTX 5090    | 32 GB | qwen3-coder:30b   | FP16         | 80-100        | Exceptional   |
+| RTX 5090    | 32 GB | deepseek-r1:70b   | Q4_K_M       | 25-35         | Exceptional   |
+| RTX 5090    | 32 GB | llama3.1:70b      | Q5_K_M       | 30-40         | Exceptional   |
 
 > **Note**: Speed varies based on context length, prompt complexity, and system configuration. Quality Score is subjective based on code generation accuracy and coherence. RTX 50 series shows significant performance improvements due to Blackwell architecture and GDDR7 memory.
 
 ### Quantization Guide
 
-| Quantization | Size Reduction | Quality Loss | Recommended For |
-|--------------|----------------|--------------|-----------------|
-| Q4_K_M | ~70% | Minimal | Most use cases |
-| Q5_K_M | ~65% | Very Low | Better quality |
-| Q6_K | ~60% | Negligible | High quality needs |
-| Q8_0 | ~50% | None | Maximum quality |
-| FP16 | 0% | None | RTX 5090 with 32GB+ VRAM |
+| Quantization | Size Reduction | Quality Loss | Recommended For          |
+| ------------ | -------------- | ------------ | ------------------------ |
+| Q4_K_M       | ~70%           | Minimal      | Most use cases           |
+| Q5_K_M       | ~65%           | Very Low     | Better quality           |
+| Q6_K         | ~60%           | Negligible   | High quality needs       |
+| Q8_0         | ~50%           | None         | Maximum quality          |
+| FP16         | 0%             | None         | RTX 5090 with 32GB+ VRAM |
 
 ## Quick Start
 
@@ -184,20 +185,52 @@ npm run dev:server
 
 ---
 
+## What's New in v0.16.8
+
+### Dependency Updates to Latest Versions
+
+All core dependencies updated to their latest stable versions:
+
+| Package                     | New Version |
+| --------------------------- | ----------- |
+| `zod`                       | 4.3.6       |
+| `@modelcontextprotocol/sdk` | 1.27.1      |
+| `ajv-formats`               | 3.0.1       |
+| `msw`                       | 2.12.10     |
+
+### Zod v4 Migration
+
+Migrated to Zod v4 for compatibility with latest MCP SDK:
+
+| Change          | Description                                    |
+| --------------- | ---------------------------------------------- |
+| `z.record()`    | Now requires explicit key/value type arguments |
+| `z.string()`    | Simplified error message parameter             |
+| `ZodObject`     | Simplified generic parameters                  |
+| Error structure | Uses `.issues` instead of `.errors`            |
+
+### Build Verification
+
+- ✅ TypeScript compilation passes
+- ✅ Build succeeds
+- ✅ Bundle created successfully
+
+---
+
 ## What's New in v0.16.7
 
 ### Test Migration — 100% Complete
 
 All tests migrated from `tools/` to `plugins/builtin/`:
 
-| Category | Tests |
-|----------|-------|
-| dev-tools | python, nodejs, golang, rust, java, cpp, swift, php, typescript |
-| file-tools | edit, glob, ls, read-file, read-many-files, write-file |
-| search-tools | grep, ripGrep, web-fetch |
-| database-tools | database, docker, redis |
-| mcp-tools | mcp-client, mcp-tool, mcp-client-manager |
-| Other | skill, task, todoWrite, exitPlanMode, lsp, shell, git-advanced, etc. |
+| Category       | Tests                                                                |
+| -------------- | -------------------------------------------------------------------- |
+| dev-tools      | python, nodejs, golang, rust, java, cpp, swift, php, typescript      |
+| file-tools     | edit, glob, ls, read-file, read-many-files, write-file               |
+| search-tools   | grep, ripGrep, web-fetch                                             |
+| database-tools | database, docker, redis                                              |
+| mcp-tools      | mcp-client, mcp-tool, mcp-client-manager                             |
+| Other          | skill, task, todoWrite, exitPlanMode, lsp, shell, git-advanced, etc. |
 
 ### TypeScript Strict Mode
 
@@ -216,13 +249,14 @@ Fixed all TypeScript strict mode errors with explicit type annotations.
 
 Comprehensive codebase cleanup with all ESLint errors resolved:
 
-| Metric | Before | After |
-|--------|--------|-------|
-| ESLint Errors | 336 | 0 |
-| ESLint Warnings | 48 | 48 |
-| TypeScript Errors | 0 | 0 |
+| Metric            | Before | After |
+| ----------------- | ------ | ----- |
+| ESLint Errors     | 336    | 0     |
+| ESLint Warnings   | 48     | 48    |
+| TypeScript Errors | 0      | 0     |
 
 **Key Improvements:**
+
 - Fixed 150+ unused variables/imports
 - Added default cases to all switch statements
 - Fixed optional chaining for type safety
@@ -675,38 +709,38 @@ ollama-code/
 
 ### 📚 Complete Guides (English)
 
-| Guide                                      | Description                              |
-| ------------------------------------------ | ---------------------------------------- |
-| [**CLI_GUIDE.md**](./docs/CLI_GUIDE.md)    | Complete CLI usage guide                 |
-| [**CORE_GUIDE.md**](./docs/CORE_GUIDE.md)  | Core library developer guide             |
-| [**WEB_UI_GUIDE.md**](./docs/WEB_UI_GUIDE.md) | Web UI complete usage guide           |
-| [FEATURES.md](./docs/FEATURES.md)          | Feature reference                        |
-| [TOOLS.md](./docs/TOOLS.md)                | Tools reference                          |
-| [USAGE_GUIDE.md](./docs/USAGE_GUIDE.md)    | Usage guide                              |
-| [EXAMPLES.md](./docs/EXAMPLES.md)          | Usage examples                           |
-| [OLLAMA_API.md](./docs/OLLAMA_API.md)      | API documentation                        |
+| Guide                                         | Description                  |
+| --------------------------------------------- | ---------------------------- |
+| [**CLI_GUIDE.md**](./docs/CLI_GUIDE.md)       | Complete CLI usage guide     |
+| [**CORE_GUIDE.md**](./docs/CORE_GUIDE.md)     | Core library developer guide |
+| [**WEB_UI_GUIDE.md**](./docs/WEB_UI_GUIDE.md) | Web UI complete usage guide  |
+| [FEATURES.md](./docs/FEATURES.md)             | Feature reference            |
+| [TOOLS.md](./docs/TOOLS.md)                   | Tools reference              |
+| [USAGE_GUIDE.md](./docs/USAGE_GUIDE.md)       | Usage guide                  |
+| [EXAMPLES.md](./docs/EXAMPLES.md)             | Usage examples               |
+| [OLLAMA_API.md](./docs/OLLAMA_API.md)         | API documentation            |
 
 ### 📚 Полные руководства (Русский)
 
-| Руководство                                      | Описание                           |
-| ------------------------------------------------ | ---------------------------------- |
-| [**CLI_GUIDE.ru.md**](./docs/CLI_GUIDE.ru.md)    | Полное руководство по CLI          |
-| [**CORE_GUIDE.ru.md**](./docs/CORE_GUIDE.ru.md)  | Руководство разработчика Core      |
-| [**WEB_UI_GUIDE.ru.md**](./docs/WEB_UI_GUIDE.ru.md) | Полное руководство по Web UI    |
-| [FEATURES.ru.md](./docs/FEATURES.ru.md)          | Справочник функций                 |
-| [TOOLS.ru.md](./docs/TOOLS.ru.md)                | Справочник инструментов            |
-| [README.ru.md](./README.ru.md)                   | README на русском                  |
+| Руководство                                         | Описание                      |
+| --------------------------------------------------- | ----------------------------- |
+| [**CLI_GUIDE.ru.md**](./docs/CLI_GUIDE.ru.md)       | Полное руководство по CLI     |
+| [**CORE_GUIDE.ru.md**](./docs/CORE_GUIDE.ru.md)     | Руководство разработчика Core |
+| [**WEB_UI_GUIDE.ru.md**](./docs/WEB_UI_GUIDE.ru.md) | Полное руководство по Web UI  |
+| [FEATURES.ru.md](./docs/FEATURES.ru.md)             | Справочник функций            |
+| [TOOLS.ru.md](./docs/TOOLS.ru.md)                   | Справочник инструментов       |
+| [README.ru.md](./README.ru.md)                      | README на русском             |
 
 ### Quick Reference
 
-| Document                                | Description                    |
-| --------------------------------------- | ------------------------------ |
-| [WEB_UI.md](./docs/WEB_UI.md)           | Web UI technical docs          |
-| [FEATURES.md](./docs/FEATURES.md)       | Complete feature reference     |
-| [TOOLS.md](./docs/TOOLS.md)             | Detailed tools reference       |
-| [USAGE_GUIDE.md](./docs/USAGE_GUIDE.md) | Usage guide                    |
-| [EXAMPLES.md](./docs/EXAMPLES.md)       | Usage examples                 |
-| [OLLAMA_API.md](./docs/OLLAMA_API.md)   | API documentation              |
+| Document                                | Description                |
+| --------------------------------------- | -------------------------- |
+| [WEB_UI.md](./docs/WEB_UI.md)           | Web UI technical docs      |
+| [FEATURES.md](./docs/FEATURES.md)       | Complete feature reference |
+| [TOOLS.md](./docs/TOOLS.md)             | Detailed tools reference   |
+| [USAGE_GUIDE.md](./docs/USAGE_GUIDE.md) | Usage guide                |
+| [EXAMPLES.md](./docs/EXAMPLES.md)       | Usage examples             |
+| [OLLAMA_API.md](./docs/OLLAMA_API.md)   | API documentation          |
 
 ### Project Resources
 
@@ -848,7 +882,7 @@ Apache License 2.0
 
 ---
 
-*Documentation created with GLM-5 from Z.AI*
+_Documentation created with GLM-5 from Z.AI_
 
 ## Contributing
 

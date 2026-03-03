@@ -1,5 +1,73 @@
 # Журнал изменений
 
+## 0.16.8
+
+_Обновление зависимостей и миграция на Zod v4_
+
+### Обновление зависимостей
+
+Все зависимости обновлены до актуальных версий для совместимости и безопасности:
+
+| Пакет                       | Старая версия            | Новая версия | Причина                                 |
+| --------------------------- | ------------------------ | ------------ | --------------------------------------- |
+| `zod`                       | 3.23.8 / 3.24.0 / 3.25.0 | **4.3.6**    | Требуется для @modelcontextprotocol/sdk |
+| `@modelcontextprotocol/sdk` | 1.25.1                   | **1.27.1**   | Новые возможности MCP SDK               |
+| `ajv-formats`               | 3.0.0                    | **3.0.1**    | Объявления типов TypeScript             |
+| `msw`                       | 2.3.4                    | **2.12.10**  | Исправление peer dependency             |
+
+### Критические изменения
+
+#### Изменения API Zod v4
+
+Zod v4 вводит критические изменения API, потребовавшие обновления кода:
+
+| Изменение              | Старый API                               | Новый API                           |
+| ---------------------- | ---------------------------------------- | ----------------------------------- |
+| `z.record()`           | `z.record(z.unknown())`                  | `z.record(z.string(), z.unknown())` |
+| Параметры `z.string()` | `{ required_error, invalid_type_error }` | `{ message }`                       |
+| Generic `ZodObject`    | `ZodObject<Shape, 'strip', ZodTypeAny>`  | `ZodObject<Shape>`                  |
+| Ошибки валидации       | `error.errors`                           | `error.issues`                      |
+
+### Изменённые файлы
+
+| Файл                                                   | Изменения                                             |
+| ------------------------------------------------------ | ----------------------------------------------------- |
+| `package.json`                                         | Обновлён zod до 4.3.6                                 |
+| `packages/cli/package.json`                            | Обновлены zod, @modelcontextprotocol/sdk              |
+| `packages/core/package.json`                           | Обновлены @modelcontextprotocol/sdk, ajv-formats, msw |
+| `packages/sdk-typescript/package.json`                 | Обновлены zod, @modelcontextprotocol/sdk              |
+| `packages/cli/src/acp-integration/schema.ts`           | Исправлены вызовы `z.record()`                        |
+| `packages/cli/src/services/FileCommandLoader.ts`       | Исправлены параметры `z.string()`                     |
+| `packages/cli/src/services/markdown-command-parser.ts` | Исправлены параметры `z.string()`                     |
+| `packages/sdk-typescript/src/mcp/tool.ts`              | Исправлен generic `ZodObject`                         |
+| `packages/sdk-typescript/src/query/createQuery.ts`     | Исправлен доступ к свойствам ошибки                   |
+| `packages/*/vitest.config.ts`                          | Отключён PostCSS для тестов                           |
+| `packages/*/postcss.config.js`                         | Добавлены пустые конфиги                              |
+
+### Технические детали
+
+#### Исправления совместимости Zod v4
+
+1. **Аргументы типа record**: `z.record()` теперь требует явные аргументы типа ключа и значения
+2. **Сообщения об ошибках**: Унифицированный параметр `message` для ошибок валидации
+3. **Вывод типов**: Упрощённые generic-параметры `ZodObject`
+4. **Структура ошибок**: Ошибки валидации теперь используют `.issues` вместо `.errors`
+
+#### Конфигурация Vitest
+
+Исправлены конфликты конфигурации PostCSS путём:
+
+- Добавления `css: { postcss: false }` во все конфиги vitest
+- Создания пустых файлов `postcss.config.js` в каждом пакете
+
+### Проверка
+
+- ✅ Компиляция TypeScript проходит успешно
+- ✅ Сборка выполняется без ошибок
+- ✅ Бандл создан успешно
+
+---
+
 ## 0.16.7
 
 _Улучшения UX, исправления TypeScript и миграция тестов_
@@ -10,9 +78,9 @@ _Улучшения UX, исправления TypeScript и миграция т
 
 Добавлен отступ после сообщения Tips в CLI для лучшей читаемости:
 
-| Компонент | Изменение |
-| --------- | --------- |
-| `Tips.tsx` | Добавлен `marginBottom={1}` для визуального отступа |
+| Компонент  | Изменение                                                   |
+| ---------- | ----------------------------------------------------------- |
+| `Tips.tsx` | Добавлен `marginBottom={1}` для визуального отступа         |
 | `Tips.tsx` | Добавлен `flexDirection="column"` для правильной компоновки |
 
 ### Исправления ошибок
@@ -21,13 +89,13 @@ _Улучшения UX, исправления TypeScript и миграция т
 
 Исправлены ошибки TS7006/TS7053 добавлением явных аннотаций типов:
 
-| Файл | Изменения |
-| ---- | --------- |
-| `ide-client.ts` | Добавлены типы для параметров `part`, `tool` |
-| `McpPromptLoader.ts` | Добавлены типы `PromptArgument` |
-| `acpAgent.ts` | Добавлены типы для параметров `mode`, `item`, `model`, исправлено приведение APPROVAL_MODES |
-| `ToolCallEmitter.ts` | Добавлен тип для параметра `loc` |
-| `consent.ts` | Добавлен тип `ClaudeMarketplacePluginConfig` |
+| Файл                 | Изменения                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| `ide-client.ts`      | Добавлены типы для параметров `part`, `tool`                                                |
+| `McpPromptLoader.ts` | Добавлены типы `PromptArgument`                                                             |
+| `acpAgent.ts`        | Добавлены типы для параметров `mode`, `item`, `model`, исправлено приведение APPROVAL_MODES |
+| `ToolCallEmitter.ts` | Добавлен тип для параметра `loc`                                                            |
+| `consent.ts`         | Добавлен тип `ClaudeMarketplacePluginConfig`                                                |
 
 ### Рефакторинг
 
@@ -35,19 +103,20 @@ _Улучшения UX, исправления TypeScript и миграция т
 
 Все тесты перенесены из `tools/` в `plugins/builtin/`:
 
-| Категория | Перенесённые тесты |
-| --------- | ----------------- |
-| dev-tools | python, nodejs, golang, rust, java, cpp, swift, php, typescript |
-| file-tools | edit, glob, ls, read-file, read-many-files, write-file |
-| search-tools | grep, ripGrep, web-fetch |
-| database-tools | database, docker, redis |
-| mcp-tools | mcp-client, mcp-tool, mcp-client-manager, sdk-control-client-transport |
-| agent-tools | skill, task |
-| productivity-tools | todoWrite, exitPlanMode |
-| utility-tools | code-analyzer, diagram-generator |
-| Прочие | git-advanced, lsp, shell, api-tester, save-memory |
+| Категория          | Перенесённые тесты                                                     |
+| ------------------ | ---------------------------------------------------------------------- |
+| dev-tools          | python, nodejs, golang, rust, java, cpp, swift, php, typescript        |
+| file-tools         | edit, glob, ls, read-file, read-many-files, write-file                 |
+| search-tools       | grep, ripGrep, web-fetch                                               |
+| database-tools     | database, docker, redis                                                |
+| mcp-tools          | mcp-client, mcp-tool, mcp-client-manager, sdk-control-client-transport |
+| agent-tools        | skill, task                                                            |
+| productivity-tools | todoWrite, exitPlanMode                                                |
+| utility-tools      | code-analyzer, diagram-generator                                       |
+| Прочие             | git-advanced, lsp, shell, api-tester, save-memory                      |
 
 **Тесты, оставшиеся в `tools/` (тесты базовых классов):**
+
 - diffOptions.test.ts
 - modifiable-tool.test.ts
 - tool-error.test.ts
@@ -57,26 +126,26 @@ _Улучшения UX, исправления TypeScript и миграция т
 
 ### Обновления зависимостей
 
-| Пакет | Изменение | Причина |
-| ----- | --------- | ------- |
-| `zod` | 3.24.0 → 3.25.0 | MCP SDK 1.25.1+ требует zod ^3.25 для экспортов v3/v4 |
-| `ajv-formats` | 3.0.0 → 2.1.1 | Исправление совместимости ESM |
+| Пакет         | Изменение       | Причина                                               |
+| ------------- | --------------- | ----------------------------------------------------- |
+| `zod`         | 3.24.0 → 3.25.0 | MCP SDK 1.25.1+ требует zod ^3.25 для экспортов v3/v4 |
+| `ajv-formats` | 3.0.0 → 2.1.1   | Исправление совместимости ESM                         |
 
 ### Изменённые файлы
 
-| Файл | Изменения |
-| ---- | --------- |
-| `packages/cli/src/ui/components/Tips.tsx` | Отступ после сообщения Tips |
-| `packages/core/src/ide/ide-client.ts` | Аннотации типов |
-| `packages/cli/src/services/McpPromptLoader.ts` | Аннотации типов |
-| `packages/cli/src/acp-integration/acpAgent.ts` | Аннотации типов |
-| `packages/cli/src/acp-integration/session/emitters/ToolCallEmitter.ts` | Аннотации типов |
-| `packages/cli/src/commands/extensions/consent.ts` | Аннотации типов |
-| `packages/core/package.json` | понижение версии ajv-formats |
-| `package.json` | обновление zod |
-| `ROADMAP.md` | Обновлён статус миграции на 100% |
-| `CHANGELOG.md` | Добавлен v0.16.7 |
-| `CHANGELOG.ru.md` | Добавлен v0.16.7 (русский) |
+| Файл                                                                   | Изменения                        |
+| ---------------------------------------------------------------------- | -------------------------------- |
+| `packages/cli/src/ui/components/Tips.tsx`                              | Отступ после сообщения Tips      |
+| `packages/core/src/ide/ide-client.ts`                                  | Аннотации типов                  |
+| `packages/cli/src/services/McpPromptLoader.ts`                         | Аннотации типов                  |
+| `packages/cli/src/acp-integration/acpAgent.ts`                         | Аннотации типов                  |
+| `packages/cli/src/acp-integration/session/emitters/ToolCallEmitter.ts` | Аннотации типов                  |
+| `packages/cli/src/commands/extensions/consent.ts`                      | Аннотации типов                  |
+| `packages/core/package.json`                                           | понижение версии ajv-formats     |
+| `package.json`                                                         | обновление zod                   |
+| `ROADMAP.md`                                                           | Обновлён статус миграции на 100% |
+| `CHANGELOG.md`                                                         | Добавлен v0.16.7                 |
+| `CHANGELOG.ru.md`                                                      | Добавлен v0.16.7 (русский)       |
 
 ---
 
@@ -90,16 +159,17 @@ _Исправление совместимости с Node.js_
 
 Обновлена документация с чётким указанием поддерживаемых версий Node.js:
 
-| Версия Node.js | Статус           | Примечания                       |
-| -------------- | ---------------- | -------------------------------- |
-| 18.x           | ✅ Поддерживается | LTS Maintenance                  |
-| 20.x           | ✅ Поддерживается | LTS Current (Рекомендуется)      |
-| 22.x           | ✅ Поддерживается | LTS Latest                       |
-| 23.x           | ❌ Не поддерживается | Проблемы компиляции node-pty  |
-| 24.x           | ❌ Не поддерживается | Экспериментальная, проблемы    |
-| 25.x           | ❌ Не поддерживается | Экспериментальная, проблемы    |
+| Версия Node.js | Статус               | Примечания                   |
+| -------------- | -------------------- | ---------------------------- |
+| 18.x           | ✅ Поддерживается    | LTS Maintenance              |
+| 20.x           | ✅ Поддерживается    | LTS Current (Рекомендуется)  |
+| 22.x           | ✅ Поддерживается    | LTS Latest                   |
+| 23.x           | ❌ Не поддерживается | Проблемы компиляции node-pty |
+| 24.x           | ❌ Не поддерживается | Экспериментальная, проблемы  |
+| 25.x           | ❌ Не поддерживается | Экспериментальная, проблемы  |
 
 **Проблема:** Node.js 25.x вызывал ошибку компиляции `node-pty`:
+
 ```
 error: expected expression
 I::ReadExternalPointerField<{internal::kFirstEmbedderDataTag,
@@ -109,11 +179,11 @@ I::ReadExternalPointerField<{internal::kFirstEmbedderDataTag,
 
 ### Обновления документации
 
-| Файл          | Изменения                                          |
-| ------------- | -------------------------------------------------- |
-| `README.md`   | Добавлено предупреждение о совместимости с Node.js |
-| `README.ru.md`| Добавлено предупреждение на русском                |
-| `package.json`| Обновлено требование engines (>=20.0.0 <23.0.0)    |
+| Файл           | Изменения                                          |
+| -------------- | -------------------------------------------------- |
+| `README.md`    | Добавлено предупреждение о совместимости с Node.js |
+| `README.ru.md` | Добавлено предупреждение на русском                |
+| `package.json` | Обновлено требование engines (>=20.0.0 <23.0.0)    |
 
 ### Исправление установки
 
@@ -133,7 +203,7 @@ pnpm install
 
 ## 0.16.0
 
-*Документация создана с помощью GLM-5 от Z.AI*
+_Документация создана с помощью GLM-5 от Z.AI_
 
 ### Новые возможности
 
@@ -141,19 +211,21 @@ pnpm install
 
 Добавлена комплексная документация по требованиям к GPU с тестами производительности:
 
-| Секция | Описание |
-|--------|----------|
-| **Таблица требований к GPU** | Минимальная VRAM для каждого размера модели (от 3B до 70B+) |
-| **Результаты тестов производительности** | Бенчмарки для RTX 3060 до RTX 4090 |
-| **Руководство по квантизации** | Рекомендации Q4_K_M, Q5_K_M, Q6_K, Q8_0 |
+| Секция                                   | Описание                                                    |
+| ---------------------------------------- | ----------------------------------------------------------- |
+| **Таблица требований к GPU**             | Минимальная VRAM для каждого размера модели (от 3B до 70B+) |
+| **Результаты тестов производительности** | Бенчмарки для RTX 3060 до RTX 4090                          |
+| **Руководство по квантизации**           | Рекомендации Q4_K_M, Q5_K_M, Q6_K, Q8_0                     |
 
 **Таблица тестов производительности включает:**
+
 - 17 комбинаций GPU/Модель протестировано
 - Начиная с RTX 3060 (12 ГБ) как базовой
 - Измерения скорости в токенах/секунду
 - Оценки качества для каждой конфигурации
 
 **Обновлённые файлы:**
+
 - `README.md` — Добавлена секция GPU Requirements
 - `README.ru.md` — Добавлена русская секция требований к GPU
 
@@ -161,23 +233,23 @@ pnpm install
 
 Полная реорганизация инструментов в категории плагинов для лучшей модульности и расширяемости:
 
-| Компонент | Описание |
-|-----------|----------|
-| **12 категорий плагинов** | Инструменты организованы по функциональности |
+| Компонент                   | Описание                                                 |
+| --------------------------- | -------------------------------------------------------- |
+| **12 категорий плагинов**   | Инструменты организованы по функциональности             |
 | **Ре-экспорт инструментов** | Существующие инструменты обёрнуты в архитектуру плагинов |
-| **Улучшенная документация** | Каждый плагин имеет свой README и метаданные |
+| **Улучшенная документация** | Каждый плагин имеет свой README и метаданные             |
 
 **Новые категории плагинов (7 новых):**
 
-| ID плагина          | Инструменты | Описание |
-|---------------------|-------------|----------|
-| `memory-tools`      | save_memory | Управление памятью и контекстом |
-| `task-tools`        | task, todo_write | Делегирование и отслеживание задач |
-| `database-tools`    | redis, database | Операции с БД (Redis, SQL, MongoDB) |
-| `docker-tools`      | docker | Управление контейнерами |
-| `git-tools`         | git_advanced | Продвинутые операции Git |
-| `mcp-tools`         | mcp_server | Интеграция Model Context Protocol |
-| `code-analysis-tools` | code_analyzer, diagram_generator, api_tester | Качество и анализ кода |
+| ID плагина            | Инструменты                                  | Описание                            |
+| --------------------- | -------------------------------------------- | ----------------------------------- |
+| `memory-tools`        | save_memory                                  | Управление памятью и контекстом     |
+| `task-tools`          | task, todo_write                             | Делегирование и отслеживание задач  |
+| `database-tools`      | redis, database                              | Операции с БД (Redis, SQL, MongoDB) |
+| `docker-tools`        | docker                                       | Управление контейнерами             |
+| `git-tools`           | git_advanced                                 | Продвинутые операции Git            |
+| `mcp-tools`           | mcp_server                                   | Интеграция Model Context Protocol   |
+| `code-analysis-tools` | code_analyzer, diagram_generator, api_tester | Качество и анализ кода              |
 
 ---
 
@@ -227,14 +299,14 @@ Error: Rendered more hooks than during the previous render.
 
 Разделение монолитного `UIStateContext` (70+ полей) на меньшие, сфокусированные контексты:
 
-| Контекст              | Назначение                            |
-| --------------------- | ------------------------------------- |
-| `DialogStateContext`  | Состояния видимости диалогов          |
-| `TerminalContext`     | Размеры и компоновка терминала        |
-| `InputStateContext`   | Буфер ввода и состояния клавиш        |
-| `HistoryContext`      | Элементы истории и ожидающие сообщения|
-| `LoadingContext`      | Состояния стриминга и загрузки        |
-| `ConfirmationContext` | Запросы подтверждения                 |
+| Контекст              | Назначение                             |
+| --------------------- | -------------------------------------- |
+| `DialogStateContext`  | Состояния видимости диалогов           |
+| `TerminalContext`     | Размеры и компоновка терминала         |
+| `InputStateContext`   | Буфер ввода и состояния клавиш         |
+| `HistoryContext`      | Элементы истории и ожидающие сообщения |
+| `LoadingContext`      | Состояния стриминга и загрузки         |
+| `ConfirmationContext` | Запросы подтверждения                  |
 
 #### Мемоизированные компоненты
 
@@ -260,22 +332,22 @@ Error: Rendered more hooks than during the previous render.
 
 ### Добавленные файлы
 
-| Файл                                                   | Описание                  |
-| ------------------------------------------------------ | ------------------------- |
+| Файл                                                   | Описание                       |
+| ------------------------------------------------------ | ------------------------------ |
 | `packages/cli/src/ui/contexts/DialogStateContext.tsx`  | Управление состоянием диалогов |
-| `packages/cli/src/ui/contexts/TerminalContext.tsx`     | Размеры терминала         |
-| `packages/cli/src/ui/contexts/InputStateContext.tsx`   | Управление состоянием ввода |
-| `packages/cli/src/ui/contexts/HistoryContext.tsx`      | Управление состоянием истории |
+| `packages/cli/src/ui/contexts/TerminalContext.tsx`     | Размеры терминала              |
+| `packages/cli/src/ui/contexts/InputStateContext.tsx`   | Управление состоянием ввода    |
+| `packages/cli/src/ui/contexts/HistoryContext.tsx`      | Управление состоянием истории  |
 | `packages/cli/src/ui/contexts/LoadingContext.tsx`      | Управление состоянием загрузки |
-| `packages/cli/src/ui/contexts/ConfirmationContext.tsx` | Запросы подтверждения     |
+| `packages/cli/src/ui/contexts/ConfirmationContext.tsx` | Запросы подтверждения          |
 
 ### Изменённые файлы
 
-| Файл                                                    | Изменения                              |
-| ------------------------------------------------------- | -------------------------------------- |
-| `packages/cli/src/ui/components/AppHeader.tsx`          | Добавлены memo и useMemo               |
-| `packages/cli/src/ui/components/MainContent.tsx`        | Добавлены memo, упрощён рендеринг      |
-| `packages/cli/src/ui/components/HistoryItemDisplay.tsx` | Добавлены memo, мемоизированы размеры  |
+| Файл                                                    | Изменения                               |
+| ------------------------------------------------------- | --------------------------------------- |
+| `packages/cli/src/ui/components/AppHeader.tsx`          | Добавлены memo и useMemo                |
+| `packages/cli/src/ui/components/MainContent.tsx`        | Добавлены memo, упрощён рендеринг       |
+| `packages/cli/src/ui/components/HistoryItemDisplay.tsx` | Добавлены memo, мемоизированы размеры   |
 | `packages/cli/src/ui/components/Composer.tsx`           | Добавлены memo, мемоизированы селекторы |
 
 ---
@@ -304,26 +376,26 @@ Error: Rendered more hooks than during the previous render.
 
 Крупные архитектурные улучшения для лучшей производительности и расширяемости:
 
-| Функция                  | Описание                                                |
-| ------------------------ | ------------------------------------------------------- |
-| **Миграция на Zustand**  | Заменил Context API для атомарных обновлений состояния |
-| **Event Bus**            | Типизированная система pub/sub для слабой связности     |
-| **Command Pattern**      | Полная поддержка Undo/Redo для обратимых операций       |
-| **Plugin System v1**     | Динамическая загрузка инструментов с lifecycle hooks    |
-| **Context Caching**      | KV-cache reuse для 80-90% более быстрых диалогов        |
-| **Документация промптов**| Комплексная документация системы промптов               |
+| Функция                   | Описание                                               |
+| ------------------------- | ------------------------------------------------------ |
+| **Миграция на Zustand**   | Заменил Context API для атомарных обновлений состояния |
+| **Event Bus**             | Типизированная система pub/sub для слабой связности    |
+| **Command Pattern**       | Полная поддержка Undo/Redo для обратимых операций      |
+| **Plugin System v1**      | Динамическая загрузка инструментов с lifecycle hooks   |
+| **Context Caching**       | KV-cache reuse для 80-90% более быстрых диалогов       |
+| **Документация промптов** | Комплексная документация системы промптов              |
 
 #### Stores Zustand
 
 Пять новых stores, заменяющих Context API:
 
-| Store            | Назначение                           |
-| ---------------- | ------------------------------------ |
-| `sessionStore`   | Состояние сессии и метрики           |
-| `streamingStore` | Состояние стриминга + AbortController|
-| `uiStore`        | UI настройки с персистентностью      |
-| `commandStore`   | Command pattern для undo/redo        |
-| `eventBus`       | Система событий pub/sub             |
+| Store            | Назначение                            |
+| ---------------- | ------------------------------------- |
+| `sessionStore`   | Состояние сессии и метрики            |
+| `streamingStore` | Состояние стриминга + AbortController |
+| `uiStore`        | UI настройки с персистентностью       |
+| `commandStore`   | Command pattern для undo/redo         |
+| `eventBus`       | Система событий pub/sub               |
 
 #### Event Bus
 
@@ -410,27 +482,27 @@ const plugin: PluginDefinition = {
 
 **Встроенные плагины:**
 
-| Плагин        | Инструменты                                                                                        |
-| ------------- | -------------------------------------------------------------------------------------------------- |
-| `core-tools`  | echo, timestamp, get_env                                                                           |
-| `dev-tools`   | python_dev, nodejs_dev, golang_dev, rust_dev, typescript_dev, java_dev, cpp_dev, swift_dev, php_dev|
-| `file-tools`  | read_file, write_file, edit_file                                                                   |
-| `search-tools`| grep, glob, web_fetch                                                                              |
-| `shell-tools` | run_shell_command                                                                                  |
+| Плагин         | Инструменты                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------------- |
+| `core-tools`   | echo, timestamp, get_env                                                                            |
+| `dev-tools`    | python_dev, nodejs_dev, golang_dev, rust_dev, typescript_dev, java_dev, cpp_dev, swift_dev, php_dev |
+| `file-tools`   | read_file, write_file, edit_file                                                                    |
+| `search-tools` | grep, glob, web_fetch                                                                               |
+| `shell-tools`  | run_shell_command                                                                                   |
 
 #### Документация системы промптов
 
 Новая комплексная документация в `docs/PROMPT_SYSTEM.md`:
 
-| Функция                          | Назначение                           |
-| -------------------------------- | ------------------------------------ |
-| `getCoreSystemPrompt()`          | Построение основного системного промпта |
-| `getCompressionPrompt()`         | Сжатие истории в XML формат          |
-| `getProjectSummaryPrompt()`      | Sumмаризация проекта в Markdown      |
-| `getToolCallFormatInstructions()`| Для моделей без нативной поддержки tools |
-| `getToolLearningContext()`       | Обучение на прошлых ошибках          |
-| `getEnvironmentInfo()`           | Контекст runtime окружения           |
-| `getCustomSystemPrompt()`        | Обработка пользовательских инструкций|
+| Функция                           | Назначение                               |
+| --------------------------------- | ---------------------------------------- |
+| `getCoreSystemPrompt()`           | Построение основного системного промпта  |
+| `getCompressionPrompt()`          | Сжатие истории в XML формат              |
+| `getProjectSummaryPrompt()`       | Sumмаризация проекта в Markdown          |
+| `getToolCallFormatInstructions()` | Для моделей без нативной поддержки tools |
+| `getToolLearningContext()`        | Обучение на прошлых ошибках              |
+| `getEnvironmentInfo()`            | Контекст runtime окружения               |
+| `getCustomSystemPrompt()`         | Обработка пользовательских инструкций    |
 
 ### Технические улучшения
 
@@ -443,25 +515,25 @@ const plugin: PluginDefinition = {
 
 ### Добавленные/изменённые файлы
 
-| Файл                                           | Описание                    |
-| ---------------------------------------------- | --------------------------- |
-| `packages/cli/src/ui/stores/commandStore.ts`   | Реализация Command pattern  |
-| `packages/cli/src/ui/stores/eventBus.ts`       | Реализация Event bus        |
-| `packages/core/src/plugins/types.ts`           | Типы системы плагинов       |
+| Файл                                           | Описание                      |
+| ---------------------------------------------- | ----------------------------- |
+| `packages/cli/src/ui/stores/commandStore.ts`   | Реализация Command pattern    |
+| `packages/cli/src/ui/stores/eventBus.ts`       | Реализация Event bus          |
+| `packages/core/src/plugins/types.ts`           | Типы системы плагинов         |
 | `packages/core/src/plugins/pluginManager.ts`   | Управление lifecycle плагинов |
-| `packages/core/src/plugins/pluginLoader.ts`    | Обнаружение плагинов         |
-| `packages/core/src/plugins/pluginRegistry.ts`  | Регистрация плагинов        |
-| `packages/core/src/plugins/builtin/*/index.ts` | Встроенные плагины          |
+| `packages/core/src/plugins/pluginLoader.ts`    | Обнаружение плагинов          |
+| `packages/core/src/plugins/pluginRegistry.ts`  | Регистрация плагинов          |
+| `packages/core/src/plugins/builtin/*/index.ts` | Встроенные плагины            |
 | `docs/PROMPT_SYSTEM.md`                        | Документация системы промптов |
 
 ### Обновления документации
 
-| Документ        | Изменения                     |
-| --------------- | ----------------------------- |
-| `README.md`     | Обновлён для v0.11.0          |
-| `README.ru.md`  | Русская версия обновлена      |
-| `ROADMAP.md`    | Обновлён с завершёнными задачами |
-| `CHANGELOG.md`  | Этот журнал изменений         |
+| Документ       | Изменения                        |
+| -------------- | -------------------------------- |
+| `README.md`    | Обновлён для v0.11.0             |
+| `README.ru.md` | Русская версия обновлена         |
+| `ROADMAP.md`   | Обновлён с завершёнными задачами |
+| `CHANGELOG.md` | Этот журнал изменений            |
 
 ### Критические изменения
 
@@ -556,17 +628,17 @@ const config: ContentGeneratorConfig = {
 
 ### Добавленные файлы
 
-| Файл                                               | Описание             |
-| -------------------------------------------------- | -------------------- |
+| Файл                                               | Описание                      |
+| -------------------------------------------------- | ----------------------------- |
 | `packages/core/src/cache/contextCacheManager.ts`   | Кэширование токенов контекста |
-| `packages/core/src/core/ollamaContextClient.ts`    | Клиент /api/generate |
-| `packages/core/src/core/hybridContentGenerator.ts` | Выбор эндпоинта      |
-| `packages/cli/src/ui/stores/sessionStore.ts`       | Состояние сессии (Zustand) |
-| `packages/cli/src/ui/stores/streamingStore.ts`     | Состояние стриминга  |
-| `packages/cli/src/ui/stores/uiStore.ts`            | UI настройки         |
-| `packages/cli/src/ui/stores/eventBus.ts`           | Event bus            |
-| `packages/cli/src/ui/stores/commandStore.ts`       | Undo/Redo            |
-| `packages/core/src/plugins/index.ts`               | Система плагинов     |
+| `packages/core/src/core/ollamaContextClient.ts`    | Клиент /api/generate          |
+| `packages/core/src/core/hybridContentGenerator.ts` | Выбор эндпоинта               |
+| `packages/cli/src/ui/stores/sessionStore.ts`       | Состояние сессии (Zustand)    |
+| `packages/cli/src/ui/stores/streamingStore.ts`     | Состояние стриминга           |
+| `packages/cli/src/ui/stores/uiStore.ts`            | UI настройки                  |
+| `packages/cli/src/ui/stores/eventBus.ts`           | Event bus                     |
+| `packages/cli/src/ui/stores/commandStore.ts`       | Undo/Redo                     |
+| `packages/core/src/plugins/index.ts`               | Система плагинов              |
 
 ### Опции конфигурации
 
@@ -593,20 +665,20 @@ interface ContentGeneratorConfig {
 
 ### Документация
 
-| Документ                   | Описание                           |
-| -------------------------- | ---------------------------------- |
+| Документ                   | Описание                             |
+| -------------------------- | ------------------------------------ |
 | `docs/CONTEXT_CACHING.md`  | Справочник API кэширования контекста |
-| `docs/STATE_MANAGEMENT.md` | Документация stores Zustand        |
-| `docs/EVENT_BUS.md`        | Архитектура Event bus              |
-| `docs/PLUGIN_SYSTEM.md`    | Справочник системы плагинов        |
+| `docs/STATE_MANAGEMENT.md` | Документация stores Zustand          |
+| `docs/EVENT_BUS.md`        | Архитектура Event bus                |
+| `docs/PLUGIN_SYSTEM.md`    | Справочник системы плагинов          |
 
 ### Метрики производительности
 
-| Метрика       | Без кэширования | С кэшированием |
-| ------------- | --------------- | -------------- |
-| 1-е сообщение | 100%            | 100%           |
-| 2-е сообщение | 100%            | ~15%           |
-| 10-е сообщение| 100%            | ~7%            |
+| Метрика        | Без кэширования | С кэшированием |
+| -------------- | --------------- | -------------- |
+| 1-е сообщение  | 100%            | 100%           |
+| 2-е сообщение  | 100%            | ~15%           |
+| 10-е сообщение | 100%            | ~7%            |
 
 ---
 
@@ -639,12 +711,12 @@ interface ContentGeneratorConfig {
 
 Удалены неиспользуемые команды для упрощения CLI:
 
-| Удалённая команда | Альтернатива        |
-| ----------------- | ------------------- |
-| `/bug`            | Прямое сообщение    |
-| `/docs`           | См. папку `docs/`   |
-| `/help`           | См. документацию    |
-| `/setup-github`   | Настроить вручную   |
+| Удалённая команда | Альтернатива      |
+| ----------------- | ----------------- |
+| `/bug`            | Прямое сообщение  |
+| `/docs`           | См. папку `docs/` |
+| `/help`           | См. документацию  |
+| `/setup-github`   | Настроить вручную |
 
 Объединённые команды для лучшей организации:
 
@@ -667,4 +739,4 @@ interface ContentGeneratorConfig {
 
 ---
 
-*См. [CHANGELOG.md](../CHANGELOG.md) для более ранних версий.*
+_См. [CHANGELOG.md](../CHANGELOG.md) для более ранних версий._
