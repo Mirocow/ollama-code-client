@@ -49,13 +49,26 @@ export function normalizeOutputLanguage(language: string): string {
 
 /**
  * Resolves the output language, converting 'auto' to the detected system language.
+ * Falls back to UI language if system detection returns English but UI is different.
  */
 export function resolveOutputLanguage(
   value: string | undefined | null,
+  uiLanguage?: string,
 ): string {
   if (isAutoLanguage(value)) {
     const detectedLocale = detectSystemLanguage();
-    return getLanguageNameFromLocale(detectedLocale);
+    const detectedLanguage = getLanguageNameFromLocale(detectedLocale);
+    
+    // If system detection returned English, but UI language is different,
+    // prefer the UI language as it's more likely the user's preference
+    if (detectedLocale === 'en' && uiLanguage && uiLanguage !== 'en' && uiLanguage !== 'auto') {
+      const uiLangName = getLanguageNameFromLocale(uiLanguage);
+      if (uiLangName !== 'English') {
+        return uiLangName;
+      }
+    }
+    
+    return detectedLanguage;
   }
   return normalizeOutputLanguage(value!);
 }
@@ -163,8 +176,8 @@ export function writeOutputLanguageFile(language: string): void {
  * Updates the LLM output language rule file based on the setting value.
  * Resolves 'auto' to the detected system language before writing.
  */
-export function updateOutputLanguageFile(settingValue: string): void {
-  const resolved = resolveOutputLanguage(settingValue);
+export function updateOutputLanguageFile(settingValue: string, uiLanguage?: string): void {
+  const resolved = resolveOutputLanguage(settingValue, uiLanguage);
   writeOutputLanguageFile(resolved);
 }
 
@@ -172,16 +185,25 @@ export function updateOutputLanguageFile(settingValue: string): void {
  * Initializes the LLM output language rule file on application startup.
  *
  * @param outputLanguage - The output language setting value (e.g., 'auto', 'Chinese', etc.)
+ * @param uiLanguage - The UI language setting value (used as fallback for 'auto')
  *
  * Behavior:
- * - Resolves the setting value ('auto' -> detected system language, or use as-is)
- * - Ensures the rule file matches the resolved language
- * - Creates the file if it doesn't exist
+ * - If no setting is provided (undefined) and file exists, keep the existing file
+ * - If setting is 'auto', resolve to detected system language (with UI fallback)
+ * - If setting is explicit, use that language
+ * - Create file only if it doesn't exist or setting explicitly differs from current
  */
-export function initializeLlmOutputLanguage(outputLanguage?: string): void {
-  // Resolve 'auto' or undefined to the detected system language
-  const resolved = resolveOutputLanguage(outputLanguage);
+export function initializeLlmOutputLanguage(outputLanguage?: string, uiLanguage?: string): void {
   const currentFileLanguage = readOutputLanguageFromFile();
+  
+  // If no explicit setting and file already exists, preserve the existing file
+  // This prevents overwriting user's manual changes to output-language.md
+  if (outputLanguage === undefined && currentFileLanguage !== null) {
+    return;
+  }
+  
+  // Resolve 'auto' or undefined to the detected system language (with UI language fallback)
+  const resolved = resolveOutputLanguage(outputLanguage, uiLanguage);
 
   // Only write if the file doesn't match the resolved language
   if (currentFileLanguage !== resolved) {

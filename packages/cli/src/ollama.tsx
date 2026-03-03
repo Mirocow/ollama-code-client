@@ -433,7 +433,11 @@ export async function main() {
   // may have side effects.
 
   // Initialize output language file before config loads to ensure it's included in context
-  initializeLlmOutputLanguage(settings.merged.general?.outputLanguage);
+  // Pass UI language as fallback for 'auto' detection
+  initializeLlmOutputLanguage(
+    settings.merged.general?.outputLanguage,
+    settings.merged.general?.language,
+  );
 
   {
     const config = await loadCliConfig(

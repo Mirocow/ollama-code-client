@@ -55,20 +55,68 @@ const getLocalePath = (
 
 // Language detection
 export function detectSystemLanguage(): SupportedLanguage {
-  const envLang = process.env['OLLAMA_CODE_LANG'] || process.env['LANG'];
-  if (envLang) {
+  // Priority 1: Explicit OLLAMA_CODE_LANG environment variable
+  const explicitLang = process.env['OLLAMA_CODE_LANG'];
+  if (explicitLang) {
     for (const lang of SUPPORTED_LANGUAGES) {
-      if (envLang.startsWith(lang.code)) return lang.code;
+      if (explicitLang.toLowerCase().startsWith(lang.code)) return lang.code;
     }
   }
 
+  // Priority 2: Check multiple locale environment variables
+  const localeEnvVars = [
+    process.env['LANG'],
+    process.env['LANGUAGE'],
+    process.env['LC_ALL'],
+    process.env['LC_MESSAGES'],
+    process.env['LC_CTYPE'],
+  ].filter((v): v is string => !!v);
+
+  for (const envLang of localeEnvVars) {
+    // Extract language code from locale like "ru_RU.UTF-8" or "ru_RU" or "ru"
+    const match = envLang.match(/^([a-z]{2})[_-]?/i);
+    if (match) {
+      const code = match[1].toLowerCase();
+      for (const lang of SUPPORTED_LANGUAGES) {
+        if (code === lang.code) return lang.code;
+      }
+    }
+    // Also check if the whole string starts with a language code
+    for (const lang of SUPPORTED_LANGUAGES) {
+      if (envLang.toLowerCase().startsWith(lang.code)) return lang.code;
+    }
+  }
+
+  // Priority 3: Try Intl API
   try {
     const locale = Intl.DateTimeFormat().resolvedOptions().locale;
-    for (const lang of SUPPORTED_LANGUAGES) {
-      if (locale.startsWith(lang.code)) return lang.code;
+    // Extract language code from locale like "ru-RU" or "ru"
+    const match = locale.match(/^([a-z]{2})[_-]?/i);
+    if (match) {
+      const code = match[1].toLowerCase();
+      for (const lang of SUPPORTED_LANGUAGES) {
+        if (code === lang.code) return lang.code;
+      }
     }
   } catch {
     // Fallback to default
+  }
+
+  // Priority 4: Try to detect from system locale command (Unix-like systems)
+  try {
+    // On Linux, try reading /etc/locale.conf
+    if (fs.existsSync('/etc/locale.conf')) {
+      const content = fs.readFileSync('/etc/locale.conf', 'utf-8');
+      const langMatch = content.match(/^(?:LANG|LC_ALL)\s*=\s*([a-z]{2})/im);
+      if (langMatch) {
+        const code = langMatch[1].toLowerCase();
+        for (const lang of SUPPORTED_LANGUAGES) {
+          if (code === lang.code) return lang.code;
+        }
+      }
+    }
+  } catch {
+    // Ignore errors
   }
 
   return 'en';
