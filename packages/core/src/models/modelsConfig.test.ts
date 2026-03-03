@@ -62,7 +62,7 @@ vi.mock('./modelRegistry.js', () => ({
     }
 
     reloadModels() {}
-  };
+  }
 }));
 
 vi.mock('../utils/debugLogger.js', () => ({
