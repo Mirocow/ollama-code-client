@@ -445,6 +445,15 @@ export async function main() {
   const workspaceOutputLang = settings.workspace.originalSettings.general?.outputLanguage;
   const explicitOutputLanguage = userOutputLang ?? workspaceOutputLang;
   
+  // Debug logging
+  if (process.env['DEBUG'] || argv.debug) {
+    console.error(`[DEBUG] Language initialization:`);
+    console.error(`[DEBUG]   uiLanguage: ${uiLanguage}`);
+    console.error(`[DEBUG]   userOutputLang: ${userOutputLang}`);
+    console.error(`[DEBUG]   workspaceOutputLang: ${workspaceOutputLang}`);
+    console.error(`[DEBUG]   explicitOutputLanguage: ${explicitOutputLanguage}`);
+  }
+  
   initializeLlmOutputLanguage(
     explicitOutputLanguage,
     typeof uiLanguage === 'string' ? uiLanguage : undefined,
