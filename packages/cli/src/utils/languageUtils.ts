@@ -189,9 +189,9 @@ export function updateOutputLanguageFile(settingValue: string, uiLanguage?: stri
  *
  * Behavior:
  * - If no setting is provided (undefined) and file exists, keep the existing file
+ * - If no setting and file doesn't exist, create with detected system language (with UI fallback)
  * - If setting is 'auto', resolve to detected system language (with UI fallback)
  * - If setting is explicit, use that language
- * - Create file only if it doesn't exist or setting explicitly differs from current
  */
 export function initializeLlmOutputLanguage(outputLanguage?: string, uiLanguage?: string): void {
   const currentFileLanguage = readOutputLanguageFromFile();
@@ -203,7 +203,8 @@ export function initializeLlmOutputLanguage(outputLanguage?: string, uiLanguage?
   }
   
   // Resolve 'auto' or undefined to the detected system language (with UI language fallback)
-  const resolved = resolveOutputLanguage(outputLanguage, uiLanguage);
+  // Pass uiLanguage so it can be used as fallback when system detects English
+  const resolved = resolveOutputLanguage(outputLanguage ?? 'auto', uiLanguage);
 
   // Only write if the file doesn't match the resolved language
   if (currentFileLanguage !== resolved) {
