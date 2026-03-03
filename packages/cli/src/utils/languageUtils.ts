@@ -175,12 +175,6 @@ export function writeOutputLanguageFile(language: string): void {
   const filePath = getOutputLanguageFilePath();
   const content = generateOutputLanguageFileContent(language);
   const dir = path.dirname(filePath);
-  
-  // Debug: log what we're writing
-  if (process.env['DEBUG'] || process.env['OLLAMA_CODE_DEBUG']) {
-    console.error(`[DEBUG] writeOutputLanguageFile: filePath=${filePath}, language=${language}`);
-  }
-  
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(filePath, content, 'utf-8');
 }
@@ -209,27 +203,15 @@ export function updateOutputLanguageFile(settingValue: string, uiLanguage?: stri
 export function initializeLlmOutputLanguage(outputLanguage?: string, uiLanguage?: string): void {
   const currentFileLanguage = readOutputLanguageFromFile();
   
-  // Debug logging
-  if (process.env['DEBUG'] || process.env['OLLAMA_CODE_DEBUG']) {
-    console.error(`[DEBUG] initializeLlmOutputLanguage: outputLanguage=${outputLanguage}, uiLanguage=${uiLanguage}, currentFileLanguage=${currentFileLanguage}`);
-  }
-  
   // If no explicit setting and file already exists, preserve the existing file
   // This prevents overwriting user's manual changes to output-language.md
   if (outputLanguage === undefined && currentFileLanguage !== null) {
-    if (process.env['DEBUG'] || process.env['OLLAMA_CODE_DEBUG']) {
-      console.error(`[DEBUG] initializeLlmOutputLanguage: preserving existing file with language=${currentFileLanguage}`);
-    }
     return;
   }
   
   // Resolve 'auto' or undefined to the detected system language (with UI language fallback)
   // Pass uiLanguage so it can be used as fallback when system detects English
   const resolved = resolveOutputLanguage(outputLanguage ?? 'auto', uiLanguage);
-
-  if (process.env['DEBUG'] || process.env['OLLAMA_CODE_DEBUG']) {
-    console.error(`[DEBUG] initializeLlmOutputLanguage: resolved=${resolved}`);
-  }
 
   // Only write if the file doesn't match the resolved language
   if (currentFileLanguage !== resolved) {
