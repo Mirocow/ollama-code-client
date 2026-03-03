@@ -474,11 +474,21 @@ export async function main() {
       process.stdin.setRawMode(true);
 
       // This cleanup isn't strictly needed but may help in certain situations.
-      process.on('SIGTERM', () => {
+      process.on('SIGTERM', async () => {
         process.stdin.setRawMode(wasRaw);
+        // Cancel any ongoing stream via streamingStore
+        const { streamingStore } = await import('./ui/stores/streamingStore.js');
+        streamingStore.getState().cancelStream();
+        await runExitCleanup();
+        process.exit(0);
       });
-      process.on('SIGINT', () => {
+      process.on('SIGINT', async () => {
         process.stdin.setRawMode(wasRaw);
+        // Cancel any ongoing stream via streamingStore to prevent hanging
+        const { streamingStore } = await import('./ui/stores/streamingStore.js');
+        streamingStore.getState().cancelStream();
+        await runExitCleanup();
+        process.exit(0);
       });
 
       // Detect and enable Kitty keyboard protocol once at startup.

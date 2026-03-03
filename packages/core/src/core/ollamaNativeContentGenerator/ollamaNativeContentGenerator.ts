@@ -175,6 +175,7 @@ export class OllamaNativeContentGenerator implements ContentGenerator {
     const client = this.client;
     const converter = this.converter;
     const handleError = this.handleError.bind(this);
+    const abortSignal = request.config?.abortSignal;
 
     // Create async generator with queue-based streaming
     return (async function* (): AsyncGenerator<GenerateContentResponse> {
@@ -196,7 +197,7 @@ export class OllamaNativeContentGenerator implements ContentGenerator {
       // Accumulate text content for text-based tool call parsing
       const accumulatedContent = { text: '' };
 
-      // Process streaming response
+      // Process streaming response - pass abortSignal to enable cancellation
       const streamPromise = client
         .chat(ollamaRequest, (chunk: OllamaChatResponse) => {
           chunkCount++;
@@ -218,7 +219,7 @@ export class OllamaNativeContentGenerator implements ContentGenerator {
             resolveNext({ value: nextChunk, done: false });
             resolveNext = null;
           }
-        })
+        }, { signal: abortSignal })
         .then(() => {
           debugLogger.info(`Stream completed, total chunks: ${chunkCount}`);
           done = true;
@@ -246,13 +247,26 @@ export class OllamaNativeContentGenerator implements ContentGenerator {
 
       // Yield chunks as they become available
       while (!done || chunkQueue.length > 0) {
+        // Check for abort signal - exit early if cancelled
+        if (abortSignal?.aborted) {
+          debugLogger.info('Stream aborted by abortSignal');
+          break;
+        }
+        
         if (chunkQueue.length > 0) {
           yield chunkQueue.shift()!;
         } else if (!done) {
-          // Wait for next chunk
+          // Wait for next chunk with abort support
           const nextValue = await new Promise<GenerateContentResponse | null>(
             (resolve) => {
+              // Set up abort handler to resolve immediately on cancellation
+              const abortHandler = () => {
+                resolve(null);
+              };
+              abortSignal?.addEventListener('abort', abortHandler, { once: true });
+              
               resolveNext = (result) => {
+                abortSignal?.removeEventListener('abort', abortHandler);
                 if (result.done) {
                   resolve(null);
                 } else {
@@ -261,8 +275,10 @@ export class OllamaNativeContentGenerator implements ContentGenerator {
               };
             },
           );
-          // Check for null (stream ended)
+          // Check for null (stream ended or aborted)
           if (nextValue === null && chunkQueue.length === 0 && done) break;
+          // Also break if we got null due to abort
+          if (abortSignal?.aborted) break;
           if (nextValue !== null) {
             yield nextValue;
           }
