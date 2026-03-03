@@ -98,17 +98,35 @@ export function getRunnerCommand(runner: TypeScriptRunner): string[] {
 
 export type TypeScriptAction =
   | 'compile' // Compile with tsc
+  | 'c' // Alias for compile
   | 'watch' // Watch mode with tsc --watch
+  | 'w' // Alias for watch
   | 'build' // Build (tsc --build)
+  | 'b' // Alias for build
   | 'check' // Type check without emit (tsc --noEmit)
-  | 'clean' // Clean build (tsc --build --clean)
+  | 'k' // Alias for check
+  | 'clean' // Clean build (tsc --build --clean
   | 'init' // Initialize tsconfig.json
   | 'show_config' // Show resolved config
   | 'version' // Show TypeScript version
+  | 'v' // Alias for version
   | 'run' // Run TypeScript file
+  | 'r' // Alias for run
   | 'run_esm' // Run ESM TypeScript file
   | 'transpile' // Transpile only (no type check)
+  | 't' // Alias for transpile
   | 'custom'; // Custom TypeScript command
+
+// Action aliases mapping
+const ACTION_ALIASES: Record<string, TypeScriptAction> = {
+  c: 'compile',
+  w: 'watch',
+  b: 'build',
+  k: 'check',
+  v: 'version',
+  r: 'run',
+  t: 'transpile',
+};
 
 export interface TypeScriptToolParams {
   action: TypeScriptAction;
@@ -211,7 +229,10 @@ export class TypeScriptToolInvocation extends BaseToolInvocation<
   }
 
   private buildCommand(runner?: TypeScriptRunner): string {
-    switch (this.params.action) {
+    // Resolve action alias
+    const action = ACTION_ALIASES[this.params.action] || this.params.action;
+
+    switch (action) {
       case 'compile':
         return this.buildCompileCommand();
 
@@ -733,16 +754,23 @@ export class TypeScriptTool extends BaseDeclarativeTool<
             type: 'string',
             enum: [
               'compile',
+              'c',
               'watch',
+              'w',
               'build',
+              'b',
               'check',
+              'k',
               'clean',
               'init',
               'show_config',
               'version',
+              'v',
               'run',
+              'r',
               'run_esm',
               'transpile',
+              't',
               'custom',
             ],
             description: 'The TypeScript action to perform',

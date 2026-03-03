@@ -33,26 +33,62 @@ export type JavaBuildTool = 'maven' | 'gradle';
 
 export type JavaAction =
   | 'run' // Run a Java class
+  | 'r' // Alias for run
   | 'compile' // Compile Java files
+  | 'c' // Alias for compile
   | 'test' // Run tests
+  | 't' // Alias for test
   | 'build' // Build project
+  | 'b' // Alias for build
   | 'clean' // Clean build artifacts
   | 'maven_compile' // Maven compile
+  | 'mc' // Alias for maven_compile
   | 'maven_test' // Maven test
+  | 'mt' // Alias for maven_test
   | 'maven_package' // Maven package
+  | 'mp' // Alias for maven_package
   | 'maven_install' // Maven install
+  | 'mi' // Alias for maven_install
   | 'maven_clean' // Maven clean
+  | 'mcl' // Alias for maven_clean
   | 'maven_dependency_tree' // Show dependency tree
+  | 'mdt' // Alias for maven_dependency_tree
   | 'maven_exec' // Execute Maven goal
   | 'gradle_build' // Gradle build
+  | 'gb' // Alias for gradle_build
   | 'gradle_test' // Gradle test
+  | 'gt' // Alias for gradle_test
   | 'gradle_clean' // Gradle clean
+  | 'gcl' // Alias for gradle_clean
   | 'gradle_run' // Gradle run (application plugin)
+  | 'gr' // Alias for gradle_run
   | 'gradle_tasks' // List Gradle tasks
+  | 'gls' // Alias for gradle_tasks
   | 'gradle_dependency_tree' // Show dependency tree
+  | 'gdt' // Alias for gradle_dependency_tree
   | 'gradle_exec' // Execute Gradle task
   | 'jar' // Create JAR file
   | 'custom'; // Custom Java command
+
+// Action aliases mapping
+const ACTION_ALIASES: Record<string, JavaAction> = {
+  r: 'run',
+  c: 'compile',
+  t: 'test',
+  b: 'build',
+  mc: 'maven_compile',
+  mt: 'maven_test',
+  mp: 'maven_package',
+  mi: 'maven_install',
+  mcl: 'maven_clean',
+  mdt: 'maven_dependency_tree',
+  gb: 'gradle_build',
+  gt: 'gradle_test',
+  gcl: 'gradle_clean',
+  gr: 'gradle_run',
+  gls: 'gradle_tasks',
+  gdt: 'gradle_dependency_tree',
+};
 
 export interface JavaToolParams {
   action: JavaAction;
@@ -164,7 +200,10 @@ export class JavaToolInvocation extends BaseToolInvocation<
   }
 
   private buildCommand(): string {
-    switch (this.params.action) {
+    // Resolve action alias
+    const action = ACTION_ALIASES[this.params.action] || this.params.action;
+
+    switch (action) {
       case 'run':
         return this.buildRunCommand();
 
@@ -707,23 +746,39 @@ export class JavaTool extends BaseDeclarativeTool<JavaToolParams, ToolResult> {
             type: 'string',
             enum: [
               'run',
+              'r',
               'compile',
+              'c',
               'test',
+              't',
               'build',
+              'b',
               'clean',
               'maven_compile',
+              'mc',
               'maven_test',
+              'mt',
               'maven_package',
+              'mp',
               'maven_install',
+              'mi',
               'maven_clean',
+              'mcl',
               'maven_dependency_tree',
+              'mdt',
               'maven_exec',
               'gradle_build',
+              'gb',
               'gradle_test',
+              'gt',
               'gradle_clean',
+              'gcl',
               'gradle_run',
+              'gr',
               'gradle_tasks',
+              'gls',
               'gradle_dependency_tree',
+              'gdt',
               'gradle_exec',
               'jar',
               'custom',

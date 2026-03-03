@@ -30,18 +30,32 @@ export const DEFAULT_SWIFT_TIMEOUT_MS = 120000;
 
 export type SwiftAction =
   | 'run' // Run with swift run
+  | 'r' // Alias for run
   | 'build' // Build with swift build
+  | 'b' // Alias for build
   | 'test' // Run tests with swift test
+  | 't' // Alias for test
+  | 'init' // Alias for package_init
   | 'package_init' // Initialize package
   | 'package_resolve' // Resolve dependencies
   | 'package_update' // Update dependencies
   | 'package_dump' // Dump package info
   | 'package_desc' // Describe package
   | 'package_clean' // Clean build artifacts
+  | 'pcl' // Alias for package_clean
   | 'package_edit' // Put package in editable mode
   | 'package_unedit' // Remove package from editable mode
   | 'package_reset' // Reset complete cache
   | 'custom'; // Custom Swift command
+
+// Action aliases mapping
+const ACTION_ALIASES: Record<string, SwiftAction> = {
+  r: 'run',
+  b: 'build',
+  t: 'test',
+  init: 'package_init',
+  pcl: 'package_clean',
+};
 
 export interface SwiftToolParams {
   action: SwiftAction;
@@ -129,7 +143,10 @@ export class SwiftToolInvocation extends BaseToolInvocation<
   }
 
   private buildCommand(): string {
-    switch (this.params.action) {
+    // Resolve action alias
+    const action = ACTION_ALIASES[this.params.action] || this.params.action;
+
+    switch (action) {
       case 'run':
         return this.buildRunCommand();
 
@@ -600,14 +617,19 @@ export class SwiftTool extends BaseDeclarativeTool<
             type: 'string',
             enum: [
               'run',
+              'r',
               'build',
+              'b',
               'test',
+              't',
+              'init',
               'package_init',
               'package_resolve',
               'package_update',
               'package_dump',
               'package_desc',
               'package_clean',
+              'pcl',
               'package_edit',
               'package_unedit',
               'package_reset',

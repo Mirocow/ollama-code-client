@@ -30,20 +30,54 @@ export const DEFAULT_PHP_TIMEOUT_MS = 120000;
 
 export type PHPAction =
   | 'run' // Run PHP script
+  | 'r' // Alias for run
   | 'test' // Run PHPUnit tests
+  | 't' // Alias for test
   | 'lint' // Run PHP_CodeSniffer (phpcs)
+  | 'l' // Alias for lint
   | 'format' // Run PHP-CS-Fixer
+  | 'f' // Alias for format
+  | 'install' // Alias for composer_install
   | 'composer_install' // Run composer install
+  | 'ci' // Alias for composer_install
   | 'composer_update' // Run composer update
+  | 'cu' // Alias for composer_update
   | 'composer_require' // Add package
+  | 'cr' // Alias for composer_require
   | 'composer_remove' // Remove package
+  | 'crm' // Alias for composer_remove
   | 'composer_dump_autoload' // Regenerate autoload
+  | 'cda' // Alias for composer_dump_autoload
   | 'composer_outdated' // Check outdated packages
+  | 'co' // Alias for composer_outdated
   | 'phpunit' // Run PHPUnit directly
+  | 'pu' // Alias for phpunit
   | 'psalm' // Run Psalm static analysis
+  | 'ps' // Alias for psalm
   | 'phpstan' // Run PHPStan analysis
+  | 'stan' // Alias for phpstan
   | 'artisan' // Run Laravel Artisan commands
+  | 'art' // Alias for artisan
   | 'custom'; // Custom PHP command
+
+// Action aliases mapping
+const ACTION_ALIASES: Record<string, PHPAction> = {
+  r: 'run',
+  t: 'test',
+  l: 'lint',
+  f: 'format',
+  install: 'composer_install',
+  ci: 'composer_install',
+  cu: 'composer_update',
+  cr: 'composer_require',
+  crm: 'composer_remove',
+  cda: 'composer_dump_autoload',
+  co: 'composer_outdated',
+  pu: 'phpunit',
+  ps: 'psalm',
+  stan: 'phpstan',
+  art: 'artisan',
+};
 
 export interface PHPToolParams {
   action: PHPAction;
@@ -128,7 +162,10 @@ export class PHPToolInvocation extends BaseToolInvocation<
   }
 
   private buildCommand(): string {
-    switch (this.params.action) {
+    // Resolve action alias
+    const action = ACTION_ALIASES[this.params.action] || this.params.action;
+
+    switch (action) {
       case 'run':
         return this.buildRunCommand();
 
@@ -575,19 +612,34 @@ export class PHPTool extends BaseDeclarativeTool<PHPToolParams, ToolResult> {
             type: 'string',
             enum: [
               'run',
+              'r',
               'test',
+              't',
               'lint',
+              'l',
               'format',
+              'f',
+              'install',
               'composer_install',
+              'ci',
               'composer_update',
+              'cu',
               'composer_require',
+              'cr',
               'composer_remove',
+              'crm',
               'composer_dump_autoload',
+              'cda',
               'composer_outdated',
+              'co',
               'phpunit',
+              'pu',
               'psalm',
+              'ps',
               'phpstan',
+              'stan',
               'artisan',
+              'art',
               'custom',
             ],
             description: 'The PHP action to perform',

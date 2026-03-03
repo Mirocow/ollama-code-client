@@ -33,18 +33,46 @@ export type CppCompiler = 'gcc' | 'g++' | 'clang' | 'clang++';
 
 export type CppAction =
   | 'compile' // Compile C/C++ files
+  | 'c' // Alias for compile
   | 'run' // Compile and run
+  | 'r' // Alias for run
   | 'build' // Build with make/cmake
+  | 'b' // Alias for build
   | 'test' // Run tests
+  | 't' // Alias for test
   | 'cmake_configure' // Configure with CMake
+  | 'cc' // Alias for cmake_configure
   | 'cmake_build' // Build with CMake
+  | 'cb' // Alias for cmake_build
   | 'cmake_clean' // Clean CMake build
+  | 'ccl' // Alias for cmake_clean
   | 'cmake_test' // Run CTest
+  | 'ct' // Alias for cmake_test
   | 'cmake_install' // Install with CMake
+  | 'ci' // Alias for cmake_install
   | 'make' // Run make
+  | 'm' // Alias for make
   | 'make_clean' // Run make clean
+  | 'mcl' // Alias for make_clean
   | 'make_install' // Run make install
+  | 'mi' // Alias for make_install
   | 'custom'; // Custom C/C++ command
+
+// Action aliases mapping
+const ACTION_ALIASES: Record<string, CppAction> = {
+  c: 'compile',
+  r: 'run',
+  b: 'build',
+  t: 'test',
+  cc: 'cmake_configure',
+  cb: 'cmake_build',
+  ccl: 'cmake_clean',
+  ct: 'cmake_test',
+  ci: 'cmake_install',
+  m: 'make',
+  mcl: 'make_clean',
+  mi: 'make_install',
+};
 
 export interface CppToolParams {
   action: CppAction;
@@ -138,7 +166,10 @@ export class CppToolInvocation extends BaseToolInvocation<
   }
 
   private buildCommand(): string {
-    switch (this.params.action) {
+    // Resolve action alias
+    const action = ACTION_ALIASES[this.params.action] || this.params.action;
+
+    switch (action) {
       case 'compile':
         return this.buildCompileCommand();
 
@@ -620,17 +651,29 @@ export class CppTool extends BaseDeclarativeTool<CppToolParams, ToolResult> {
             type: 'string',
             enum: [
               'compile',
+              'c',
               'run',
+              'r',
               'build',
+              'b',
               'test',
+              't',
               'cmake_configure',
+              'cc',
               'cmake_build',
+              'cb',
               'cmake_clean',
+              'ccl',
               'cmake_test',
+              'ct',
               'cmake_install',
+              'ci',
               'make',
+              'm',
               'make_clean',
+              'mcl',
               'make_install',
+              'mi',
               'custom',
             ],
             description: 'The C/C++ action to perform',
