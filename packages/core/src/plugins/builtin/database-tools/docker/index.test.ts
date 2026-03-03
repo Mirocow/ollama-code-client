@@ -5,7 +5,12 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { DockerToolParams, DockerOperation, ContainerInfo, ImageInfo } from './index.js';
+import type {
+  DockerToolParams,
+  DockerOperation,
+  ContainerInfo,
+  ImageInfo,
+} from './index.js';
 import dockerTool from './index.js';
 
 // Mock execSync

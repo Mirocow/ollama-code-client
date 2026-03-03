@@ -5,9 +5,15 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { CppToolParams } from './index.js';
-import { CppTool, CppToolInvocation, DEFAULT_CPP_TIMEOUT_MS } from './index.js';
+import type {
+  CppToolParams} from './index.js';
+import {
+  CppTool,
+  CppToolInvocation,
+  DEFAULT_CPP_TIMEOUT_MS,
+} from './index.js';
 import type { Config } from '../../../../config/config.js';
+import type { ToolResult } from '../../../../tools/tools.js';
 
 // Mock Config
 const mockConfig = {
@@ -42,7 +48,7 @@ describe('CppTool', () => {
     });
 
     it('should have description', () => {
-      expect(tool.description).toContain('C++ development tool');
+      expect(tool.description).toContain('C/C++ development tool');
     });
 
     it('should have valid parameter schema', () => {
@@ -103,7 +109,18 @@ describe('CppTool', () => {
       const params: CppToolParams = {
         action: 'compile',
         file: 'main.cpp',
-        timeout: 700000,
+        timeout: 700000, // Exceeds max
+      };
+      const error = tool.validateToolParamValues(params);
+      expect(error).toBeTruthy();
+      expect(error).toContain('timeout');
+    });
+
+    it('should validate timeout range - too low', () => {
+      const params: CppToolParams = {
+        action: 'compile',
+        file: 'main.cpp',
+        timeout: 0,
       };
       const error = tool.validateToolParamValues(params);
       expect(error).toBeTruthy();

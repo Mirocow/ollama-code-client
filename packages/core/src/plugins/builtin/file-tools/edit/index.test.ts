@@ -4,24 +4,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
+ 
 
 const mockGenerateJson = vi.hoisted(() => vi.fn());
 const mockOpenDiff = vi.hoisted(() => vi.fn());
 
-import { IdeClient } from '../../../../ide/ide-client.js';
+import { IdeClient } from '../ide/ide-client.js';
 
-vi.mock('../../../../ide/ide-client.js', () => ({
+vi.mock('../ide/ide-client.js', () => ({
   IdeClient: {
     getInstance: vi.fn(),
   },
 }));
 
-vi.mock('../../../../utils/editor.js', () => ({
+vi.mock('../utils/editor.js', () => ({
   openDiff: mockOpenDiff,
 }));
 
-vi.mock('../../../../telemetry/loggers.js', () => ({
+vi.mock('../telemetry/loggers.js', () => ({
   logFileOperation: vi.fn(),
 }));
 
@@ -35,10 +35,10 @@ import { ToolErrorType } from '../../../../tools/tool-error.js';
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
-import type { Config } from '../../../../config/config.js';
-import { ApprovalMode } from '../../../../config/config.js';
-import { createMockWorkspaceContext } from '../../../../test-utils/mockWorkspaceContext.js';
-import { StandardFileSystemService } from '../../../../services/fileSystemService.js';
+import type { Config } from '../config/config.js';
+import { ApprovalMode } from '../config/config.js';
+import { createMockWorkspaceContext } from '../test-utils/mockWorkspaceContext.js';
+import { StandardFileSystemService } from '../services/fileSystemService.js';
 
 describe('EditTool', () => {
   let tool: EditTool;

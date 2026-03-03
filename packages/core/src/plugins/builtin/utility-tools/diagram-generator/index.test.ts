@@ -13,7 +13,7 @@ import {
   DiagramGeneratorTool,
   createDiagramGeneratorTool,
 } from './index.js';
-import type { Config } from '../../../../config/config.js';
+import type { Config } from '../config/config.js';
 
 // Mock Config
 const mockConfig = {
