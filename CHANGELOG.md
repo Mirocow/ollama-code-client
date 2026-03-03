@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.16.7
+
+_UX Improvements & TypeScript Fixes_
+
+### UX Improvements
+
+#### Tips Message Formatting
+
+Added spacing after Tips message in CLI for better readability:
+
+| Component | Change |
+| --------- | ------ |
+| `Tips.tsx` | Added `marginBottom={1}` for visual spacing |
+| `Tips.tsx` | Added `flexDirection="column"` for proper layout |
+
+### Bug Fixes
+
+#### TypeScript Strict Mode Compatibility
+
+Fixed TS7006 errors by adding explicit type annotations:
+
+| File | Changes |
+| ---- | ------- |
+| `ide-client.ts` | Added types for `part`, `tool` parameters |
+| `McpPromptLoader.ts` | Added `PromptArgument` types |
+| `acpAgent.ts` | Added types for `mode`, `item`, `model` parameters |
+| `ToolCallEmitter.ts` | Added type for `loc` parameter |
+| `consent.ts` | Added `ClaudeMarketplacePluginConfig` type |
+
+### Files Modified
+
+| File | Changes |
+| ---- | ------- |
+| `packages/cli/src/ui/components/Tips.tsx` | Spacing after Tips message |
+| `packages/core/src/ide/ide-client.ts` | Type annotations |
+| `packages/cli/src/services/McpPromptLoader.ts` | Type annotations |
+| `packages/cli/src/acp-integration/acpAgent.ts` | Type annotations |
+| `packages/cli/src/acp-integration/session/emitters/ToolCallEmitter.ts` | Type annotations |
+| `packages/cli/src/commands/extensions/consent.ts` | Type annotations |
+| `ROADMAP.md` | Updated migration status to 100% |
+
+---
+
 ## 0.16.6
 
 _Node.js Compatibility Fix_

@@ -2,11 +2,11 @@
 
 > Профессиональный анализ архитектуры и план развития проекта
 
-## Текущее состояние (v0.16.4-dev)
+## Текущее состояние (v0.16.7)
 
-### 🔄 В процессе: Миграция инструментов в plugins
+### ✅ Завершено: Миграция инструментов в plugins
 
-**Статус:** 🔄 70% завершено
+**Статус:** ✅ 100% завершено
 
 Все инструменты перенесены из `tools/` в `plugins/builtin/`:
 
@@ -26,13 +26,14 @@
 | **api-tools** | api-tester | ✅ Перенесено |
 | **utility-tools** | code-analyzer, diagram-generator | ✅ Перенесено |
 
-**Оставшиеся задачи:**
+**Выполненные задачи:**
 
-1. ⏳ Исправить импорты в перенесенных файлах (частично)
-2. ⏳ Добавить `default` exports в plugin index files
-3. ⏳ Обновить `pluginRegistry.ts` для работы с `DeclarativeTool` классами
-4. ⏳ Исправить web-search provider imports
-5. ⏳ Протестировать сборку
+1. ✅ Исправить импорты в перенесенных файлах
+2. ✅ Добавить `default` exports в plugin index files
+3. ✅ Обновить `pluginRegistry.ts` для работы с `DeclarativeTool` классами
+4. ✅ Исправить web-search provider imports
+5. ✅ Протестировать сборку
+6. ✅ Добавить explicit type annotations для TypeScript strict mode
 
 **Базовые классы остаются в tools/:**
 - tools.ts (BaseDeclarativeTool, BaseToolInvocation)
@@ -41,6 +42,7 @@
 - tool-names.ts
 - modifiable-tool.ts
 - diffOptions.ts
+- *.test.ts (тесты остаются в tools/, тестируют plugins/builtin/)
 
 ### ⚠️ Откаченные изменения (v0.16.2)
 
@@ -474,18 +476,18 @@ packages/core/src/plugins/builtin/
 
 ---
 
-### v0.16.2 — Bug Fixes & UX Improvements 🔄
+### v0.16.2 — Bug Fixes & UX Improvements ✅
 
 **Цель:** Исправление ошибок и улучшение UX
 
 | Задача                                    | Приоритет | Оценка | Статус       |
 | ----------------------------------------- | --------- | ------ | ------------ |
-| PCRE2 поддержка для look-around regex     | P0        | 2h     | 🔄 В процессе |
-| Языковое правило в CRITICAL секцию        | P0        | 1h     | 🔴 Не начато |
-| Алиас init для dev-tools                  | P0        | 2h     | 🔴 Не начато |
-| Общие алиасы для dev-tools (r, b, t, ...) | P1        | 2h     | 🔴 Не начато |
-| Тесты для новых функционалов              | P1        | 3h     | 🔴 Не начато |
-| Обновление CHANGELOG                      | P2        | 1h     | 🔴 Не начато |
+| PCRE2 поддержка для look-around regex     | P0        | 2h     | ✅ Завершено |
+| Языковое правило в CRITICAL секцию        | P0        | 1h     | ✅ Завершено |
+| Алиас init для dev-tools                  | P0        | 2h     | ✅ Завершено |
+| Общие алиасы для dev-tools (r, b, t, ...) | P1        | 2h     | ✅ Завершено |
+| Тесты для новых функционалов              | P1        | 3h     | ✅ Завершено |
+| Обновление CHANGELOG                      | P2        | 1h     | ✅ Завершено |
 
 **Детали задач:**
 

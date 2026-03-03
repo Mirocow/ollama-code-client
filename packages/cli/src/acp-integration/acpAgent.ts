@@ -9,6 +9,7 @@ import type { ReadableStream, WritableStream } from 'node:stream/web';
 import {
   APPROVAL_MODE_INFO,
   APPROVAL_MODES,
+  ApprovalMode,
   AuthType,
   createDebugLogger,
   MCPServerConfig,
@@ -77,7 +78,7 @@ class OllamaAgent {
     const currentApprovalMode = this.config.getApprovalMode();
 
     // Build available modes from shared APPROVAL_MODE_INFO
-    const availableModes = APPROVAL_MODES.map((mode: string) => ({
+    const availableModes = (APPROVAL_MODES as ApprovalMode[]).map((mode) => ({
       id: mode as ApprovalModeValue,
       name: APPROVAL_MODE_INFO[mode].name,
       description: APPROVAL_MODE_INFO[mode].description,
@@ -228,7 +229,7 @@ class OllamaAgent {
     });
 
     return {
-      items: result.items.map((item: { sessionId: string; cwd: string; startTime: number; mtime: number; prompt: string; gitBranch?: string; filePath?: string; messageCount: number }) => ({
+      items: result.items.map((item) => ({
         sessionId: item.sessionId,
         cwd: item.cwd,
         startTime: item.startTime,
