@@ -8,7 +8,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { getMCPServerPrompts } from './mcp-prompts.js';
 import type { Config } from '../config/config.js';
 import { PromptRegistry } from './prompt-registry.js';
-import type { DiscoveredMCPPrompt } from '../tools/mcp-client.js';
+import type { DiscoveredMCPPrompt } from '../plugins/builtin/mcp-tools/mcp-client/index.js';
 
 describe('getMCPServerPrompts', () => {
   const createMockPrompt = (
@@ -73,7 +73,11 @@ describe('getMCPServerPrompts', () => {
     const mockConfig = createMockConfig(registry) as Config;
     const result = getMCPServerPrompts(mockConfig, 'server');
 
-    expect(result.map((p) => p.name)).toEqual(['a-prompt', 'm-prompt', 'z-prompt']);
+    expect(result.map((p) => p.name)).toEqual([
+      'a-prompt',
+      'm-prompt',
+      'z-prompt',
+    ]);
   });
 
   it('should call getPromptRegistry on config', () => {

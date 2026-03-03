@@ -1,8 +1,65 @@
 # Changelog
 
+## 0.16.5
+
+_Tools Migration Complete_
+
+### Tools Migration to Plugins — 100% Complete
+
+All tool implementations have been migrated from `tools/` to `plugins/builtin/`. The `tools/` directory now only contains base infrastructure:
+
+| Remaining in `tools/` | Purpose                                        |
+| --------------------- | ---------------------------------------------- |
+| `tool-names.ts`       | Tool name constants                            |
+| `tool-error.ts`       | Error type definitions                         |
+| `tools.ts`            | Base classes (DeclarativeTool, ToolInvocation) |
+| `tool-registry.ts`    | Tool registry implementation                   |
+| `modifiable-tool.ts`  | Modifiable tool support                        |
+
+### Updated Imports
+
+Test files updated to import from new plugin locations:
+
+| File                              | Change                                                                 |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| `utils/tool-utils.test.ts`        | `ReadFileTool` → `plugins/builtin/file-tools/read-file/`               |
+| `prompts/mcp-prompts.test.ts`     | `DiscoveredMCPPrompt` → `plugins/builtin/mcp-tools/mcp-client/`        |
+| `prompts/prompt-registry.test.ts` | `DiscoveredMCPPrompt` → `plugins/builtin/mcp-tools/mcp-client/`        |
+| `core/prompts.test.ts`            | `OLLAMA_CODE_CONFIG_DIR` → `plugins/builtin/memory-tools/save-memory/` |
+
+### Plugin Categories (14 total)
+
+```
+plugins/builtin/
+├── core-tools/          # echo, timestamp, get_env
+├── file-tools/          # read_file, write_file, edit, glob, ls, read-many-files
+├── shell-tools/         # run_shell_command, bash
+├── search-tools/        # grep, ripGrep, web_search, web_fetch
+├── dev-tools/           # python, nodejs, golang, rust, typescript, java, cpp, swift, php
+├── memory-tools/        # save_memory
+├── agent-tools/         # task, skill
+├── productivity-tools/  # todo_write, exit_plan_mode
+├── database-tools/      # redis, database, docker
+├── git-tools/           # git_advanced
+├── mcp-tools/           # mcp_client, mcp_tool, mcp-client-manager, sdk-control-client-transport
+├── utility-tools/       # code_analyzer, diagram_generator
+├── lsp-tools/           # lsp
+└── api-tools/           # api_tester
+```
+
+### Status
+
+| Metric            | Value                |
+| ----------------- | -------------------- |
+| ESLint Errors     | 0                    |
+| ESLint Warnings   | 48 (test files only) |
+| TypeScript Errors | 0                    |
+
+---
+
 ## 0.16.4
 
-*Code Quality & ESLint Fixes*
+_Code Quality & ESLint Fixes_
 
 ### Bug Fixes
 
@@ -10,14 +67,14 @@
 
 Comprehensive ESLint error resolution across the entire codebase:
 
-| Category | Fixes |
-|----------|-------|
-| Unused variables/imports | Fixed 150+ occurrences |
-| Console statements | Added to allowlist for CLI/telemetry files |
-| Missing default cases | Added to switch statements |
-| TypeScript strict mode | Fixed optional chaining, @ts-ignore → @ts-expect-error |
-| Regex escape characters | Fixed PCRE2 pattern escapes |
-| React hooks rules | Fixed useCallback inside useMemo |
+| Category                 | Fixes                                                  |
+| ------------------------ | ------------------------------------------------------ |
+| Unused variables/imports | Fixed 150+ occurrences                                 |
+| Console statements       | Added to allowlist for CLI/telemetry files             |
+| Missing default cases    | Added to switch statements                             |
+| TypeScript strict mode   | Fixed optional chaining, @ts-ignore → @ts-expect-error |
+| Regex escape characters  | Fixed PCRE2 pattern escapes                            |
+| React hooks rules        | Fixed useCallback inside useMemo                       |
 
 **Key Files Modified:**
 
@@ -36,37 +93,37 @@ Comprehensive ESLint error resolution across the entire codebase:
 
 ### Final Status
 
-| Metric | Before | After |
-|--------|--------|-------|
-| ESLint Errors | 336 | 0 |
-| ESLint Warnings | 48 | 48 |
-| TypeScript Errors | 0 | 0 |
+| Metric            | Before | After |
+| ----------------- | ------ | ----- |
+| ESLint Errors     | 336    | 0     |
+| ESLint Warnings   | 48     | 48    |
+| TypeScript Errors | 0      | 0     |
 
 ### Files Modified
 
-| File | Changes |
-|------|---------|
-| `eslint.config.js` | Test file rules, console allowlist, default-case |
-| `packages/core/src/utils/ripgrepUtils.ts` | PCRE2 regex patterns |
-| `packages/core/src/utils/schemaValidator.ts` | @ts-expect-error |
-| `packages/core/src/observability/metricsCollector.ts` | Default cases, unused params |
-| `packages/core/src/streaming/streamBuffer.ts` | Unused param |
-| `packages/core/src/plugins/plugin-cli.ts` | Unused catch variable |
-| `packages/core/src/plugins/builtin/git-tools/git-advanced/index.ts` | Default case |
-| `packages/core/src/plugins/builtin/utility-tools/diagram-generator/index.ts` | Unused param |
-| `packages/web-app/server.ts` | Unused params |
-| `packages/web-app/src/app/api/fs/route.ts` | Unused variable |
-| `packages/web-app/src/components/chat/ChatInterface.tsx` | Unused variables |
-| `packages/web-app/src/hooks/useWebSocket.ts` | Unused param |
-| `packages/core/src/core/ollamaNativeContentGenerator/converter.test.ts` | Optional chaining |
-| `packages/core/src/tools/sdk-control-client-transport.test.ts` | Throw string ESLint disable |
-| `integration-tests/terminal-capture/scenario-runner.js` | Removed unused import |
+| File                                                                         | Changes                                          |
+| ---------------------------------------------------------------------------- | ------------------------------------------------ |
+| `eslint.config.js`                                                           | Test file rules, console allowlist, default-case |
+| `packages/core/src/utils/ripgrepUtils.ts`                                    | PCRE2 regex patterns                             |
+| `packages/core/src/utils/schemaValidator.ts`                                 | @ts-expect-error                                 |
+| `packages/core/src/observability/metricsCollector.ts`                        | Default cases, unused params                     |
+| `packages/core/src/streaming/streamBuffer.ts`                                | Unused param                                     |
+| `packages/core/src/plugins/plugin-cli.ts`                                    | Unused catch variable                            |
+| `packages/core/src/plugins/builtin/git-tools/git-advanced/index.ts`          | Default case                                     |
+| `packages/core/src/plugins/builtin/utility-tools/diagram-generator/index.ts` | Unused param                                     |
+| `packages/web-app/server.ts`                                                 | Unused params                                    |
+| `packages/web-app/src/app/api/fs/route.ts`                                   | Unused variable                                  |
+| `packages/web-app/src/components/chat/ChatInterface.tsx`                     | Unused variables                                 |
+| `packages/web-app/src/hooks/useWebSocket.ts`                                 | Unused param                                     |
+| `packages/core/src/core/ollamaNativeContentGenerator/converter.test.ts`      | Optional chaining                                |
+| `packages/core/src/tools/sdk-control-client-transport.test.ts`               | Throw string ESLint disable                      |
+| `integration-tests/terminal-capture/scenario-runner.js`                      | Removed unused import                            |
 
 ---
 
 ## 0.16.3
 
-*Build Fix*
+_Build Fix_
 
 ### Bug Fixes
 
@@ -75,6 +132,7 @@ Comprehensive ESLint error resolution across the entire codebase:
 Fixed ESM module import error with `ajv-formats` package:
 
 **Problem:** TypeScript compilation failed with:
+
 ```
 error TS2307: Cannot find module 'ajv-formats' or its corresponding type declarations.
 ```
@@ -93,6 +151,7 @@ import addFormats from 'ajv-formats';
 ```
 
 **Files Modified:**
+
 - `packages/core/src/utils/schemaValidator.ts`
 
 ### Commits
@@ -105,7 +164,7 @@ import addFormats from 'ajv-formats';
 
 ## 0.16.2
 
-*Bug Fixes & UX Improvements*
+_Bug Fixes & UX Improvements_
 
 ### Bug Fixes
 
@@ -113,14 +172,15 @@ import addFormats from 'ajv-formats';
 
 Added automatic PCRE2 support for look-ahead and look-behind regex patterns:
 
-| Pattern | Description | Example |
-|---------|-------------|---------|
-| `(?=...)` | Positive look-ahead | `(?=.*\bfactory\b)(?=.*\bmodel\b)` |
-| `(?!...)` | Negative look-ahead | `error(?!.*warning)` |
-| `(?<=...)` | Positive look-behind | `(?<=static )import` |
-| `(?<!...)` | Negative look-behind | `(?<!@)import` |
+| Pattern    | Description          | Example                            |
+| ---------- | -------------------- | ---------------------------------- |
+| `(?=...)`  | Positive look-ahead  | `(?=.*\bfactory\b)(?=.*\bmodel\b)` |
+| `(?!...)`  | Negative look-ahead  | `error(?!.*warning)`               |
+| `(?<=...)` | Positive look-behind | `(?<=static )import`               |
+| `(?<!...)` | Negative look-behind | `(?<!@)import`                     |
 
 **Files Modified:**
+
 - `packages/core/src/utils/ripgrepUtils.ts` — Added `requiresPcre2()` function
 - `packages/core/src/plugins/builtin/search-tools/ripGrep/index.ts` — Automatic `--pcre2` flag
 
@@ -128,12 +188,12 @@ Added automatic PCRE2 support for look-ahead and look-behind regex patterns:
 
 Fixed model switching to English after tool errors by adding language rule to CRITICAL section in all prompt templates:
 
-| Template | Change |
-|----------|--------|
-| `system-8b.md` | Added `✅ ВСЕГДА отвечай на языке пользователя` |
-| `system-14b.md` | Added to [CRITICAL] section |
-| `system-32b.md` | Added to [CRITICAL] section |
-| `system-70b.md` | Added to Security section |
+| Template        | Change                                          |
+| --------------- | ----------------------------------------------- |
+| `system-8b.md`  | Added `✅ ВСЕГДА отвечай на языке пользователя` |
+| `system-14b.md` | Added to [CRITICAL] section                     |
+| `system-32b.md` | Added to [CRITICAL] section                     |
+| `system-70b.md` | Added to Security section                       |
 
 ### UX Improvements
 
@@ -141,14 +201,15 @@ Fixed model switching to English after tool errors by adding language rule to CR
 
 Added intuitive `init` alias for all dev-tools with init/create actions:
 
-| Tool | init → | Additional aliases |
-|------|--------|-------------------|
-| `golang_dev` | `mod_init` | — |
-| `python_dev` | `venv_create` | — |
-| `rust_dev` | `cargo_init` | `new` → `cargo_new` |
-| `swift_dev` | `package_init` | — |
+| Tool         | init →         | Additional aliases  |
+| ------------ | -------------- | ------------------- |
+| `golang_dev` | `mod_init`     | —                   |
+| `python_dev` | `venv_create`  | —                   |
+| `rust_dev`   | `cargo_init`   | `new` → `cargo_new` |
+| `swift_dev`  | `package_init` | —                   |
 
 **Example usage:**
+
 ```json
 // Before (confusing):
 {"action": "mod_init", "module_name": "github.com/user/project"}
@@ -161,29 +222,29 @@ Added intuitive `init` alias for all dev-tools with init/create actions:
 
 Added short aliases for frequently used actions:
 
-| Alias | Action |
-|-------|--------|
-| `r` | `run` |
-| `b` | `build` |
-| `t` | `test` |
-| `l` | `lint` |
-| `i` | `install` |
-| `v` | `version` |
-| `c` | `clean` |
+| Alias | Action    |
+| ----- | --------- |
+| `r`   | `run`     |
+| `b`   | `build`   |
+| `t`   | `test`    |
+| `l`   | `lint`    |
+| `i`   | `install` |
+| `v`   | `version` |
+| `c`   | `clean`   |
 
 ### Files Modified
 
-| File | Changes |
-|------|---------|
-| `ROADMAP.md` | Added v0.16.2 section with detailed task descriptions |
-| `packages/core/src/utils/ripgrepUtils.ts` | Added PCRE2 detection |
-| `packages/core/src/utils/ripgrepUtils.test.ts` | Added 28 tests for `requiresPcre2()` |
-| `packages/core/src/plugins/builtin/search-tools/ripGrep/index.ts` | Auto PCRE2 flag |
-| `packages/core/src/prompts/templates/*.md` | Language rule in CRITICAL |
-| `packages/core/src/plugins/builtin/dev-tools/golang/index.ts` | Short aliases |
-| `packages/core/src/plugins/builtin/dev-tools/python/index.ts` | init alias |
-| `packages/core/src/plugins/builtin/dev-tools/rust/index.ts` | init, new aliases |
-| `packages/core/src/plugins/builtin/dev-tools/swift/index.ts` | init alias |
+| File                                                              | Changes                                               |
+| ----------------------------------------------------------------- | ----------------------------------------------------- |
+| `ROADMAP.md`                                                      | Added v0.16.2 section with detailed task descriptions |
+| `packages/core/src/utils/ripgrepUtils.ts`                         | Added PCRE2 detection                                 |
+| `packages/core/src/utils/ripgrepUtils.test.ts`                    | Added 28 tests for `requiresPcre2()`                  |
+| `packages/core/src/plugins/builtin/search-tools/ripGrep/index.ts` | Auto PCRE2 flag                                       |
+| `packages/core/src/prompts/templates/*.md`                        | Language rule in CRITICAL                             |
+| `packages/core/src/plugins/builtin/dev-tools/golang/index.ts`     | Short aliases                                         |
+| `packages/core/src/plugins/builtin/dev-tools/python/index.ts`     | init alias                                            |
+| `packages/core/src/plugins/builtin/dev-tools/rust/index.ts`       | init, new aliases                                     |
+| `packages/core/src/plugins/builtin/dev-tools/swift/index.ts`      | init alias                                            |
 
 ### Commits
 
@@ -198,7 +259,7 @@ cea79177 feat(grep): add PCRE2 support for look-around regex patterns
 
 ## 0.16.0
 
-*Documentation created with GLM-5 from Z.AI*
+_Documentation created with GLM-5 from Z.AI_
 
 ### New Features
 
@@ -206,19 +267,21 @@ cea79177 feat(grep): add PCRE2 support for look-around regex patterns
 
 Added comprehensive GPU requirements documentation with performance benchmarks:
 
-| Section | Description |
-|---------|-------------|
-| **GPU Requirements Table** | Minimum VRAM for each model size (3B to 70B+) |
-| **Performance Test Results** | Benchmarks for RTX 3060 through RTX 4090 |
-| **Quantization Guide** | Q4_K_M, Q5_K_M, Q6_K, Q8_0 recommendations |
+| Section                      | Description                                   |
+| ---------------------------- | --------------------------------------------- |
+| **GPU Requirements Table**   | Minimum VRAM for each model size (3B to 70B+) |
+| **Performance Test Results** | Benchmarks for RTX 3060 through RTX 4090      |
+| **Quantization Guide**       | Q4_K_M, Q5_K_M, Q6_K, Q8_0 recommendations    |
 
 **Performance Test Table includes:**
+
 - 17 GPU/Model combinations tested
 - Starting with RTX 3060 (12 GB) as baseline
 - Speed measurements in tokens/second
 - Quality scores for each configuration
 
 **Files Updated:**
+
 - `README.md` — Added GPU Requirements section
 - `README.ru.md` — Added Russian GPU Requirements section
 
@@ -226,34 +289,34 @@ Added comprehensive GPU requirements documentation with performance benchmarks:
 
 Complete reorganization of tools into categorized plugins for better modularity and extensibility:
 
-| Component                 | Description                                           |
-| ------------------------- | ----------------------------------------------------- |
-| **13 Plugin Categories**  | Tools organized by functionality                      |
-| **Tool Re-exports**       | Existing tools wrapped in plugin architecture         |
-| **Enhanced Documentation** | Each plugin has its own README and metadata          |
+| Component                  | Description                                   |
+| -------------------------- | --------------------------------------------- |
+| **13 Plugin Categories**   | Tools organized by functionality              |
+| **Tool Re-exports**        | Existing tools wrapped in plugin architecture |
+| **Enhanced Documentation** | Each plugin has its own README and metadata   |
 
 **New Plugin Categories (8 new):**
 
-| Plugin ID             | Tools                                                       | Description                              |
-| --------------------- | ----------------------------------------------------------- | ---------------------------------------- |
-| `memory-tools`        | save_memory                                                 | Memory and context management            |
-| `task-tools`          | task, todo_write                                            | Task delegation and tracking             |
-| `database-tools`      | redis, database                                             | Database operations (Redis, SQL, MongoDB)|
-| `docker-tools`        | docker                                                      | Container management                     |
-| `git-tools`           | git_advanced                                                | Advanced Git operations                  |
-| `mcp-tools`           | mcp_server                                                  | Model Context Protocol integration       |
-| `code-analysis-tools` | code_analyzer, diagram_generator, api_tester               | Code quality and analysis                |
-| `skill-tools`         | skill, list_skills                                          | Skill management and execution           |
+| Plugin ID             | Tools                                        | Description                               |
+| --------------------- | -------------------------------------------- | ----------------------------------------- |
+| `memory-tools`        | save_memory                                  | Memory and context management             |
+| `task-tools`          | task, todo_write                             | Task delegation and tracking              |
+| `database-tools`      | redis, database                              | Database operations (Redis, SQL, MongoDB) |
+| `docker-tools`        | docker                                       | Container management                      |
+| `git-tools`           | git_advanced                                 | Advanced Git operations                   |
+| `mcp-tools`           | mcp_server                                   | Model Context Protocol integration        |
+| `code-analysis-tools` | code_analyzer, diagram_generator, api_tester | Code quality and analysis                 |
+| `skill-tools`         | skill, list_skills                           | Skill management and execution            |
 
 **Updated Existing Plugins (5):**
 
-| Plugin ID        | Changes                                                       |
-| ---------------- | ------------------------------------------------------------- |
-| `file-tools`     | Added read_many_files tool, enhanced documentation            |
-| `shell-tools`    | Added bash alias, improved confirmation messages              |
-| `search-tools`   | Added full grep implementation, web_search enhancements       |
-| `dev-tools`      | All language tools with full descriptions                     |
-| `core-tools`     | Enhanced with environment variable whitelist                  |
+| Plugin ID      | Changes                                                 |
+| -------------- | ------------------------------------------------------- |
+| `file-tools`   | Added read_many_files tool, enhanced documentation      |
+| `shell-tools`  | Added bash alias, improved confirmation messages        |
+| `search-tools` | Added full grep implementation, web_search enhancements |
+| `dev-tools`    | All language tools with full descriptions               |
+| `core-tools`   | Enhanced with environment variable whitelist            |
 
 **Plugin Structure:**
 
@@ -285,42 +348,44 @@ packages/core/src/plugins/builtin/
 #### File Structure
 
 Each plugin now includes:
+
 - `index.ts` — Plugin definition with tools and hooks
 - `plugin.json` — Metadata file for plugin discovery
 
 ### Files Added
 
-| File                                                            | Description                |
-| --------------------------------------------------------------- | -------------------------- |
-| `plugins/builtin/memory-tools/index.ts`                         | Memory tools plugin        |
-| `plugins/builtin/memory-tools/plugin.json`                      | Memory tools metadata      |
-| `plugins/builtin/task-tools/index.ts`                           | Task tools plugin          |
-| `plugins/builtin/task-tools/plugin.json`                        | Task tools metadata        |
-| `plugins/builtin/database-tools/index.ts`                       | Database tools plugin      |
-| `plugins/builtin/database-tools/plugin.json`                    | Database tools metadata    |
-| `plugins/builtin/docker-tools/index.ts`                         | Docker tools plugin        |
-| `plugins/builtin/docker-tools/plugin.json`                      | Docker tools metadata      |
-| `plugins/builtin/git-tools/index.ts`                            | Git tools plugin           |
-| `plugins/builtin/git-tools/plugin.json`                         | Git tools metadata         |
-| `plugins/builtin/mcp-tools/index.ts`                            | MCP tools plugin           |
-| `plugins/builtin/mcp-tools/plugin.json`                         | MCP tools metadata         |
-| `plugins/builtin/code-analysis-tools/index.ts`                  | Code analysis plugin       |
-| `plugins/builtin/code-analysis-tools/plugin.json`               | Code analysis metadata     |
-| `plugins/builtin/skill-tools/index.ts`                          | Skill tools plugin         |
-| `plugins/builtin/skill-tools/plugin.json`                       | Skill tools metadata       |
+| File                                              | Description             |
+| ------------------------------------------------- | ----------------------- |
+| `plugins/builtin/memory-tools/index.ts`           | Memory tools plugin     |
+| `plugins/builtin/memory-tools/plugin.json`        | Memory tools metadata   |
+| `plugins/builtin/task-tools/index.ts`             | Task tools plugin       |
+| `plugins/builtin/task-tools/plugin.json`          | Task tools metadata     |
+| `plugins/builtin/database-tools/index.ts`         | Database tools plugin   |
+| `plugins/builtin/database-tools/plugin.json`      | Database tools metadata |
+| `plugins/builtin/docker-tools/index.ts`           | Docker tools plugin     |
+| `plugins/builtin/docker-tools/plugin.json`        | Docker tools metadata   |
+| `plugins/builtin/git-tools/index.ts`              | Git tools plugin        |
+| `plugins/builtin/git-tools/plugin.json`           | Git tools metadata      |
+| `plugins/builtin/mcp-tools/index.ts`              | MCP tools plugin        |
+| `plugins/builtin/mcp-tools/plugin.json`           | MCP tools metadata      |
+| `plugins/builtin/code-analysis-tools/index.ts`    | Code analysis plugin    |
+| `plugins/builtin/code-analysis-tools/plugin.json` | Code analysis metadata  |
+| `plugins/builtin/skill-tools/index.ts`            | Skill tools plugin      |
+| `plugins/builtin/skill-tools/plugin.json`         | Skill tools metadata    |
 
 ### Files Modified
 
-| File                                         | Changes                            |
-| -------------------------------------------- | ---------------------------------- |
-| `plugins/builtin/file-tools/index.ts`        | Enhanced with read_many_files      |
-| `plugins/builtin/shell-tools/index.ts`       | Added bash alias, safety checks    |
-| `plugins/builtin/search-tools/index.ts`      | Full grep/web implementation       |
-| `plugins/pluginRegistry.ts`                  | Load all 13 plugin categories      |
+| File                                    | Changes                         |
+| --------------------------------------- | ------------------------------- |
+| `plugins/builtin/file-tools/index.ts`   | Enhanced with read_many_files   |
+| `plugins/builtin/shell-tools/index.ts`  | Added bash alias, safety checks |
+| `plugins/builtin/search-tools/index.ts` | Full grep/web implementation    |
+| `plugins/pluginRegistry.ts`             | Load all 13 plugin categories   |
 
 ### Migration Guide
 
 Tools are now loaded via the plugin system:
+
 - All existing tool classes are still available for direct import
 - Tools are automatically registered through `PluginRegistry.initialize()`
 - Plugin hooks enable custom behavior before/after tool execution
@@ -1151,6 +1216,7 @@ Merged commands for better organization:
 #### Development Tools
 
 - **Python Development Tool** (`python_dev`): Comprehensive Python development support including:
+
   - Run Python scripts with arguments
   - Execute pytest with test patterns
   - Run pylint, mypy, and black for code quality
@@ -1159,6 +1225,7 @@ Merged commands for better organization:
   - Support for custom Python interpreter paths
 
 - **Node.js Development Tool** (`nodejs_dev`): Full Node.js/JavaScript development support including:
+
   - Auto-detection of package manager (npm, yarn, pnpm, bun)
   - Run Node.js scripts
   - Package management (install, add, remove, update)

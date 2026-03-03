@@ -7,7 +7,7 @@
 import { expect, describe, it } from 'vitest';
 import { doesToolInvocationMatch, isToolEnabled } from './tool-utils.js';
 import type { AnyToolInvocation, Config } from '../index.js';
-import { ReadFileTool } from '../tools/read-file.js';
+import { ReadFileTool } from '../plugins/builtin/file-tools/read-file/index.js';
 import { ToolNames } from '../tools/tool-names.js';
 
 describe('doesToolInvocationMatch', () => {

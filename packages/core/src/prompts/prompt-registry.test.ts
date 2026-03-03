@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PromptRegistry } from './prompt-registry.js';
-import type { DiscoveredMCPPrompt } from '../tools/mcp-client.js';
+import type { DiscoveredMCPPrompt } from '../plugins/builtin/mcp-tools/mcp-client/index.js';
 
 describe('PromptRegistry', () => {
   let registry: PromptRegistry;
@@ -105,7 +105,12 @@ describe('PromptRegistry', () => {
       });
 
       const all = registry.getAllPrompts();
-      expect(all.map((p) => p.name)).toEqual(['apple', 'banana', 'mango', 'zebra']);
+      expect(all.map((p) => p.name)).toEqual([
+        'apple',
+        'banana',
+        'mango',
+        'zebra',
+      ]);
     });
   });
 
@@ -151,7 +156,11 @@ describe('PromptRegistry', () => {
       registry.registerPrompt(createMockPrompt('m-prompt', 'server'));
 
       const prompts = registry.getPromptsByServer('server');
-      expect(prompts.map((p) => p.name)).toEqual(['a-prompt', 'm-prompt', 'z-prompt']);
+      expect(prompts.map((p) => p.name)).toEqual([
+        'a-prompt',
+        'm-prompt',
+        'z-prompt',
+      ]);
     });
   });
 
