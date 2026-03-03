@@ -4,19 +4,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   isAutoLanguage,
   normalizeOutputLanguage,
   resolveOutputLanguage,
+  initializeLlmOutputLanguage,
   OUTPUT_LANGUAGE_AUTO,
 } from './languageUtils.js';
+
+// Mock the Storage module
+vi.mock('@ollama-code/ollama-code-core', () => ({
+  Storage: {
+    getGlobalOllamaDir: () => '/mock/.ollama-code',
+  },
+}));
+
+// Mock fs module
+let mockFiles: Record<string, string> = {};
+vi.mock('node:fs', () => ({
+  existsSync: (path: string) => path in mockFiles,
+  readFileSync: (path: string) => mockFiles[path] ?? '',
+  writeFileSync: (path: string, content: string) => {
+    mockFiles[path] = content;
+  },
+  mkdirSync: () => {},
+}));
 
 describe('languageUtils', () => {
   const originalEnv = { ...process.env };
 
   beforeEach(() => {
     process.env = { ...originalEnv };
+    mockFiles = {}; // Reset mock file system
   });
 
   afterEach(() => {
@@ -175,6 +195,130 @@ describe('languageUtils', () => {
   describe('OUTPUT_LANGUAGE_AUTO constant', () => {
     it('should be "auto"', () => {
       expect(OUTPUT_LANGUAGE_AUTO).toBe('auto');
+    });
+  });
+
+  describe('initializeLlmOutputLanguage', () => {
+    const filePath = '/mock/.ollama-code/output-language.md';
+
+    it('should preserve existing file when no setting is provided', () => {
+      // Setup: file exists with Russian
+      mockFiles[filePath] = `# Output language preference: Russian
+<!-- ollama-code:llm-output-language: Russian -->`;
+
+      // Act: call with undefined (no setting in settings.json)
+      initializeLlmOutputLanguage(undefined);
+
+      // Assert: file should be unchanged
+      expect(mockFiles[filePath]).toContain('Russian');
+      expect(mockFiles[filePath]).not.toContain('English');
+    });
+
+    it('should create new file when no setting provided and file does not exist', () => {
+      // Setup: file doesn't exist
+      delete mockFiles[filePath];
+      
+      // Set system language to English
+      delete process.env['OLLAMA_CODE_LANG'];
+      process.env['LANG'] = 'en_US.UTF-8';
+      delete process.env['LANGUAGE'];
+      delete process.env['LC_ALL'];
+      delete process.env['LC_MESSAGES'];
+      delete process.env['LC_CTYPE'];
+
+      // Act
+      initializeLlmOutputLanguage(undefined);
+
+      // Assert: file should be created with English
+      expect(mockFiles[filePath]).toBeDefined();
+      expect(mockFiles[filePath]).toContain('English');
+    });
+
+    it('should resolve "auto" and write when file exists with different language', () => {
+      // Setup: file exists with English
+      mockFiles[filePath] = `# Output language preference: English
+<!-- ollama-code:llm-output-language: English -->`;
+
+      // Set system language to Russian
+      delete process.env['OLLAMA_CODE_LANG'];
+      process.env['LANG'] = 'ru_RU.UTF-8';
+      delete process.env['LANGUAGE'];
+      delete process.env['LC_ALL'];
+      delete process.env['LC_MESSAGES'];
+      delete process.env['LC_CTYPE'];
+
+      // Act: auto should detect Russian
+      initializeLlmOutputLanguage('auto');
+
+      // Assert: file should be updated to Russian
+      expect(mockFiles[filePath]).toContain('Russian');
+    });
+
+    it('should NOT write when setting matches current file', () => {
+      // Setup: file exists with Russian
+      const originalContent = `# Output language preference: Russian
+<!-- ollama-code:llm-output-language: Russian -->`;
+      mockFiles[filePath] = originalContent;
+
+      // Act: explicit setting matches current
+      initializeLlmOutputLanguage('Russian');
+
+      // Assert: file should be unchanged
+      expect(mockFiles[filePath]).toBe(originalContent);
+    });
+
+    it('should write when explicit setting differs from current file', () => {
+      // Setup: file exists with Russian
+      mockFiles[filePath] = `# Output language preference: Russian
+<!-- ollama-code:llm-output-language: Russian -->`;
+
+      // Act: explicit setting is different
+      initializeLlmOutputLanguage('Japanese');
+
+      // Assert: file should be updated
+      expect(mockFiles[filePath]).toContain('Japanese');
+      expect(mockFiles[filePath]).not.toContain('Russian');
+    });
+
+    it('should use UI language fallback when system is English but UI is Russian', () => {
+      // Setup: file doesn't exist
+      delete mockFiles[filePath];
+      
+      // Set system language to English
+      delete process.env['OLLAMA_CODE_LANG'];
+      process.env['LANG'] = 'en_US.UTF-8';
+      delete process.env['LANGUAGE'];
+      delete process.env['LC_ALL'];
+      delete process.env['LC_MESSAGES'];
+      delete process.env['LC_CTYPE'];
+
+      // Act: auto with UI language Russian
+      initializeLlmOutputLanguage('auto', 'ru');
+
+      // Assert: file should use Russian (UI fallback)
+      expect(mockFiles[filePath]).toContain('Russian');
+    });
+
+    it('should NOT preserve file when explicit setting is provided', () => {
+      // Setup: file exists with Russian
+      mockFiles[filePath] = `# Output language preference: Russian
+<!-- ollama-code:llm-output-language: Russian -->`;
+
+      // Act: explicit setting provided (even empty string is explicit)
+      initializeLlmOutputLanguage('auto');
+
+      // With auto and English system, should update to English
+      // (this tests that explicit 'auto' is treated differently than undefined)
+      delete process.env['OLLAMA_CODE_LANG'];
+      process.env['LANG'] = 'en_US.UTF-8';
+      delete process.env['LANGUAGE'];
+      delete process.env['LC_ALL'];
+      delete process.env['LC_MESSAGES'];
+      delete process.env['LC_CTYPE'];
+
+      initializeLlmOutputLanguage('auto');
+
+      expect(mockFiles[filePath]).toContain('English');
     });
   });
 });
