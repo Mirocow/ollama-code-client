@@ -10,7 +10,7 @@ import type {
   WebSearchResultItem,
   TavilyProviderConfig,
 } from '../types.js';
-import { createHttpClient } from '../../../../utils/httpClient.js';
+import { createHttpClient } from '../../../../../utils/httpClient.js';
 
 interface TavilyResultItem {
   title: string;

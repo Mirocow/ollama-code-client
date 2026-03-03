@@ -8,9 +8,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os, { EOL } from 'node:os';
 import crypto from 'node:crypto';
-import type { Config } from '../../../../config/config.js';
-import { ToolNames, ToolDisplayNames } from '../../../../tools/tool-names.js';
-import { ToolErrorType } from '../../../../tools/tool-error.js';
+import type { Config } from '../../../config/config.js';
+import { ToolNames, ToolDisplayNames } from '../../../tools/tool-names.js';
+import { ToolErrorType } from '../../../tools/tool-error.js';
 import type {
   ToolInvocation,
   ToolResult,
@@ -18,31 +18,31 @@ import type {
   ToolCallConfirmationDetails,
   ToolExecuteConfirmationDetails,
   ToolConfirmationPayload,
-} from '../../../../tools/tools.js';
+} from '../../../tools/tools.js';
 import {
   BaseDeclarativeTool,
   BaseToolInvocation,
   ToolConfirmationOutcome,
   Kind,
-} from '../../../../tools/tools.js';
-import { getErrorMessage } from '../../../../utils/errors.js';
-import { summarizeToolOutput } from '../../../../utils/summarizer.js';
-import { abortSignalAny } from '../../../../utils/nodePolyfills.js';
+} from '../../../tools/tools.js';
+import { getErrorMessage } from '../../../utils/errors.js';
+import { summarizeToolOutput } from '../../../utils/summarizer.js';
+import { abortSignalAny } from '../../../utils/nodePolyfills.js';
 import type {
   ShellExecutionConfig,
   ShellOutputEvent,
-} from '../../../../services/shellExecutionService.js';
-import { ShellExecutionService } from '../../../../services/shellExecutionService.js';
-import { formatMemoryUsage } from '../../../../utils/formatters.js';
-import type { AnsiOutput } from '../../../../utils/terminalSerializer.js';
-import { isSubpath } from '../../../../utils/paths.js';
+} from '../../../services/shellExecutionService.js';
+import { ShellExecutionService } from '../../../services/shellExecutionService.js';
+import { formatMemoryUsage } from '../../../utils/formatters.js';
+import type { AnsiOutput } from '../../../utils/terminalSerializer.js';
+import { isSubpath } from '../../../utils/paths.js';
 import {
   getCommandRoots,
   isCommandAllowed,
   isCommandNeedsPermission,
   stripShellWrapper,
-} from '../../../../utils/shell-utils.js';
-import { createDebugLogger } from '../../../../utils/debugLogger.js';
+} from '../../../utils/shell-utils.js';
+import { createDebugLogger } from '../../../utils/debugLogger.js';
 
 const debugLogger = createDebugLogger('SHELL');
 

@@ -10,7 +10,7 @@ import type {
   WebSearchResultItem,
   GoogleProviderConfig,
 } from '../types.js';
-import { createHttpClient } from '../../../../utils/httpClient.js';
+import { createHttpClient } from '../../../../../utils/httpClient.js';
 
 interface GoogleSearchItem {
   title: string;

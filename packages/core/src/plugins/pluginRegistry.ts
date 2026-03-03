@@ -64,7 +64,20 @@ export class PluginRegistry {
           await pluginManager.registerPlugin(plugin);
           await pluginManager.enablePlugin(plugin.metadata.id);
           
-          // Register tools with ToolRegistry
+          // Register tool classes with ToolRegistry (for real DeclarativeTool instances)
+          if (plugin.toolClasses && this.toolRegistry) {
+            for (const toolClass of plugin.toolClasses) {
+              if (toolClass && typeof toolClass === 'function') {
+                try {
+                  this.toolRegistry.registerTool(toolClass as unknown as Parameters<typeof this.toolRegistry.registerTool>[0]);
+                } catch (e) {
+                  debugLogger.warn(`Failed to register tool class: ${e}`);
+                }
+              }
+            }
+          }
+          
+          // Register plugin tools (for PluginTool interface)
           if (plugin.tools && this.toolRegistry) {
             registerPluginTools(
               plugin.tools,
