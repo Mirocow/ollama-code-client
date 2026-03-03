@@ -1,26 +1,26 @@
 #!/bin/bash
 
-# Qwen Code Installation Script
-# This script installs Node.js (via NVM) and Qwen Code CLI
+# Ollama Code Installation Script
+# This script installs Node.js (via NVM), pnpm, and Ollama Code CLI
 # Supports Linux and macOS
 #
-# Usage: install-qwen-with-source.sh --source [github|npm|internal|local-build]
-#        install-qwen-with-source.sh -s [github|npm|internal|local-build]
+# Usage: install-ollama-with-source.sh --source [github|npm|internal|local-build]
+#        install-ollama-with-source.sh -s [github|npm|internal|local-build]
 
 # Re-execute with bash if running with sh or other shells
 # This block must use POSIX-compliant syntax ([ not [[) since it runs before we know bash is available
-if [ -z "${BASH_VERSION}" ] && [ -z "${__QWEN_INSTALL_REEXEC:-}" ]; then
+if [ -z "${BASH_VERSION}" ] && [ -z "${__OLLAMA_INSTALL_REEXEC:-}" ]; then
     # Check if we're in a git hook environment
     case "${0}" in
-        *.git/hooks/*) export __QWEN_IN_GIT_HOOK=1 ;;
+        *.git/hooks/*) export __OLLAMA_IN_GIT_HOOK=1 ;;
     esac
     if [ -n "${GIT_DIR:-}" ]; then
-        export __QWEN_IN_GIT_HOOK=1
+        export __OLLAMA_IN_GIT_HOOK=1
     fi
 
     # Try to find bash
     if command -v bash >/dev/null 2>&1; then
-        export __QWEN_INSTALL_REEXEC=1
+        export __OLLAMA_INSTALL_REEXEC=1
         # Re-exec with bash, preserving all arguments
         exec bash -- "${0}" "$@"
     else
@@ -39,12 +39,22 @@ else
 fi
 
 # ============================================
+# Configuration
+# ============================================
+OLLAMA_CODE_DIR="${OLLAMA_CODE_DIR:-}"
+PACKAGE_NAME="@ollama-code/ollama-code"
+CLI_COMMAND="ollama-code"
+DATA_DIR_NAME=".ollama-code"
+REQUIRED_NODE_VERSION="20"
+
+# ============================================
 # Color definitions
 # ============================================
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # ============================================
@@ -64,6 +74,10 @@ log_warning() {
 
 log_error() {
     echo -e "${RED}❌ $1${NC}"
+}
+
+log_step() {
+    echo -e "${CYAN}▶ $1${NC}"
 }
 
 # ============================================
@@ -92,10 +106,45 @@ get_shell_profile() {
     esac
 }
 
+get_platform_info() {
+    local os_type
+    os_type=$(uname -s)
+    local arch_type
+    arch_type=$(uname -m)
+
+    case "${os_type}" in
+        Darwin)
+            PLATFORM="macos"
+            PACKAGE_MANAGER="${PACKAGE_MANAGER:-$(command -v brew >/dev/null 2>&1 && echo 'brew' || echo 'none')}"
+            ;;
+        Linux)
+            PLATFORM="linux"
+            if command -v apt-get >/dev/null 2>&1; then
+                PACKAGE_MANAGER="apt"
+            elif command -v yum >/dev/null 2>&1; then
+                PACKAGE_MANAGER="yum"
+            elif command -v dnf >/dev/null 2>&1; then
+                PACKAGE_MANAGER="dnf"
+            elif command -v pacman >/dev/null 2>&1; then
+                PACKAGE_MANAGER="pacman"
+            else
+                PACKAGE_MANAGER="none"
+            fi
+            ;;
+        *)
+            PLATFORM="unknown"
+            PACKAGE_MANAGER="none"
+            ;;
+    esac
+
+    ARCH="${arch_type}"
+}
+
 # ============================================
 # Parse command line arguments
 # ============================================
 SOURCE="unknown"
+BUILD_FROM_SOURCE="false"
 while [[ $# -gt 0 ]]; do
     case $1 in
         -s|--source)
@@ -106,12 +155,31 @@ while [[ $# -gt 0 ]]; do
             SOURCE="$2"
             shift 2
             ;;
+        --build-from-source)
+            BUILD_FROM_SOURCE="true"
+            shift
+            ;;
+        --dir)
+            if [[ -z "$2" ]] || [[ "$2" == -* ]]; then
+                log_error "--dir requires a value"
+                exit 1
+            fi
+            OLLAMA_CODE_DIR="$2"
+            shift 2
+            ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  -s, --source SOURCE    Specify the installation source (e.g., github, npm, internal)"
-            echo "  -h, --help             Show this help message"
+            echo "  -s, --source SOURCE       Specify the installation source (e.g., github, npm, internal, local-build)"
+            echo "  --build-from-source       Build from source code instead of npm"
+            echo "  --dir DIR                 Path to source directory (for local-build)"
+            echo "  -h, --help                Show this help message"
+            echo ""
+            echo "Examples:"
+            echo "  $0 --source npm                    # Install from npm"
+            echo "  $0 --source github                 # Install from GitHub"
+            echo "  $0 --source local-build --dir /path/to/ollama-code  # Build from local source"
             echo ""
             exit 0
             ;;
@@ -125,13 +193,22 @@ done
 # ============================================
 # Print header
 # ============================================
-echo "=========================================="
-echo "   Qwen Code Installation Script"
-echo "=========================================="
-echo ""
-log_info "System: $(uname -s) $(uname -r)" || true
-log_info "Shell: $(basename "${SHELL}")"
-echo ""
+print_header() {
+    echo ""
+    echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║${NC}       ${GREEN}Ollama Code Installation Script${NC}                       ${CYAN}║${NC}"
+    echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    get_platform_info
+    log_info "Platform: ${PLATFORM} (${ARCH})"
+    log_info "Shell: $(basename "${SHELL}")"
+    log_info "Package Manager: ${PACKAGE_MANAGER}"
+    log_info "Installation Source: ${SOURCE}"
+    if [[ "${BUILD_FROM_SOURCE}" == "true" ]]; then
+        log_info "Build Mode: From Source"
+    fi
+    echo ""
+}
 
 # ============================================
 # Ensure download tool is available
@@ -154,7 +231,99 @@ ensure_download_tool() {
     echo "  - macOS: brew install curl"
     echo "  - Ubuntu/Debian: sudo apt-get install curl"
     echo "  - CentOS/RHEL: sudo yum install curl"
+    echo "  - Arch Linux: sudo pacman -S curl"
     exit 1
+}
+
+# ============================================
+# Install system dependencies
+# ============================================
+install_system_dependencies() {
+    log_step "Checking system dependencies..."
+
+    local missing_deps=()
+
+    # Check for git
+    if ! command_exists git; then
+        missing_deps+=("git")
+    fi
+
+    # Check for curl or wget
+    if ! command_exists curl && ! command_exists wget; then
+        missing_deps+=("curl")
+    fi
+
+    # Check for build tools (needed for node-pty)
+    case "${PLATFORM}" in
+        macos)
+            if ! command_exists xcode-select || ! xcode-select -p >/dev/null 2>&1; then
+                log_warning "Xcode Command Line Tools not found. Installing..."
+                xcode-select --install 2>/dev/null || true
+            fi
+            ;;
+        linux)
+            if ! command_exists make || ! command_exists gcc; then
+                case "${PACKAGE_MANAGER}" in
+                    apt)
+                        missing_deps+=("build-essential" "python3")
+                        ;;
+                    yum|dnf)
+                        missing_deps+=("gcc-c++" "make" "python3")
+                        ;;
+                    pacman)
+                        missing_deps+=("base-devel" "python")
+                        ;;
+                esac
+            fi
+            ;;
+    esac
+
+    if [[ ${#missing_deps[@]} -gt 0 ]]; then
+        log_warning "Missing dependencies: ${missing_deps[*]}"
+        log_info "Installing missing dependencies..."
+
+        case "${PACKAGE_MANAGER}" in
+            brew)
+                brew install "${missing_deps[@]}" || {
+                    log_error "Failed to install dependencies with Homebrew"
+                    exit 1
+                }
+                ;;
+            apt)
+                sudo apt-get update -qq
+                sudo apt-get install -y "${missing_deps[@]}" || {
+                    log_error "Failed to install dependencies with apt"
+                    exit 1
+                }
+                ;;
+            yum)
+                sudo yum install -y "${missing_deps[@]}" || {
+                    log_error "Failed to install dependencies with yum"
+                    exit 1
+                }
+                ;;
+            dnf)
+                sudo dnf install -y "${missing_deps[@]}" || {
+                    log_error "Failed to install dependencies with dnf"
+                    exit 1
+                }
+                ;;
+            pacman)
+                sudo pacman -S --noconfirm "${missing_deps[@]}" || {
+                    log_error "Failed to install dependencies with pacman"
+                    exit 1
+                }
+                ;;
+            none)
+                log_error "No package manager found. Please install: ${missing_deps[*]}"
+                exit 1
+                ;;
+        esac
+
+        log_success "Dependencies installed"
+    else
+        log_success "All system dependencies are installed"
+    fi
 }
 
 # ============================================
@@ -181,13 +350,14 @@ install_nvm() {
         return 0
     fi
 
-    log_info "Installing NVM ${NVM_VERSION}..."
+    log_step "Installing NVM ${NVM_VERSION}..."
 
-    # Download and install NVM from Aliyun OSS
-    # Use temporary file instead of pipe to avoid potential subshell issues
+    # Download and install NVM
     local NVM_INSTALL_TEMP
     NVM_INSTALL_TEMP=$(mktemp)
-    if "${DOWNLOAD_CMD}" "${DOWNLOAD_ARGS}" "https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install_nvm.sh" > "${NVM_INSTALL_TEMP}"; then
+
+    # Try official NVM source first
+    if "${DOWNLOAD_CMD}" "${DOWNLOAD_ARGS}" "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" > "${NVM_INSTALL_TEMP}" 2>/dev/null; then
         # Run the script in current shell environment
         # shellcheck source=/dev/null
         . "${NVM_INSTALL_TEMP}"
@@ -211,10 +381,9 @@ install_nvm() {
         log_info "You may need to manually add NVM configuration to your shell profile"
     elif ! grep -q 'NVM_DIR' "${PROFILE_FILE}" 2>/dev/null; then
         # shellcheck disable=SC2016
-        # The following echo statements intentionally use single quotes to write literal strings
         {
             echo ""
-            echo "# NVM configuration (added by Qwen Code installer)"
+            echo "# NVM configuration (added by Ollama Code installer)"
             echo "export NVM_DIR=\"\$HOME/.nvm\""
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
             echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"'
@@ -239,7 +408,7 @@ install_nvm() {
 # Install Node.js via NVM
 # ============================================
 install_nodejs_with_nvm() {
-    local NODE_VERSION="${NODE_VERSION:-20}"
+    local NODE_VERSION="${NODE_VERSION:-${REQUIRED_NODE_VERSION}}"
     local NVM_DIR="${NVM_DIR:-${HOME}/.nvm}"
 
     # Ensure NVM is loaded
@@ -252,11 +421,8 @@ install_nodejs_with_nvm() {
         return 1
     fi
 
-    # Set Node.js mirror source for faster downloads in China
-    export NVM_NODEJS_ORG_MIRROR="https://npmmirror.com/mirrors/node"
-
     # Install Node.js
-    log_info "Installing Node.js v${NODE_VERSION}..."
+    log_step "Installing Node.js v${NODE_VERSION}..."
     if nvm install "${NODE_VERSION}"; then
         nvm alias default "${NODE_VERSION}" || true
         nvm use default || true
@@ -286,11 +452,11 @@ check_node_version() {
     local major_version
     major_version=$(echo "${current_version}" | cut -d. -f1)
 
-    if [[ "${major_version}" -ge 20 ]]; then
-        log_success "Node.js v${current_version} is already installed (>= 20)"
+    if [[ "${major_version}" -ge "${REQUIRED_NODE_VERSION}" ]]; then
+        log_success "Node.js v${current_version} is already installed (>= ${REQUIRED_NODE_VERSION})"
         return 0
     else
-        log_warning "Node.js v${current_version} is installed but version < 20"
+        log_warning "Node.js v${current_version} is installed but version < ${REQUIRED_NODE_VERSION}"
         return 1
     fi
 }
@@ -304,7 +470,7 @@ install_nodejs() {
 
     case "${platform}" in
         Linux|Darwin)
-            log_info "Installing Node.js on ${platform}..."
+            log_step "Installing Node.js on ${platform}..."
 
             # Install NVM
             if ! install_nvm; then
@@ -349,6 +515,39 @@ check_and_install_nodejs() {
 }
 
 # ============================================
+# Install pnpm
+# ============================================
+install_pnpm() {
+    log_step "Installing pnpm..."
+
+    if command_exists pnpm; then
+        local pnpm_version
+        pnpm_version=$(pnpm --version)
+        log_success "pnpm ${pnpm_version} is already installed"
+        return 0
+    fi
+
+    # Install pnpm via npm corepack or npm
+    if command_exists corepack; then
+        corepack enable 2>/dev/null || true
+        corepack prepare pnpm@latest --activate 2>/dev/null || {
+            log_warning "Failed to install pnpm via corepack, using npm..."
+            npm install -g pnpm
+        }
+    else
+        npm install -g pnpm
+    fi
+
+    if command_exists pnpm; then
+        log_success "pnpm $(pnpm --version) installed successfully"
+        return 0
+    else
+        log_error "Failed to install pnpm"
+        return 1
+    fi
+}
+
+# ============================================
 # Fix npm permissions (without using sudo)
 # ============================================
 fix_npm_permissions() {
@@ -364,7 +563,6 @@ fix_npm_permissions() {
     fi
 
     # SAFETY CHECK: Never modify system directories
-    # This prevents catastrophic failures like breaking sudo setuid binaries
     case "${NPM_GLOBAL_DIR}" in
         /|/usr|/usr/local|/bin|/sbin|/lib|/lib64|/opt|/snap|/var|/etc)
             log_warning "npm prefix is a system directory (${NPM_GLOBAL_DIR})."
@@ -401,7 +599,7 @@ fix_npm_permissions() {
     if ! grep -q '.npm-global/bin' "${PROFILE_FILE}" 2>/dev/null; then
         {
             echo ""
-            echo "# NPM global bin (added by Qwen Code installer)"
+            echo "# NPM global bin (added by Ollama Code installer)"
             echo "export PATH=\"\$HOME/.npm-global/bin:\$PATH\""
         } >> "${PROFILE_FILE}"
         log_info "Added npm global bin to PATH in ${PROFILE_FILE}"
@@ -411,9 +609,58 @@ fix_npm_permissions() {
 }
 
 # ============================================
-# Install Qwen Code
+# Build from source
 # ============================================
-install_qwen_code() {
+build_from_source() {
+    local source_dir="${OLLAMA_CODE_DIR:-$(pwd)}"
+
+    if [[ ! -d "${source_dir}" ]]; then
+        log_error "Source directory not found: ${source_dir}"
+        exit 1
+    fi
+
+    if [[ ! -f "${source_dir}/package.json" ]]; then
+        log_error "package.json not found in ${source_dir}"
+        exit 1
+    fi
+
+    log_step "Building Ollama Code from source..."
+    log_info "Source directory: ${source_dir}"
+
+    cd "${source_dir}"
+
+    # Install dependencies
+    log_info "Installing dependencies..."
+    pnpm install --frozen-lockfile || pnpm install
+
+    # Build the project
+    log_info "Building project..."
+    pnpm run build || {
+        log_error "Build failed"
+        exit 1
+    }
+
+    # Bundle the CLI
+    log_info "Bundling CLI..."
+    pnpm run bundle || {
+        log_error "Bundle failed"
+        exit 1
+    }
+
+    # Link globally
+    log_info "Linking globally..."
+    npm link || {
+        log_error "Failed to link globally"
+        exit 1
+    }
+
+    log_success "Ollama Code built and linked from source"
+}
+
+# ============================================
+# Install Ollama Code from npm
+# ============================================
+install_ollama_code_npm() {
     # Ensure NVM node is in PATH
     export NVM_DIR="${HOME}/.nvm"
     # shellcheck source=/dev/null
@@ -426,10 +673,10 @@ install_qwen_code() {
         export PATH="${NPM_GLOBAL_BIN}:${PATH}"
     fi
 
-    if command_exists qwen; then
-        local QWEN_VERSION
-        QWEN_VERSION=$(qwen --version 2>/dev/null) || echo "unknown"
-        log_success "Qwen Code is already installed: ${QWEN_VERSION}"
+    if command_exists "${CLI_COMMAND}"; then
+        local CURRENT_VERSION
+        CURRENT_VERSION=$("${CLI_COMMAND}" --version 2>/dev/null) || echo "unknown"
+        log_success "Ollama Code is already installed: ${CURRENT_VERSION}"
         log_info "Upgrading to the latest version..."
     fi
 
@@ -439,30 +686,21 @@ install_qwen_code() {
     # Fix npm permissions if needed
     fix_npm_permissions
 
-    # Configure npm registry for faster downloads in China
-    npm config set registry https://registry.npmmirror.com
-    log_info "npm registry set to npmmirror"
-
-    # Install Qwen Code
-    log_info "Installing Qwen Code..."
-    if npm install -g @qwen-code/qwen-code@latest; then
-        log_success "Qwen Code installed successfully!"
+    # Install Ollama Code
+    log_step "Installing Ollama Code..."
+    if npm install -g "${PACKAGE_NAME}@latest"; then
+        log_success "Ollama Code installed successfully!"
 
         # Verify installation
-        if command_exists qwen; then
-            local qwen_version
-            qwen_version=$(qwen --version 2>/dev/null) || qwen_version="unknown"
-            log_info "Qwen Code version: ${qwen_version}"
+        if command_exists "${CLI_COMMAND}"; then
+            local installed_version
+            installed_version=$("${CLI_COMMAND}" --version 2>/dev/null) || installed_version="unknown"
+            log_info "Ollama Code version: ${installed_version}"
         fi
     else
-        log_error "Failed to install Qwen Code!"
+        log_error "Failed to install Ollama Code!"
         log_info "Please check your internet connection and try again"
         exit 1
-    fi
-
-    # Create source.json if source parameter was provided
-    if [[ "${SOURCE}" != "unknown" ]]; then
-        create_source_json
     fi
 }
 
@@ -470,21 +708,24 @@ install_qwen_code() {
 # Create source.json
 # ============================================
 create_source_json() {
-    local QWEN_DIR="${HOME}/.qwen"
+    local DATA_DIR="${HOME}/${DATA_DIR_NAME}"
 
-    mkdir -p "${QWEN_DIR}"
+    mkdir -p "${DATA_DIR}"
 
     # Escape special characters in SOURCE for JSON
     local ESCAPED_SOURCE
     ESCAPED_SOURCE=$(printf '%s' "${SOURCE}" | sed 's/\\/\\\\/g; s/"/\\"/g')
 
-    cat > "${QWEN_DIR}/source.json" <<EOF
+    cat > "${DATA_DIR}/source.json" <<EOF
 {
-  "source": "${ESCAPED_SOURCE}"
+  "source": "${ESCAPED_SOURCE}",
+  "installed_at": "$(date -Iseconds 2>/dev/null || date +%Y-%m-%dT%H:%M:%S)",
+  "platform": "${PLATFORM}",
+  "arch": "${ARCH}"
 }
 EOF
 
-    log_success "Installation source saved to ~/.qwen/source.json"
+    log_success "Installation source saved to ~/${DATA_DIR_NAME}/source.json"
 }
 
 # ============================================
@@ -508,23 +749,43 @@ main() {
         log_info "Using HOME=${HOME}"
     fi
 
+    # Print header
+    print_header
+
     # Ensure download tool is available
     ensure_download_tool
+
+    # Install system dependencies
+    install_system_dependencies
+    echo ""
 
     # Check and install Node.js
     check_and_install_nodejs
     echo ""
 
-    # Install Qwen Code
-    install_qwen_code
+    # Install pnpm
+    install_pnpm
     echo ""
+
+    # Build from source or install from npm
+    if [[ "${BUILD_FROM_SOURCE}" == "true" ]]; then
+        build_from_source
+    else
+        install_ollama_code_npm
+    fi
+    echo ""
+
+    # Create source.json if source parameter was provided
+    if [[ "${SOURCE}" != "unknown" ]]; then
+        create_source_json
+    fi
 
     # ============================================
     # Final instructions
     # ============================================
-    echo "=========================================="
-    echo "✅ Installation completed!"
-    echo "=========================================="
+    echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║${NC}              ${CYAN}Installation completed!${NC}                        ${GREEN}║${NC}"
+    echo -e "${GREEN}╚════════════════════════════════════════════════════════════╝${NC}"
     echo ""
 
     # Ensure NVM and npm global bin are in PATH
@@ -537,19 +798,28 @@ main() {
         export PATH="${NPM_GLOBAL_BIN}:${PATH}"
     fi
 
-    # Check if qwen is immediately available
-    if command_exists qwen; then
-        log_success "Qwen Code is ready to use!"
+    # Check if CLI is immediately available
+    if command_exists "${CLI_COMMAND}"; then
+        log_success "Ollama Code is ready to use!"
         echo ""
-        echo "You can now run: qwen"
+        echo -e "${CYAN}Usage:${NC}"
+        echo "  ${CLI_COMMAND}          # Start interactive session"
+        echo "  ${CLI_COMMAND} --help   # Show help"
+        echo ""
+
+        # Show quick start info
+        echo -e "${CYAN}Quick Start:${NC}"
+        echo "  1. Run: ${CLI_COMMAND}"
+        echo "  2. Configure your Ollama server URL if needed"
+        echo "  3. Start chatting with your AI assistant!"
     else
-        log_warning "To start using Qwen Code, please run:"
+        log_warning "To start using Ollama Code, please run:"
         echo ""
         local PROFILE_FILE
         PROFILE_FILE=$(get_shell_profile)
         echo "  source ${PROFILE_FILE}"
         echo ""
-        echo "Or simply restart your terminal, then run: qwen"
+        echo "Or simply restart your terminal, then run: ${CLI_COMMAND}"
     fi
 }
 

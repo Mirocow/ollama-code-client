@@ -4,37 +4,43 @@ This guide describes how to install Node.js and Ollama Code with source informat
 
 ## Overview
 
-The installation scripts automate the process of installing Node.js (if not present or below version 20) and Ollama Code, while capturing and storing the installation source information for analytics and tracking purposes.
+The installation scripts automate the process of installing Node.js (if not present or below version 20), pnpm, and Ollama Code, while capturing and storing the installation source information for analytics and tracking purposes.
 
 ## Installation Scripts
 
 We provide platform-specific installation scripts:
 
-- **Linux/macOS**: `install-qwen-with-source.sh`
-- **Windows**: `install-qwen-with-source.bat`
+- **Linux/macOS**: `install-ollama-with-source.sh`
+- **Windows**: `install-ollama-with-source.bat`
 
 ## Linux/macOS Installation
 
-### Script: install-qwen-with-source.sh
+### Script: install-ollama-with-source.sh
 
 #### Features:
 
 - Checks for existing Node.js installation and version
 - Installs Node.js 20+ if needed using NVM
+- Installs pnpm package manager
+- Installs system dependencies (build tools, git, etc.)
 - Installs Ollama Code globally with source information
 - Stores the source information in `~/.ollama-code/source.json`
+- Supports building from source code
 
 #### Usage:
 
 ```bash
 # Install with a specific source
-sh install-qwen-with-source.sh --source github
+./install-ollama-with-source.sh --source github
 
 # Install with internal source
-sh install-qwen-with-source.sh -s internal
+./install-ollama-with-source.sh -s internal
+
+# Build from local source
+./install-ollama-with-source.sh --source local-build --build-from-source --dir /path/to/ollama-code
 
 # Show help
-sh install-qwen-with-source.sh --help
+./install-ollama-with-source.sh --help
 ```
 
 #### Supported Source Values:
@@ -47,9 +53,21 @@ sh install-qwen-with-source.sh --help
 #### How it Works:
 
 1. The script accepts a `--source` parameter to specify where Ollama Code is being installed from
-2. It installs Node.js if needed
-3. It installs Ollama Code globally
-4. It creates `~/.ollama-code/source.json` with the specified source information
+2. It installs system dependencies if needed (git, build tools, etc.)
+3. It installs Node.js if needed
+4. It installs pnpm package manager
+5. It installs Ollama Code globally (or builds from source)
+6. It creates `~/.ollama-code/source.json` with the specified source information
+
+#### Platform-Specific Notes:
+
+**macOS:**
+- Requires Xcode Command Line Tools (will prompt to install if missing)
+- Homebrew is recommended for installing dependencies
+
+**Linux:**
+- Supports apt, yum, dnf, and pacman package managers
+- Build tools (gcc, make) are required for native modules
 
 #### Important Notes:
 
@@ -65,17 +83,19 @@ This is required to load the newly installed Node.js and Ollama Code into your P
 
 #### Prerequisites:
 
-- curl (for NVM installation and script download)
+- curl or wget (for NVM installation and script download)
 - bash-compatible shell
+- (Optional) Homebrew on macOS
 
 ## Windows Installation
 
-### Script: install-qwen-with-source.bat
+### Script: install-ollama-with-source.bat
 
 #### Features:
 
-- Checks for existing Node.js installation and version (requires version 18+)
-- Automatically downloads and installs Node.js 24 LTS if not present or version is too low
+- Checks for existing Node.js installation and version (requires version 20+)
+- Automatically downloads and installs Node.js 20 LTS if not present or version is too low
+- Installs pnpm package manager
 - Installs Ollama Code globally with source information
 - Stores the source information in `%USERPROFILE%\.ollama-code\source.json`
 
@@ -97,13 +117,13 @@ This is required to load the newly installed Node.js and Ollama Code into your P
 
 ```powershell
 # Install with a specific source using --source parameter
-./install-qwen-with-source.bat --source github
+./install-ollama-with-source.bat --source github
 
 # Install with short parameter
-./install-qwen-with-source.bat -s internal
+./install-ollama-with-source.bat -s internal
 
 # Use default source (unknown)
-./install-qwen-with-source.bat
+./install-ollama-with-source.bat
 ```
 
 #### Supported Source Values:
@@ -116,10 +136,11 @@ This is required to load the newly installed Node.js and Ollama Code into your P
 #### How it Works:
 
 1. The script accepts a `--source` or `-s` parameter to specify where Ollama Code is being installed from
-2. It checks if Node.js is already installed and if the version is 18 or higher
-3. If Node.js is not installed or version is too low, it automatically downloads and installs Node.js 24 LTS
-4. It installs Ollama Code globally using npm
-5. It creates `%USERPROFILE%\.ollama-code\source.json` with the specified source information
+2. It checks if Node.js is already installed and if the version is 20 or higher
+3. If Node.js is not installed or version is too low, it automatically downloads and installs Node.js 20 LTS
+4. It installs pnpm if not available
+5. It installs Ollama Code globally using npm
+6. It creates `%USERPROFILE%\.ollama-code\source.json` with the specified source information
 
 #### Why Administrator Privileges are Required:
 
@@ -146,22 +167,18 @@ The `source.json` file contains:
 
 ```json
 {
-  "source": "github"
+  "source": "github",
+  "installed_at": "2024-01-15T10:30:00",
+  "platform": "macos",
+  "arch": "arm64"
 }
 ```
 
 ### How the Source Information is Used
 
-1. **Telemetry Tracking**: The source information is included in RUM (Real User Monitoring) telemetry logs
+1. **Telemetry Tracking**: The source information is included in telemetry logs
 2. **Analytics**: Helps understand how users are discovering and installing Ollama Code
 3. **Distribution Analysis**: Tracks which distribution channels are most popular
-
-### Technical Implementation
-
-- The source information is stored as a separate JSON file
-- The `QwenLogger` class reads this file during telemetry initialization
-- The source is included in the `app.channel` field of the RUM payload
-- The implementation gracefully handles missing files, unknown values, and parsing errors
 
 ### Verification
 
@@ -185,21 +202,37 @@ If you prefer not to use the installation scripts or don't want source tracking:
 
 ### Prerequisites
 
-```bash
-# Node.js 20+
-curl -qL https://www.npmjs.com/install.sh | sh
-```
+- Node.js 20+ (https://nodejs.org/)
+- pnpm (recommended) or npm
 
 ### NPM Installation
 
 ```bash
+# Using npm
 npm install -g @ollama-code/ollama-code@latest
+
+# Using pnpm
+pnpm add -g @ollama-code/ollama-code@latest
 ```
 
-### Homebrew (macOS, Linux)
+### Build from Source
 
 ```bash
-brew install ollama-code
+# Clone the repository
+git clone http://178.140.10.58:8082/ai/ollama-code.git
+cd ollama-code
+
+# Install dependencies
+pnpm install
+
+# Build the project
+pnpm run build
+
+# Bundle CLI
+pnpm run bundle
+
+# Link globally
+npm link
 ```
 
 ## Troubleshooting
@@ -209,38 +242,61 @@ brew install ollama-code
 **Linux/macOS:**
 
 ```bash
-# Run with sh
-sh install-qwen-with-source.sh --source github
+# Make sure script is executable
+chmod +x install-ollama-with-source.sh
+
+# Run the script
+./install-ollama-with-source.sh --source github
 ```
 
 **Windows (PowerShell as Administrator):**
 
 ```powershell
 # Run the script with --source parameter
-./install-qwen-with-source.bat --source github
+./install-ollama-with-source.bat --source github
 
 # Or with short parameter
-./install-qwen-with-source.bat -s github
+./install-ollama-with-source.bat -s github
 ```
 
 ### Node.js Installation Issues
 
 **Linux/macOS:**
 
-- Ensure NVM is installed: `curl -o- https://ollama-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install_nvm.sh | bash`
+- Ensure NVM is installed: `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash`
 - Restart your terminal or run: `source ~/.bashrc`
 
 **Windows:**
 
-- Install NVM for Windows from: https://github.com/coreybutler/nvm-windows/releases
+- Install Node.js from: https://nodejs.org/
 - After installation, run the script again
 
 ### Permission Issues
 
 You may need administrative privileges for global npm installation:
 
-- **Linux/macOS**: Use `sudo` with npm
-- **Windows**: Run PowerShell as Administrator (required for Node.js installation and global npm packages)
+- **Linux/macOS**: Use `sudo` with npm or use user-level prefix (script handles this automatically)
+- **Windows**: Run PowerShell as Administrator
+
+### Native Module Issues
+
+If you encounter errors with native modules (like `node-pty`):
+
+**macOS:**
+```bash
+xcode-select --install
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install build-essential python3
+```
+
+**CentOS/RHEL:**
+```bash
+sudo yum groupinstall "Development Tools"
+sudo yum install python3
+```
 
 ## Notes
 

@@ -1,14 +1,17 @@
 @echo off
-REM Script to install Node.js and Qwen Code with source information
+REM Script to install Node.js and Ollama Code with source information
 REM This script handles the installation process and sets the installation source
 REM
-REM Usage: install-qwen-with-source.bat --source [github|npm|internal|local-build]
-REM        install-qwen-with-source.bat -s [github|npm|internal|local-build]
+REM Usage: install-ollama-with-source.bat --source [github|npm|internal|local-build]
+REM        install-ollama-with-source.bat -s [github|npm|internal|local-build]
 REM
 
 setlocal enabledelayedexpansion
 
 set "SOURCE=unknown"
+set "PACKAGE_NAME=@ollama-code/ollama-code"
+set "CLI_COMMAND=ollama-code"
+set "DATA_DIR_NAME=.ollama-code"
 
 REM Parse command line arguments
 :parse_args
@@ -25,6 +28,8 @@ if /i "%~1"=="-s" (
     shift
     goto parse_args
 )
+if /i "%~1"=="--help" goto show_help
+if /i "%~1"=="-h" goto show_help
 if /i "%~1"=="github" set "SOURCE=github"
 if /i "%~1"=="npm" set "SOURCE=npm"
 if /i "%~1"=="internal" set "SOURCE=internal"
@@ -32,11 +37,30 @@ if /i "%~1"=="local-build" set "SOURCE=local-build"
 shift
 goto parse_args
 
+:show_help
+echo Usage: %~nx0 [OPTIONS]
+echo.
+echo Options:
+echo   -s, --source SOURCE    Specify the installation source (e.g., github, npm, internal)
+echo   -h, --help             Show this help message
+echo.
+echo Supported Source Values:
+echo   github       - Installed from GitHub repository
+echo   npm          - Installed from npm registry
+echo   internal     - Internal installation
+echo   local-build  - Local build installation
+echo.
+echo Examples:
+echo   %~nx0 --source github
+echo   %~nx0 -s npm
+exit /b 0
+
 :end_parse
 
-echo ===========================================
-echo Qwen Code Installation Script with Source Tracking
-echo ===========================================
+echo.
+echo ==========================================
+echo    Ollama Code Installation Script
+echo ==========================================
 echo.
 echo INFO: Installation source: %SOURCE%
 echo.
@@ -46,22 +70,22 @@ call :CheckCommandExists node
 if !ERRORLEVEL! EQU 0 (
     for /f "delims=" %%i in ('node --version') do set "NODE_VERSION=%%i"
     echo INFO: Node.js is already installed: !NODE_VERSION!
-    
+
     REM Extract major version number
     set "MAJOR_VERSION=!NODE_VERSION:v=!"
     for /f "tokens=1 delims=." %%a in ("!MAJOR_VERSION!") do (
         set "MAJOR_VERSION=%%a"
     )
-    
+
     if !MAJOR_VERSION! GEQ 20 (
         echo INFO: Node.js version !NODE_VERSION! is sufficient. Skipping Node.js installation.
-        goto :InstallQwenCode
+        goto :InstallOllamaCode
     ) else (
         echo INFO: Node.js version !NODE_VERSION! is too low. Need version 20 or higher.
         echo INFO: Installing Node.js 20+
         call :InstallNodeJSDirectly
         if !ERRORLEVEL! NEQ 0 (
-            echo ERROR: Failed to install Node.js. Cannot continue with Qwen Code installation.
+            echo ERROR: Failed to install Node.js. Cannot continue with Ollama Code installation.
             exit /b 1
         )
     )
@@ -69,14 +93,14 @@ if !ERRORLEVEL! EQU 0 (
     echo INFO: Node.js not found. Installing Node.js 20+
     call :InstallNodeJSDirectly
     if !ERRORLEVEL! NEQ 0 (
-        echo ERROR: Failed to install Node.js. Cannot continue with Qwen Code installation.
+        echo ERROR: Failed to install Node.js. Cannot continue with Ollama Code installation.
         exit /b 1
     )
 )
 
-:InstallQwenCode
+:InstallOllamaCode
 
-REM Verify npm is available before installing Qwen Code
+REM Verify npm is available before installing Ollama Code
 REM Always use full path to npm to avoid local node_modules conflicts
 set "NODEJS_PATH=C:\Program Files\nodejs"
 set "NODEJS_PATH_X86=C:\Program Files (x86)\nodejs"
@@ -98,48 +122,84 @@ if exist "!NODEJS_PATH!\npm.cmd" (
     set "NPM_CMD=npm"
 )
 
-REM Install Qwen Code with source information
-echo INFO: Installing Qwen Code with source: %SOURCE%
-echo INFO: Running: %NPM_CMD% install -g @qwen-code/qwen-code
-call "%NPM_CMD%" install -g @qwen-code/qwen-code
+REM Check if pnpm is installed, install if not
+call :CheckCommandExists pnpm
+if !ERRORLEVEL! NEQ 0 (
+    echo INFO: Installing pnpm...
+    call "%NPM_CMD%" install -g pnpm
+    if !ERRORLEVEL! NEQ 0 (
+        echo WARNING: Failed to install pnpm. Continuing with npm.
+    ) else (
+        echo SUCCESS: pnpm installed successfully.
+    )
+)
+
+REM Install Ollama Code with source information
+echo INFO: Installing Ollama Code with source: %SOURCE%
+echo INFO: Running: %NPM_CMD% install -g %PACKAGE_NAME%
+call "%NPM_CMD%" install -g %PACKAGE_NAME%
 
 if %ERRORLEVEL% EQU 0 (
-    echo SUCCESS: Qwen Code installed successfully!
+    echo SUCCESS: Ollama Code installed successfully!
 ) else (
-    echo ERROR: Failed to install Qwen Code.
+    echo ERROR: Failed to install Ollama Code.
     exit /b 1
 )
 
-REM After installation, create source.json in the .qwen directory
-echo INFO: Creating source.json in %USERPROFILE%\.qwen...
+REM After installation, create source.json in the .ollama-code directory
+echo INFO: Creating source.json in %USERPROFILE%\%DATA_DIR_NAME%...
 
-set "QWEN_DIR=%USERPROFILE%\.qwen"
-if not exist "%QWEN_DIR%" (
-    mkdir "%QWEN_DIR%"
+set "DATA_DIR=%USERPROFILE%\%DATA_DIR_NAME%"
+if not exist "%DATA_DIR%" (
+    mkdir "%DATA_DIR%"
 )
+
+REM Get current timestamp
+for /f "tokens=1-3 delims=/ " %%a in ('date /t') do set "INSTALL_DATE=%%c-%%a-%%b"
+for /f "tokens=1-2 delims=: " %%a in ('time /t') do set "INSTALL_TIME=%%a:%%b:00"
+set "INSTALL_TIMESTAMP=%INSTALL_DATE%T%INSTALL_TIME%"
+
+REM Get platform info
+set "PLATFORM=windows"
+set "ARCH=%PROCESSOR_ARCHITECTURE%"
+if "%ARCH%"=="AMD64" set "ARCH=x64"
 
 REM Create the source.json file with the installation source
-echo { > "%QWEN_DIR%\source.json"
-echo   "source": "%SOURCE%" >> "%QWEN_DIR%\source.json"
-echo } >> "%QWEN_DIR%\source.json"
+echo { > "%DATA_DIR%\source.json"
+echo   "source": "%SOURCE%", >> "%DATA_DIR%\source.json"
+echo   "installed_at": "%INSTALL_TIMESTAMP%", >> "%DATA_DIR%\source.json"
+echo   "platform": "%PLATFORM%", >> "%DATA_DIR%\source.json"
+echo   "arch": "%ARCH%" >> "%DATA_DIR%\source.json"
+echo } >> "%DATA_DIR%\source.json"
 
-echo SUCCESS: Installation source saved to %USERPROFILE%\.qwen\source.json
+echo SUCCESS: Installation source saved to %USERPROFILE%\%DATA_DIR_NAME%\source.json
 
 REM Verify installation
-call :CheckCommandExists qwen
+call :CheckCommandExists %CLI_COMMAND%
 if %ERRORLEVEL% EQU 0 (
-    echo SUCCESS: Qwen Code is available as 'qwen' command.
-    call qwen --version
+    echo SUCCESS: Ollama Code is available as '%CLI_COMMAND%' command.
+    call %CLI_COMMAND% --version
 ) else (
-    echo WARNING: Qwen Code may not be in PATH. Please check your npm global bin directory.
+    echo WARNING: Ollama Code may not be in PATH. Please check your npm global bin directory.
+    echo INFO: You may need to restart your command prompt.
 )
 
 echo.
-echo ===========================================
+echo ==========================================
 echo SUCCESS: Installation completed!
-echo The source information is stored in %USERPROFILE%\.qwen\source.json
+echo ==========================================
 echo.
-echo ===========================================
+echo The source information is stored in %USERPROFILE%\%DATA_DIR_NAME%\source.json
+echo.
+echo Usage:
+echo   %CLI_COMMAND%          - Start interactive session
+echo   %CLI_COMMAND% --help   - Show help
+echo.
+echo Quick Start:
+echo   1. Run: %CLI_COMMAND%
+echo   2. Configure your Ollama server URL if needed
+echo   3. Start chatting with your AI assistant!
+echo.
 
 endlocal
 exit /b 0
@@ -160,7 +220,7 @@ REM ============================================================
 echo INFO: Downloading Node.js LTS (20.x) from official website
 
 REM Create temp directory for download
-set "TEMP_DIR=%TEMP%\qwen-nodejs-install"
+set "TEMP_DIR=%TEMP%\ollama-code-nodejs-install"
 if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 
 REM Determine architecture
@@ -236,14 +296,14 @@ if !ERRORLEVEL! EQU 0 (
 ) else (
     echo WARNING: Node.js installed but not found in PATH.
     echo INFO: Trying to use Node.js from default installation path
-    
+
     REM Try to use Node.js directly from installation path
     set "NODE_PATH=C:\Program Files\nodejs"
     if exist "%NODE_PATH%\node.exe" (
         echo INFO: Found Node.js at %NODE_PATH%
         REM Update PATH for current session
         set "PATH=%PATH%;%NODE_PATH%"
-        
+
         REM Test if node works now
         "%NODE_PATH%\node.exe" --version >nul 2>&1
         if !ERRORLEVEL! EQU 0 (
@@ -252,14 +312,14 @@ if !ERRORLEVEL! EQU 0 (
             exit /b 0
         )
     )
-    
+
     REM Try x86 path
     set "NODE_PATH_X86=C:\Program Files (x86)\nodejs"
     if exist "%NODE_PATH_X86%\node.exe" (
         echo INFO: Found Node.js at %NODE_PATH_X86%
         REM Update PATH for current session
         set "PATH=%PATH%;%NODE_PATH_X86%"
-        
+
         REM Test if node works now
         "%NODE_PATH_X86%\node.exe" --version >nul 2>&1
         if !ERRORLEVEL! EQU 0 (
@@ -268,7 +328,7 @@ if !ERRORLEVEL! EQU 0 (
             exit /b 0
         )
     )
-    
+
     echo ERROR: Node.js installation completed but cannot be executed
     exit /b 1
 )
