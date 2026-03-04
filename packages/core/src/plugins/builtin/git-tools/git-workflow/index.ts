@@ -58,7 +58,11 @@ export type GitWorkflowOperation =
   | 'create_pr'
   | 'create_merge'
   | 'clone'
-  | 'remote_info';
+  | 'remote_info'
+  | 'auth_status'
+  | 'auth_login'
+  | 'auth_logout'
+  | 'auth_token';
 
 /**
  * Parameters for the Git Workflow Tool
@@ -606,6 +610,275 @@ https://${remoteInfo.host}/${remoteInfo.owner}/${remoteInfo.repo}/-/merge_reques
 
     return { success: true, output: lines.join('\n') };
   },
+
+  // ---- AUTH STATUS ----
+  auth_status: (args, cwd) => {
+    const platform = args['platform'] || 'auto'; // 'github', 'gitlab', 'auto'
+    const remoteInfo = getRemoteInfo(cwd);
+
+    const results: string[] = ['# Git Authentication Status', ''];
+
+    // Check Git credentials (global)
+    const gitName = executeGitCommand('git config --global user.name', cwd);
+    const gitEmail = executeGitCommand('git config --global user.email', cwd);
+    results.push('## Git Configuration');
+    results.push(`- **User Name:** ${gitName.success ? gitName.output : 'Not set'}`);
+    results.push(`- **User Email:** ${gitEmail.success ? gitEmail.output : 'Not set'}`);
+    results.push('');
+
+    // Check GitHub CLI (if platform is github or auto)
+    if (platform === 'github' || platform === 'auto') {
+      const ghAuth = executeGitCommand('gh auth status', cwd);
+      results.push('## GitHub CLI (gh)');
+      if (ghAuth.success) {
+        results.push('✅ **Status:** Authenticated');
+        results.push('```');
+        results.push(ghAuth.output);
+        results.push('```');
+      } else {
+        results.push('❌ **Status:** Not authenticated or not installed');
+        if (ghAuth.error?.includes('not found')) {
+          results.push('');
+          results.push('**Install:** `brew install gh` or see https://cli.github.com');
+        }
+      }
+      results.push('');
+    }
+
+    // Check GitLab CLI (if platform is gitlab or auto)
+    if (platform === 'gitlab' || platform === 'auto') {
+      const glabAuth = executeGitCommand('glab auth status', cwd);
+      results.push('## GitLab CLI (glab)');
+      if (glabAuth.success) {
+        results.push('✅ **Status:** Authenticated');
+        results.push('```');
+        results.push(glabAuth.output);
+        results.push('```');
+      } else {
+        results.push('❌ **Status:** Not authenticated or not installed');
+        if (glabAuth.error?.includes('not found')) {
+          results.push('');
+          results.push('**Install:** `brew install glab` or see https://gitlab.com/gitlab-org/cli');
+        }
+      }
+      results.push('');
+    }
+
+    // Check SSH keys
+    results.push('## SSH Keys');
+    const sshDir = executeGitCommand('ls -la ~/.ssh/*.pub 2>/dev/null || echo "No public keys found"', cwd);
+    results.push('```');
+    results.push(sshDir.output || 'No SSH public keys found');
+    results.push('```');
+    results.push('');
+
+    // Remote info
+    if (remoteInfo) {
+      results.push('## Detected Remote');
+      results.push(`- **Host:** ${remoteInfo.host}`);
+      results.push(`- **Platform:** ${remoteInfo.host.includes('github.com') ? 'GitHub' : 'GitLab'}`);
+    }
+
+    return { success: true, output: results.join('\n') };
+  },
+
+  // ---- AUTH LOGIN ----
+  auth_login: (args, cwd) => {
+    const platform = args['platform'] || 'auto'; // 'github', 'gitlab', 'auto'
+    const method = args['method'] || 'web'; // 'web', 'token', 'ssh'
+    const hostname = args['hostname'] as string; // for self-hosted GitLab
+    const token = args['token'] as string;
+    const remoteInfo = getRemoteInfo(cwd);
+
+    const lines: string[] = ['# Git Authentication Setup', ''];
+
+    // Determine platform
+    let detectedPlatform = platform;
+    if (platform === 'auto' && remoteInfo) {
+      detectedPlatform = remoteInfo.host.includes('github.com') ? 'github' : 'gitlab';
+    }
+
+    if (detectedPlatform === 'github' || platform === 'auto') {
+      lines.push('## GitHub Authentication');
+      lines.push('');
+
+      if (method === 'token' && token) {
+        // Login with token
+        const loginResult = executeGitCommand(`echo "${token}" | gh auth login --with-token`, cwd);
+        if (loginResult.success) {
+          lines.push('✅ **Successfully authenticated with GitHub using token!**');
+        } else {
+          lines.push(`❌ **Failed to authenticate:** ${loginResult.error}`);
+        }
+      } else {
+        // Interactive login instructions
+        lines.push('### Method 1: Interactive Login (Recommended)');
+        lines.push('```bash');
+        lines.push('gh auth login');
+        lines.push('```');
+        lines.push('');
+        lines.push('Follow the prompts:');
+        lines.push('1. Choose `GitHub.com` or `GitHub Enterprise`');
+        lines.push('2. Choose `HTTPS` or `SSH` protocol');
+        lines.push('3. Choose `Login with a web browser` (easiest)');
+        lines.push('');
+        lines.push('### Method 2: Login with Personal Access Token');
+        lines.push('```bash');
+        lines.push('# Create token at: https://github.com/settings/tokens');
+        lines.push('# Required scopes: repo, workflow, user');
+        lines.push('echo "YOUR_TOKEN" | gh auth login --with-token');
+        lines.push('```');
+        lines.push('');
+        lines.push('### Method 3: SSH Key Setup');
+        lines.push('```bash');
+        lines.push('# Generate SSH key');
+        lines.push('ssh-keygen -t ed25519 -C "your_email@example.com"');
+        lines.push('');
+        lines.push('# Start SSH agent');
+        lines.push('eval "$(ssh-agent -s)"');
+        lines.push('');
+        lines.push('# Add key to agent');
+        lines.push('ssh-add ~/.ssh/id_ed25519');
+        lines.push('');
+        lines.push('# Add public key to GitHub:');
+        lines.push('# https://github.com/settings/ssh/new');
+        lines.push('cat ~/.ssh/id_ed25519.pub');
+        lines.push('```');
+      }
+      lines.push('');
+    }
+
+    if (detectedPlatform === 'gitlab' || (platform === 'auto' && !remoteInfo?.host?.includes('github.com'))) {
+      lines.push('## GitLab Authentication');
+      lines.push('');
+
+      const gitlabHost = hostname || remoteInfo?.host || 'gitlab.com';
+
+      if (method === 'token' && token) {
+        const loginResult = executeGitCommand(`glab auth login --hostname ${gitlabHost} --token ${token}`, cwd);
+        if (loginResult.success) {
+          lines.push(`✅ **Successfully authenticated with ${gitlabHost} using token!**`);
+        } else {
+          lines.push(`❌ **Failed to authenticate:** ${loginResult.error}`);
+        }
+      } else {
+        lines.push('### Method 1: Interactive Login (Recommended)');
+        lines.push('```bash');
+        if (gitlabHost !== 'gitlab.com') {
+          lines.push(`glab auth login --hostname ${gitlabHost}`);
+        } else {
+          lines.push('glab auth login');
+        }
+        lines.push('```');
+        lines.push('');
+        lines.push('Follow the prompts:');
+        lines.push('1. Choose `gitlab.com` or `Self-hosted GitLab`');
+        lines.push('2. Choose `HTTPS` or `SSH` protocol');
+        lines.push('3. Paste your Personal Access Token');
+        lines.push('');
+        lines.push('### Method 2: Login with Personal Access Token');
+        lines.push('```bash');
+        lines.push(`# Create token at: https://${gitlabHost}/-/profile/personal_access_tokens`);
+        lines.push('# Required scopes: api, write_repository');
+        lines.push(`glab auth login --hostname ${gitlabHost} --token YOUR_TOKEN`);
+        lines.push('```');
+        lines.push('');
+        lines.push('### Method 3: SSH Key Setup');
+        lines.push('```bash');
+        lines.push('# Generate SSH key');
+        lines.push('ssh-keygen -t ed25519 -C "your_email@example.com"');
+        lines.push('');
+        lines.push('# Add public key to GitLab:');
+        lines.push(`# https://${gitlabHost}/-/profile/keys`);
+        lines.push('cat ~/.ssh/id_ed25519.pub');
+        lines.push('```');
+      }
+    }
+
+    lines.push('');
+    lines.push('## Verify Authentication');
+    lines.push('```bash');
+    lines.push('# GitHub');
+    lines.push('gh auth status');
+    lines.push('');
+    lines.push('# GitLab');
+    lines.push('glab auth status');
+    lines.push('```');
+
+    return { success: true, output: lines.join('\n') };
+  },
+
+  // ---- AUTH LOGOUT ----
+  auth_logout: (args, cwd) => {
+    const platform = args['platform'] || 'auto'; // 'github', 'gitlab', 'auto', 'all'
+    const hostname = args['hostname'] as string;
+
+    const lines: string[] = ['# Git Authentication Logout', ''];
+
+    if (platform === 'github' || platform === 'all') {
+      const ghLogout = executeGitCommand('gh auth logout', cwd);
+      lines.push('## GitHub');
+      if (ghLogout.success || ghLogout.output?.includes('logged out')) {
+        lines.push('✅ Successfully logged out from GitHub');
+      } else {
+        lines.push(`Result: ${ghLogout.output || ghLogout.error || 'Not logged in'}`);
+      }
+      lines.push('');
+    }
+
+    if (platform === 'gitlab' || platform === 'all' || platform === 'auto') {
+      const glabCmd = hostname ? `glab auth logout --hostname ${hostname}` : 'glab auth logout';
+      const glabLogout = executeGitCommand(glabCmd, cwd);
+      lines.push('## GitLab');
+      if (glabLogout.success || glabLogout.output?.includes('logged out')) {
+        lines.push('✅ Successfully logged out from GitLab');
+      } else {
+        lines.push(`Result: ${glabLogout.output || glabLogout.error || 'Not logged in'}`);
+      }
+    }
+
+    return { success: true, output: lines.join('\n') };
+  },
+
+  // ---- AUTH TOKEN ----
+  auth_token: (args, cwd) => {
+    const platform = args['platform']; // 'github' or 'gitlab' (required)
+    const token = args['token'] as string; // required
+    const hostname = args['hostname'] as string; // for self-hosted GitLab
+
+    if (!platform || !token) {
+      return {
+        success: false,
+        output: '',
+        error: 'Both "platform" (github/gitlab) and "token" are required',
+      };
+    }
+
+    const lines: string[] = ['# Setting Authentication Token', ''];
+
+    if (platform === 'github') {
+      const loginResult = executeGitCommand(`echo "${token}" | gh auth login --with-token`, cwd);
+      if (loginResult.success) {
+        lines.push('✅ **GitHub token set successfully!**');
+        lines.push('');
+        lines.push('Verify with: `gh auth status`');
+      } else {
+        lines.push(`❌ **Failed:** ${loginResult.error}`);
+      }
+    } else if (platform === 'gitlab') {
+      const gitlabHost = hostname || 'gitlab.com';
+      const loginResult = executeGitCommand(`glab auth login --hostname ${gitlabHost} --token ${token}`, cwd);
+      if (loginResult.success) {
+        lines.push(`✅ **GitLab token set successfully for ${gitlabHost}!**`);
+        lines.push('');
+        lines.push('Verify with: `glab auth status`');
+      } else {
+        lines.push(`❌ **Failed:** ${loginResult.error}`);
+      }
+    }
+
+    return { success: true, output: lines.join('\n') };
+  },
 };
 
 // ============================================================================
@@ -814,6 +1087,10 @@ const gitWorkflowToolSchema = {
         'create_merge',
         'clone',
         'remote_info',
+        'auth_status',
+        'auth_login',
+        'auth_logout',
+        'auth_token',
       ],
       description: 'Type of git workflow operation to perform',
     },
@@ -863,6 +1140,27 @@ function getGitWorkflowToolDescription(): string {
 
 ### Clone Operations
 - **clone**: Clone repository. Args: \`url\`, \`directory\`, \`branch\`, \`depth\`, \`singleBranch\`, \`recursive\`
+
+### Authentication Operations
+- **auth_status**: Check authentication status for GitHub/GitLab. Args: \`platform\` ('github', 'gitlab', 'auto')
+- **auth_login**: Get instructions for authentication setup. Args: \`platform\`, \`method\` ('web', 'token', 'ssh'), \`hostname\` (for self-hosted GitLab), \`token\`
+- **auth_logout**: Logout from GitHub/GitLab. Args: \`platform\`, \`hostname\`
+- **auth_token**: Set authentication token. Args: \`platform\` ('github'/'gitlab'), \`token\`, \`hostname\` (for self-hosted GitLab)
+
+## Authentication Methods
+
+### GitHub
+1. **Interactive (Recommended)**: \`gh auth login\` - opens browser for OAuth
+2. **Token**: Create at https://github.com/settings/tokens (scopes: repo, workflow, user)
+3. **SSH**: Generate key and add to https://github.com/settings/ssh/new
+
+### GitLab
+1. **Interactive (Recommended)**: \`glab auth login\` - paste token when prompted
+2. **Token**: Create at https://gitlab.com/-/profile/personal_access_tokens (scopes: api, write_repository)
+3. **SSH**: Generate key and add to https://gitlab.com/-/profile/keys
+
+### Self-Hosted GitLab
+Add \`--hostname your-gitlab.com\` to glab commands or use \`hostname\` argument.
 
 ## Usage Notes
 - **create_merge** is the recommended operation - it auto-detects GitHub vs GitLab
