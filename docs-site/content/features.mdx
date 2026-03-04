@@ -2,7 +2,25 @@
 
 Explore all the powerful features of Ollama Code.
 
-## 🆕 Latest Release (v0.16.8)
+## 🆕 Latest Release (v0.17.0)
+
+### Git Workflow Tool
+Complete git workflow integration with support for GitHub and GitLab (including self-hosted):
+- **Basic operations**: status, add, commit, push, pull, fetch
+- **Branch operations**: create, switch, merge
+- **MR/PR creation**: Auto-detect GitHub/GitLab and create merge requests
+- **Authentication**: Check status, login instructions, token management
+- **Clone repositories**: With branch, depth, and recursive options
+
+### Platform Support
+- **GitHub**: Full support via `gh` CLI
+- **GitLab.com**: Full support via `glab` CLI
+- **Self-hosted GitLab**: Auto-detection and support
+- **Fallback**: Instructions provided when CLI tools not installed
+
+---
+
+## 🆕 Previous Release (v0.16.8)
 
 ### Dependency Updates
 All core dependencies updated to latest stable versions:
@@ -38,6 +56,9 @@ Read, write, and edit files. Find files by pattern. List directories.
 
 ### Development
 Execute Python, Node.js, Go, Rust, and Java code.
+
+### Git Operations
+Complete git workflow: commit, push, pull, create branches, and MR/PR creation. Advanced operations: stash, cherry-pick, rebase, bisect.
 
 ### Search
 Search within files. Search the web. Fetch web content.

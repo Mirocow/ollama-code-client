@@ -37,6 +37,7 @@
 - 🧠 **Thinking Models** — поддержка моделей с рассуждениями (DeepSeek R1)
 - 📊 **Code Analysis** — анализ качества кода с оценкой A-F
 - 🎨 **Diagram Generator** — создание Mermaid и PlantUML диаграмм
+- 🔀 **Git Workflow** — полный git workflow (commit, push, pull, создание MR/PR)
 - 🔀 **Git Advanced** — продвинутые git операции (stash, cherry-pick, rebase, bisect)
 - 🌐 **API Tester** — тестирование REST API endpoints
 - 🏷️ **Алиасы инструментов** — короткие имена для инструментов (`run` → `run_shell_command`)
@@ -52,14 +53,14 @@
 
 ### Совместимость Node.js с node-pty
 
-| Версия Node.js | Статус               | Совместимость с node-pty |
-| -------------- | -------------------- | ------------------------ |
-| 18.x           | LTS (Maintenance)    | ✅ Работает              |
-| 20.x           | LTS (Current)        | ✅ Работает              |
-| 22.x           | LTS (Latest)         | ✅ Работает              |
-| 23.x           | Current              | ⚠️ Может работать        |
-| 24.x           | Nightly              | ❌ Не работает           |
-| 25.x           | Experimental         | ❌ **Не работает**       |
+| Версия Node.js | Статус            | Совместимость с node-pty |
+| -------------- | ----------------- | ------------------------ |
+| 18.x           | LTS (Maintenance) | ✅ Работает              |
+| 20.x           | LTS (Current)     | ✅ Работает              |
+| 22.x           | LTS (Latest)      | ✅ Работает              |
+| 23.x           | Current           | ⚠️ Может работать        |
+| 24.x           | Nightly           | ❌ Не работает           |
+| 25.x           | Experimental      | ❌ **Не работает**       |
 
 > ⚠️ **Важно**: Node.js 23+ не поддерживается. Нативный модуль `node-pty` требует Node.js 20.x или 22.x LTS. Если у вас Node.js 23+, переключитесь:
 >
@@ -202,13 +203,13 @@ npm run dev:server
 
 Добавлено 70+ новых алиасов инструментов для корректной обработки галлюцинаций моделей:
 
-| Категория          | Новые алиасы                                                                        |
-| ------------------ | ----------------------------------------------------------------------------------- |
-| **Docker**         | `docker`, `docker_dev`, `container`, `container_dev`, `docker_compose`, `compose`   |
-| **База данных**    | `database`, `db`, `sql`, `mysql`, `postgres`, `mongodb`, `redis`                    |
-| **Kubernetes**     | `kubernetes`, `k8s`, `kubectl`, `helm`                                              |
-| **CI/CD**          | `ci`, `cd`, `github_actions`, `gitlab_ci`, `jenkins`                                |
-| **Инфраструктура** | `terraform`, `ansible`, `aws`, `azure`, `gcp`                                        |
+| Категория          | Новые алиасы                                                                      |
+| ------------------ | --------------------------------------------------------------------------------- |
+| **Docker**         | `docker`, `docker_dev`, `container`, `container_dev`, `docker_compose`, `compose` |
+| **База данных**    | `database`, `db`, `sql`, `mysql`, `postgres`, `mongodb`, `redis`                  |
+| **Kubernetes**     | `kubernetes`, `k8s`, `kubectl`, `helm`                                            |
+| **CI/CD**          | `ci`, `cd`, `github_actions`, `gitlab_ci`, `jenkins`                              |
+| **Инфраструктура** | `terraform`, `ansible`, `aws`, `azure`, `gcp`                                     |
 
 ### Улучшения поддержки IDE
 

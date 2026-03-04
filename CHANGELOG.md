@@ -1,5 +1,83 @@
 # Changelog
 
+## 0.17.0
+
+_Git Workflow Tool — Complete Git Integration_
+
+### New Features
+
+#### Git Workflow Tool
+
+Complete git workflow integration with support for GitHub and GitLab (including self-hosted):
+
+| Operation       | Description                  | Key Arguments                                                                         |
+| --------------- | ---------------------------- | ------------------------------------------------------------------------------------- |
+| `status`        | Check repository status      | `short`, `branch`                                                                     |
+| `add`           | Stage files                  | `files` (array or string)                                                             |
+| `commit`        | Commit staged changes        | `message`, `amend`, `noVerify`, `signoff`                                             |
+| `push`          | Push to remote               | `remote`, `branch`, `setUpstream`, `force`                                            |
+| `pull`          | Pull from remote             | `remote`, `branch`, `rebase`                                                          |
+| `fetch`         | Fetch from remote            | `remote`, `branch`, `all`, `prune`                                                    |
+| `merge`         | Merge branches               | `branch`, `noFf`, `ffOnly`, `message`                                                 |
+| `create_branch` | Create new branch            | `name`, `checkout`, `startPoint`                                                      |
+| `switch`        | Switch to branch             | `branch`, `create`                                                                    |
+| `log`           | Show commit history          | `oneline`, `graph`, `count`, `branch`                                                 |
+| `diff`          | Show differences             | `staged`, `file`, `branch1`, `branch2`                                                |
+| `clone`         | Clone repository             | `url`, `directory`, `branch`, `depth`                                                 |
+| `remote_info`   | Get remote info              | —                                                                                     |
+| `create_mr`     | Create GitLab Merge Request  | `title`, `description`, `targetBranch`, `sourceBranch`, `assignee`, `labels`, `draft` |
+| `create_pr`     | Create GitHub Pull Request   | `title`, `description`, `base`, `head`, `assignee`, `labels`, `draft`                 |
+| `create_merge`  | Auto-detect and create MR/PR | Works with both GitHub and GitLab (including self-hosted)                             |
+
+#### Authentication Operations
+
+| Operation     | Description                                   |
+| ------------- | --------------------------------------------- |
+| `auth_status` | Check authentication status for GitHub/GitLab |
+| `auth_login`  | Interactive login instructions                |
+| `auth_logout` | Logout from GitHub/GitLab                     |
+| `auth_token`  | Set authentication token                      |
+
+### Platform Support
+
+- **GitHub**: Full support via `gh` CLI
+- **GitLab.com**: Full support via `glab` CLI
+- **Self-hosted GitLab**: Auto-detection and support
+- **Fallback**: Instructions provided when CLI tools not installed
+
+### Tool Aliases
+
+New aliases for git workflow operations:
+
+| Alias                            | Tool           |
+| -------------------------------- | -------------- |
+| `commit`, `push`, `pull`         | `git_workflow` |
+| `mr`, `pr`, `create_merge`       | `git_workflow` |
+| `clone`                          | `git_workflow` |
+| `stash`, `rebase`, `cherry_pick` | `git_advanced` |
+
+### Files Added
+
+| File                                                                | Description                      |
+| ------------------------------------------------------------------- | -------------------------------- |
+| `packages/core/src/plugins/builtin/git-tools/git-workflow/index.ts` | Git Workflow tool implementation |
+
+### Files Modified
+
+| File                                                   | Changes                                    |
+| ------------------------------------------------------ | ------------------------------------------ |
+| `packages/core/src/plugins/builtin/git-tools/index.ts` | Export GitWorkflowTool                     |
+| `packages/core/src/tools/tool-names.ts`                | Add GIT_WORKFLOW, GIT_ADVANCED and aliases |
+
+### Commits
+
+```
+e78b2636 feat(git-workflow): add create_merge and clone operations
+7e67b2b5 feat(git-tools): add git_workflow tool for basic git operations
+```
+
+---
+
 ## 0.16.9
 
 _Tool Aliases Expansion & IDE Support Improvements_
@@ -10,14 +88,14 @@ _Tool Aliases Expansion & IDE Support Improvements_
 
 Added 70+ new tool aliases to handle common model hallucinations gracefully:
 
-| Category        | New Aliases                                                                      |
-| --------------- | -------------------------------------------------------------------------------- |
-| **Docker**      | `docker`, `docker_dev`, `container`, `container_dev`, `docker_compose`, `compose`, `podman` |
-| **Database**    | `database`, `db`, `db_dev`, `sql`, `sql_dev`, `mysql`, `postgresql`, `postgres`, `psql`, `sqlite`, `mongodb`, `mongo`, `redis`, `redis_cli` |
-| **Kubernetes**  | `kubernetes`, `k8s`, `kubectl`, `helm`, `k8s_dev`                                |
-| **CI/CD**       | `ci`, `cd`, `github_actions`, `gitlab_ci`, `jenkins`, `circleci`                  |
-| **Infrastructure** | `terraform`, `tf`, `ansible`, `aws`, `azure`, `gcp`                           |
-| **Common Tools** | `ssh`, `scp`, `rsync`, `tar`, `zip`, `unzip`                                    |
+| Category           | New Aliases                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Docker**         | `docker`, `docker_dev`, `container`, `container_dev`, `docker_compose`, `compose`, `podman`                                                 |
+| **Database**       | `database`, `db`, `db_dev`, `sql`, `sql_dev`, `mysql`, `postgresql`, `postgres`, `psql`, `sqlite`, `mongodb`, `mongo`, `redis`, `redis_cli` |
+| **Kubernetes**     | `kubernetes`, `k8s`, `kubectl`, `helm`, `k8s_dev`                                                                                           |
+| **CI/CD**          | `ci`, `cd`, `github_actions`, `gitlab_ci`, `jenkins`, `circleci`                                                                            |
+| **Infrastructure** | `terraform`, `tf`, `ansible`, `aws`, `azure`, `gcp`                                                                                         |
+| **Common Tools**   | `ssh`, `scp`, `rsync`, `tar`, `zip`, `unzip`                                                                                                |
 
 All these aliases redirect to `run_shell_command` for seamless command execution.
 
@@ -25,11 +103,11 @@ All these aliases redirect to `run_shell_command` for seamless command execution
 
 Added TypeScript to workspace root for better IDE support:
 
-| Fix                     | Description                                              |
-| ----------------------- | -------------------------------------------------------- |
-| `lib.es2023.d.ts`       | Resolved "Cannot find lib.es2023.d.ts" error             |
-| `vitest/globals`        | Resolved "Cannot find type definition file" error        |
-| Global types            | Fixed "Cannot find global type 'Promise/Boolean'" errors |
+| Fix               | Description                                              |
+| ----------------- | -------------------------------------------------------- |
+| `lib.es2023.d.ts` | Resolved "Cannot find lib.es2023.d.ts" error             |
+| `vitest/globals`  | Resolved "Cannot find type definition file" error        |
+| Global types      | Fixed "Cannot find global type 'Promise/Boolean'" errors |
 
 ### Documentation Updates
 
@@ -59,17 +137,18 @@ Added comprehensive Node.js compatibility table for `node-pty`:
 #### Test Snapshots Migration
 
 Moved shell test snapshots to correct plugin directory:
+
 - `tools/__snapshots__/` → `plugins/builtin/shell-tools/__snapshots__/`
 
 ### Files Modified
 
-| File                                                   | Changes                              |
-| ------------------------------------------------------ | ------------------------------------ |
-| `packages/core/src/tools/tool-names.ts`                | Added 70+ tool aliases               |
-| `README.md`                                            | Added Node.js compatibility table    |
-| `README.ru.md`                                         | Added Russian compatibility table    |
-| `package.json`                                         | Added TypeScript to devDependencies  |
-| `packages/cli/assets/parallel-build.mjs`               | Replaced bun with pnpm               |
+| File                                     | Changes                             |
+| ---------------------------------------- | ----------------------------------- |
+| `packages/core/src/tools/tool-names.ts`  | Added 70+ tool aliases              |
+| `README.md`                              | Added Node.js compatibility table   |
+| `README.ru.md`                           | Added Russian compatibility table   |
+| `package.json`                           | Added TypeScript to devDependencies |
+| `packages/cli/assets/parallel-build.mjs` | Replaced bun with pnpm              |
 
 ### Commits
 

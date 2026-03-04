@@ -37,6 +37,7 @@
 - 🧠 **Thinking Models** — support for reasoning models (DeepSeek R1)
 - 📊 **Code Analysis** — code quality analysis with A-F grading
 - 🎨 **Diagram Generator** — create Mermaid and PlantUML diagrams
+- 🔀 **Git Workflow** — complete git workflow (commit, push, pull, MR/PR creation)
 - 🔀 **Git Advanced** — advanced git operations (stash, cherry-pick, rebase, bisect)
 - 🌐 **API Tester** — REST API endpoint testing
 - 🏷️ **Tool Aliases** — short names for tools (`run` → `run_shell_command`)
@@ -202,13 +203,13 @@ npm run dev:server
 
 Added 70+ new tool aliases to handle common model hallucinations gracefully:
 
-| Category          | New Aliases                                                                         |
-| ----------------- | ----------------------------------------------------------------------------------- |
-| **Docker**        | `docker`, `docker_dev`, `container`, `container_dev`, `docker_compose`, `compose`   |
-| **Database**      | `database`, `db`, `sql`, `mysql`, `postgres`, `mongodb`, `redis`                    |
-| **Kubernetes**    | `kubernetes`, `k8s`, `kubectl`, `helm`                                              |
-| **CI/CD**         | `ci`, `cd`, `github_actions`, `gitlab_ci`, `jenkins`                                |
-| **Infrastructure**| `terraform`, `ansible`, `aws`, `azure`, `gcp`                                        |
+| Category           | New Aliases                                                                       |
+| ------------------ | --------------------------------------------------------------------------------- |
+| **Docker**         | `docker`, `docker_dev`, `container`, `container_dev`, `docker_compose`, `compose` |
+| **Database**       | `database`, `db`, `sql`, `mysql`, `postgres`, `mongodb`, `redis`                  |
+| **Kubernetes**     | `kubernetes`, `k8s`, `kubectl`, `helm`                                            |
+| **CI/CD**          | `ci`, `cd`, `github_actions`, `gitlab_ci`, `jenkins`                              |
+| **Infrastructure** | `terraform`, `ansible`, `aws`, `azure`, `gcp`                                     |
 
 ### IDE Support Improvements
 
