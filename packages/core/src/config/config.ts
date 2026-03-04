@@ -54,6 +54,7 @@ import { LSTool } from '../plugins/builtin/file-tools/ls/index.js';
 import type { SendSdkMcpMessage } from '../plugins/builtin/mcp-tools/mcp-client/index.js';
 import { MemoryTool, setOllamaMdFilename } from '../plugins/builtin/memory-tools/save-memory/index.js';
 import { ReadFileTool } from '../plugins/builtin/file-tools/read-file/index.js';
+import { ReadManyFilesTool } from '../plugins/builtin/file-tools/read-many-files/index.js';
 import { canUseRipgrep } from '../utils/ripgrepUtils.js';
 import { RipGrepTool } from '../plugins/builtin/search-tools/ripGrep/index.js';
 import { ShellTool } from '../plugins/builtin/shell-tools/index.js';
@@ -1609,6 +1610,7 @@ export class Config {
     registerCoreTool(SkillTool, this);
     registerCoreTool(LSTool, this);
     registerCoreTool(ReadFileTool, this);
+    registerCoreTool(ReadManyFilesTool, this);
 
     if (this.getUseRipgrep()) {
       let useRipgrep = false;
