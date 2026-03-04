@@ -196,6 +196,33 @@ npm run dev:server
 
 ---
 
+## What's New in v0.16.9
+
+### Extended Tool Aliases for Model Hallucinations
+
+Added 70+ new tool aliases to handle common model hallucinations gracefully:
+
+| Category          | New Aliases                                                                         |
+| ----------------- | ----------------------------------------------------------------------------------- |
+| **Docker**        | `docker`, `docker_dev`, `container`, `container_dev`, `docker_compose`, `compose`   |
+| **Database**      | `database`, `db`, `sql`, `mysql`, `postgres`, `mongodb`, `redis`                    |
+| **Kubernetes**    | `kubernetes`, `k8s`, `kubectl`, `helm`                                              |
+| **CI/CD**         | `ci`, `cd`, `github_actions`, `gitlab_ci`, `jenkins`                                |
+| **Infrastructure**| `terraform`, `ansible`, `aws`, `azure`, `gcp`                                        |
+
+### IDE Support Improvements
+
+- Added TypeScript to workspace root for better IDE support
+- Fixed "Cannot find lib.es2023.d.ts" and related TypeScript errors
+- Fixed global type errors (Promise, Boolean, etc.)
+
+### Removed bun Dependency
+
+- Replaced `bun` with `pnpm` for assets build
+- `pnpm` already required for monorepo workspace support
+
+---
+
 ## What's New in v0.16.8
 
 ### Dependency Updates to Latest Versions

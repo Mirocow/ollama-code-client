@@ -1,5 +1,88 @@
 # Changelog
 
+## 0.16.9
+
+_Tool Aliases Expansion & IDE Support Improvements_
+
+### New Features
+
+#### Extended Tool Aliases for Model Hallucinations
+
+Added 70+ new tool aliases to handle common model hallucinations gracefully:
+
+| Category        | New Aliases                                                                      |
+| --------------- | -------------------------------------------------------------------------------- |
+| **Docker**      | `docker`, `docker_dev`, `container`, `container_dev`, `docker_compose`, `compose`, `podman` |
+| **Database**    | `database`, `db`, `db_dev`, `sql`, `sql_dev`, `mysql`, `postgresql`, `postgres`, `psql`, `sqlite`, `mongodb`, `mongo`, `redis`, `redis_cli` |
+| **Kubernetes**  | `kubernetes`, `k8s`, `kubectl`, `helm`, `k8s_dev`                                |
+| **CI/CD**       | `ci`, `cd`, `github_actions`, `gitlab_ci`, `jenkins`, `circleci`                  |
+| **Infrastructure** | `terraform`, `tf`, `ansible`, `aws`, `azure`, `gcp`                           |
+| **Common Tools** | `ssh`, `scp`, `rsync`, `tar`, `zip`, `unzip`                                    |
+
+All these aliases redirect to `run_shell_command` for seamless command execution.
+
+#### IDE Support Improvements
+
+Added TypeScript to workspace root for better IDE support:
+
+| Fix                     | Description                                              |
+| ----------------------- | -------------------------------------------------------- |
+| `lib.es2023.d.ts`       | Resolved "Cannot find lib.es2023.d.ts" error             |
+| `vitest/globals`        | Resolved "Cannot find type definition file" error        |
+| Global types            | Fixed "Cannot find global type 'Promise/Boolean'" errors |
+
+### Documentation Updates
+
+#### Node.js Compatibility Table
+
+Added comprehensive Node.js compatibility table for `node-pty`:
+
+| Node.js Version | Status            | node-pty Compatibility |
+| --------------- | ----------------- | ---------------------- |
+| 18.x            | LTS (Maintenance) | ✅ Works               |
+| 20.x            | LTS (Current)     | ✅ Works               |
+| 22.x            | LTS (Latest)      | ✅ Works               |
+| 23.x            | Current           | ⚠️ May work            |
+| 24.x            | Nightly           | ❌ Does not work       |
+| 25.x            | Experimental      | ❌ **Does not work**   |
+
+### Bug Fixes
+
+#### Removed bun Dependency
+
+- Replaced `bun` with `pnpm` for assets build
+- `pnpm` already required for monorepo workspace support
+- Both support `workspace:*` protocol for internal packages
+
+### Refactoring
+
+#### Test Snapshots Migration
+
+Moved shell test snapshots to correct plugin directory:
+- `tools/__snapshots__/` → `plugins/builtin/shell-tools/__snapshots__/`
+
+### Files Modified
+
+| File                                                   | Changes                              |
+| ------------------------------------------------------ | ------------------------------------ |
+| `packages/core/src/tools/tool-names.ts`                | Added 70+ tool aliases               |
+| `README.md`                                            | Added Node.js compatibility table    |
+| `README.ru.md`                                         | Added Russian compatibility table    |
+| `package.json`                                         | Added TypeScript to devDependencies  |
+| `packages/cli/assets/parallel-build.mjs`               | Replaced bun with pnpm               |
+
+### Commits
+
+```
+8935f1dc feat: add more tool aliases for common model hallucinations
+68b7be0f refactor: move shell test snapshots to plugins directory
+86ecdf90 fix: add TypeScript to workspace root for IDE support
+38a95657 docs: add Node.js compatibility table for node-pty
+6c561de1 refactor: replace bun with pnpm for assets build
+```
+
+---
+
 ## 0.16.8
 
 _Dependency Updates & Zod v4 Migration_

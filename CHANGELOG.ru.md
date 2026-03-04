@@ -1,5 +1,88 @@
 # Журнал изменений
 
+## 0.16.9
+
+_Расширение алиасов инструментов и улучшения поддержки IDE_
+
+### Новые возможности
+
+#### Расширенные алиасы инструментов для галлюцинаций моделей
+
+Добавлено 70+ новых алиасов инструментов для корректной обработки галлюцинаций моделей:
+
+| Категория        | Новые алиасы                                                                      |
+| ---------------- | --------------------------------------------------------------------------------- |
+| **Docker**       | `docker`, `docker_dev`, `container`, `container_dev`, `docker_compose`, `compose`, `podman` |
+| **База данных**  | `database`, `db`, `db_dev`, `sql`, `sql_dev`, `mysql`, `postgresql`, `postgres`, `psql`, `sqlite`, `mongodb`, `mongo`, `redis`, `redis_cli` |
+| **Kubernetes**   | `kubernetes`, `k8s`, `kubectl`, `helm`, `k8s_dev`                                |
+| **CI/CD**        | `ci`, `cd`, `github_actions`, `gitlab_ci`, `jenkins`, `circleci`                  |
+| **Инфраструктура** | `terraform`, `tf`, `ansible`, `aws`, `azure`, `gcp`                            |
+| **Частые утилиты** | `ssh`, `scp`, `rsync`, `tar`, `zip`, `unzip`                                   |
+
+Все эти алиасы перенаправляются на `run_shell_command` для бесшовного выполнения команд.
+
+#### Улучшения поддержки IDE
+
+Добавлен TypeScript в workspace root для лучшей поддержки IDE:
+
+| Исправление            | Описание                                                    |
+| ---------------------- | ----------------------------------------------------------- |
+| `lib.es2023.d.ts`      | Исправлена ошибка "Cannot find lib.es2023.d.ts"             |
+| `vitest/globals`       | Исправлена ошибка "Cannot find type definition file"        |
+| Глобальные типы        | Исправлены ошибки "Cannot find global type 'Promise/Boolean'" |
+
+### Обновления документации
+
+#### Таблица совместимости Node.js
+
+Добавлена комплексная таблица совместимости Node.js для `node-pty`:
+
+| Версия Node.js | Статус               | Совместимость с node-pty |
+| -------------- | -------------------- | ------------------------ |
+| 18.x           | LTS (Maintenance)    | ✅ Работает              |
+| 20.x           | LTS (Current)        | ✅ Работает              |
+| 22.x           | LTS (Latest)         | ✅ Работает              |
+| 23.x           | Current              | ⚠️ Может работать        |
+| 24.x           | Nightly              | ❌ Не работает           |
+| 25.x           | Experimental         | ❌ **Не работает**       |
+
+### Исправления ошибок
+
+#### Удалена зависимость от bun
+
+- Заменили `bun` на `pnpm` для сборки assets
+- `pnpm` уже требуется для поддержки monorepo workspace
+- Оба поддерживают протокол `workspace:*` для внутренних пакетов
+
+### Рефакторинг
+
+#### Миграция snapshot-файлов тестов
+
+Перемещены snapshot-файлы shell в правильную директорию плагина:
+- `tools/__snapshots__/` → `plugins/builtin/shell-tools/__snapshots__/`
+
+### Изменённые файлы
+
+| Файл                                                   | Изменения                             |
+| ------------------------------------------------------ | ------------------------------------- |
+| `packages/core/src/tools/tool-names.ts`                | Добавлено 70+ алиасов инструментов    |
+| `README.md`                                            | Добавлена таблица совместимости Node.js |
+| `README.ru.md`                                         | Добавлена русская таблица совместимости |
+| `package.json`                                         | Добавлен TypeScript в devDependencies |
+| `packages/cli/assets/parallel-build.mjs`               | Заменён bun на pnpm                   |
+
+### Коммиты
+
+```
+8935f1dc feat: add more tool aliases for common model hallucinations
+68b7be0f refactor: move shell test snapshots to plugins directory
+86ecdf90 fix: add TypeScript to workspace root for IDE support
+38a95657 docs: add Node.js compatibility table for node-pty
+6c561de1 refactor: replace bun with pnpm for assets build
+```
+
+---
+
 ## 0.16.8
 
 _Обновление зависимостей и миграция на Zod v4_

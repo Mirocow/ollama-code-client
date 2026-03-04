@@ -196,6 +196,33 @@ npm run dev:server
 
 ---
 
+## Новые возможности v0.16.9
+
+### Расширенные алиасы инструментов для галлюцинаций моделей
+
+Добавлено 70+ новых алиасов инструментов для корректной обработки галлюцинаций моделей:
+
+| Категория          | Новые алиасы                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| **Docker**         | `docker`, `docker_dev`, `container`, `container_dev`, `docker_compose`, `compose`   |
+| **База данных**    | `database`, `db`, `sql`, `mysql`, `postgres`, `mongodb`, `redis`                    |
+| **Kubernetes**     | `kubernetes`, `k8s`, `kubectl`, `helm`                                              |
+| **CI/CD**          | `ci`, `cd`, `github_actions`, `gitlab_ci`, `jenkins`                                |
+| **Инфраструктура** | `terraform`, `ansible`, `aws`, `azure`, `gcp`                                        |
+
+### Улучшения поддержки IDE
+
+- Добавлен TypeScript в workspace root для лучшей поддержки IDE
+- Исправлена ошибка "Cannot find lib.es2023.d.ts" и связанные ошибки TypeScript
+- Исправлены ошибки глобальных типов (Promise, Boolean и др.)
+
+### Удалена зависимость от bun
+
+- Заменили `bun` на `pnpm` для сборки assets
+- `pnpm` уже требуется для поддержки monorepo workspace
+
+---
+
 ## Новые возможности v0.16.8
 
 ### Обновление зависимостей до актуальных версий
