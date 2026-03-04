@@ -6,13 +6,13 @@ import process from 'node:process';
 
 const assetsDir = dirname(fileURLToPath(import.meta.url));
 
-// Use pnpm for workspace protocol support
-const getPnpmCommand = () => {
-  if (process.platform === 'win32') return 'pnpm.cmd';
-  return 'pnpm';
+// Use bun for workspace protocol support
+const getBunCommand = () => {
+  if (process.platform === 'win32') return 'bun.cmd';
+  return 'bun';
 };
 
-const pnpmCommand = getPnpmCommand();
+const bunCommand = getBunCommand();
 
 const entries = await readdir(assetsDir, { withFileTypes: true });
 const assetBuilds = [];
@@ -78,18 +78,13 @@ const runCommand = ({ command, args, cwd, label }) =>
 
 const runBuild = async (asset) => {
   if (asset.useNpm) {
+    // Skip install - dependencies are installed at workspace root
+    // Just run build
     await runCommand({
-      command: pnpmCommand,
-      args: ['install', '--prefer-offline'],
-      cwd: asset.assetPath,
-      label: `pnpm install`,
-    });
-
-    await runCommand({
-      command: pnpmCommand,
+      command: bunCommand,
       args: ['run', 'build'],
       cwd: asset.assetPath,
-      label: `pnpm run build`,
+      label: `bun run build`,
     });
     return;
   }
