@@ -924,10 +924,12 @@ class DockerToolInvocation extends BaseToolInvocation<
 /**
  * Docker Tool class definition
  */
-class DockerTool extends BaseDeclarativeTool<DockerToolParams, ToolResult> {
+export class DockerTool extends BaseDeclarativeTool<DockerToolParams, ToolResult> {
+  static readonly Name = 'docker';
+  
   constructor() {
     super(
-      'docker',
+      DockerTool.Name,
       'Docker',
       `Provides Docker container and image management operations.
 

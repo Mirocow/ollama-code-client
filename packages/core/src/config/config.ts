@@ -45,28 +45,27 @@ import {
 } from '../services/fileSystemService.js';
 import { GitService } from '../services/gitService.js';
 
-// Tools
-import { EditTool } from '../plugins/builtin/file-tools/edit/index.js';
-import { ExitPlanModeTool } from '../plugins/builtin/productivity-tools/exit-plan-mode/index.js';
-import { GlobTool } from '../plugins/builtin/file-tools/glob/index.js';
-import { GrepTool } from '../plugins/builtin/search-tools/grep/index.js';
-import { LSTool } from '../plugins/builtin/file-tools/ls/index.js';
-import type { SendSdkMcpMessage } from '../plugins/builtin/mcp-tools/mcp-client/index.js';
-import { MemoryTool, setOllamaMdFilename } from '../plugins/builtin/memory-tools/save-memory/index.js';
-import { ReadFileTool } from '../plugins/builtin/file-tools/read-file/index.js';
-import { ReadManyFilesTool } from '../plugins/builtin/file-tools/read-many-files/index.js';
+// Tools - imported for direct registration in createToolRegistry
+import { setOllamaMdFilename, MemoryTool } from '../plugins/builtin/memory-tools/save-memory/index.js';
 import { canUseRipgrep } from '../utils/ripgrepUtils.js';
-import { RipGrepTool } from '../plugins/builtin/search-tools/ripGrep/index.js';
-import { ShellTool } from '../plugins/builtin/shell-tools/index.js';
-import { SkillTool } from '../plugins/builtin/agent-tools/skill/index.js';
-import { TaskTool } from '../plugins/builtin/agent-tools/task/index.js';
-import { TodoWriteTool } from '../plugins/builtin/productivity-tools/todo-write/index.js';
 import { ToolRegistry } from '../tools/tool-registry.js';
-import { WebFetchTool } from '../plugins/builtin/search-tools/web-fetch/index.js';
 import { WebSearchTool } from '../plugins/builtin/search-tools/web-search/index.js';
-import { WriteFileTool } from '../plugins/builtin/file-tools/write-file/index.js';
+import { WebFetchTool } from '../plugins/builtin/search-tools/web-fetch/index.js';
 import { LspTool } from '../plugins/builtin/lsp-tools/lsp/index.js';
 import type { LspClient } from '../lsp/types.js';
+import { RipGrepTool } from '../plugins/builtin/search-tools/ripGrep/index.js';
+import { GrepTool } from '../plugins/builtin/search-tools/grep/index.js';
+import { TaskTool } from '../plugins/builtin/agent-tools/task/index.js';
+import { SkillTool } from '../plugins/builtin/agent-tools/skill/index.js';
+import { LSTool } from '../plugins/builtin/file-tools/ls/index.js';
+import { ReadFileTool } from '../plugins/builtin/file-tools/read-file/index.js';
+import { ReadManyFilesTool } from '../plugins/builtin/file-tools/read-many-files/index.js';
+import { GlobTool } from '../plugins/builtin/file-tools/glob/index.js';
+import { EditTool } from '../plugins/builtin/file-tools/edit/index.js';
+import { WriteFileTool } from '../plugins/builtin/file-tools/write-file/index.js';
+import { ShellTool } from '../plugins/builtin/shell-tools/index.js';
+import { TodoWriteTool } from '../plugins/builtin/productivity-tools/todo-write/index.js';
+import { ExitPlanModeTool } from '../plugins/builtin/productivity-tools/exit-plan-mode/index.js';
 import { PythonTool } from '../plugins/builtin/dev-tools/python/index.js';
 import { NodeJsTool } from '../plugins/builtin/dev-tools/nodejs/index.js';
 import { GolangTool } from '../plugins/builtin/dev-tools/golang/index.js';
@@ -76,6 +75,14 @@ import { CppTool } from '../plugins/builtin/dev-tools/cpp/index.js';
 import { RustTool } from '../plugins/builtin/dev-tools/rust/index.js';
 import { SwiftTool } from '../plugins/builtin/dev-tools/swift/index.js';
 import { TypeScriptTool } from '../plugins/builtin/dev-tools/typescript/index.js';
+import { ApiTesterTool } from '../plugins/builtin/api-tools/api-tester/index.js';
+import { GitAdvancedTool } from '../plugins/builtin/git-tools/git-advanced/index.js';
+import { DiagramGeneratorTool } from '../plugins/builtin/utility-tools/diagram-generator/index.js';
+import { DatabaseTool } from '../plugins/builtin/database-tools/database/index.js';
+import { RedisTool } from '../plugins/builtin/database-tools/redis/index.js';
+import { DockerTool } from '../plugins/builtin/database-tools/docker/index.js';
+import { CodeAnalyzerTool } from '../plugins/builtin/utility-tools/code-analyzer/index.js';
+import type { SendSdkMcpMessage } from '../plugins/builtin/mcp-tools/mcp-client/index.js';
 
 // Other modules
 import { ideContextStore } from '../ide/ideContext.js';
@@ -1657,6 +1664,15 @@ export class Config {
     registerCoreTool(RustTool, this);
     registerCoreTool(SwiftTool, this);
     registerCoreTool(TypeScriptTool, this);
+
+    // Register additional builtin tools
+    registerCoreTool(ApiTesterTool, this);
+    registerCoreTool(GitAdvancedTool, this);
+    registerCoreTool(DiagramGeneratorTool, this);
+    registerCoreTool(DatabaseTool);
+    registerCoreTool(RedisTool);
+    registerCoreTool(DockerTool);
+    registerCoreTool(CodeAnalyzerTool);
 
     await registry.discoverAllTools();
     this.debugLogger.debug(

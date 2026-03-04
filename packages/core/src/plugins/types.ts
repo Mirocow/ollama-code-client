@@ -255,6 +255,10 @@ export interface PluginDefinition {
    * Created with GLM-5 from Z.AI
    */
   toolClasses?: unknown[];
+  /** Tool factories - functions that create tool instances with Config 
+   * Use this when tools require Config parameter in constructor
+   */
+  toolFactories?: Array<(config: unknown) => unknown>;
   /** Commands provided by this plugin */
   commands?: PluginCommand[];
   /** Default configuration */

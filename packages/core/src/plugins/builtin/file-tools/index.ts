@@ -11,6 +11,7 @@
  */
 
 import type { PluginDefinition } from '../../types.js';
+import type { Config } from '../../../config/config.js';
 import { ReadFileTool } from './read-file/index.js';
 import { WriteFileTool } from './write-file/index.js';
 import { EditTool } from './edit/index.js';
@@ -19,39 +20,46 @@ import { GlobTool } from './glob/index.js';
 import { ReadManyFilesTool } from './read-many-files/index.js';
 
 /**
- * File Tools Plugin Definition
+ * Create file tools plugin with config
  */
-const fileToolsPlugin: PluginDefinition = {
-  metadata: {
-    id: 'file-tools',
-    name: 'File Tools',
-    version: '1.0.0',
-    description: 'File system operations: read, write, edit, list, glob',
-    author: 'Ollama Code Team',
-    tags: ['core', 'builtin', 'file', 'filesystem'],
-    enabledByDefault: true,
-  },
-  
-  // Export tool classes for direct registration with ToolRegistry
-  toolClasses: [
-    ReadFileTool,
-    WriteFileTool,
-    EditTool,
-    LSTool,
-    GlobTool,
-    ReadManyFilesTool,
-  ],
-  
-  hooks: {
-    onLoad: async (context) => {
-      context.logger.info('File Tools plugin loaded');
+export function createFileToolsPlugin(): PluginDefinition {
+  return {
+    metadata: {
+      id: 'file-tools',
+      name: 'File Tools',
+      version: '1.0.0',
+      description: 'File system operations: read, write, edit, list, glob',
+      author: 'Ollama Code Team',
+      tags: ['core', 'builtin', 'file', 'filesystem'],
+      enabledByDefault: true,
     },
     
-    onEnable: async (context) => {
-      context.logger.info('File Tools plugin enabled');
+    // Use toolFactories for tools that need Config
+    toolFactories: [
+      (config: unknown) => new ReadFileTool(config as Config),
+      (config: unknown) => new WriteFileTool(config as Config),
+      (config: unknown) => new EditTool(config as Config),
+      (config: unknown) => new LSTool(config as Config),
+      (config: unknown) => new GlobTool(config as Config),
+      (config: unknown) => new ReadManyFilesTool(config as Config),
+    ],
+    
+    hooks: {
+      onLoad: async (context) => {
+        context.logger.info('File Tools plugin loaded');
+      },
+      
+      onEnable: async (context) => {
+        context.logger.info('File Tools plugin enabled');
+      },
     },
-  },
-};
+  };
+}
+
+/**
+ * File Tools Plugin Definition (default export for backward compatibility)
+ */
+const fileToolsPlugin: PluginDefinition = createFileToolsPlugin();
 
 export default fileToolsPlugin;
 

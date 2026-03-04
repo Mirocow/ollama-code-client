@@ -18,6 +18,7 @@ import { createPluginLoader, registerPluginTools } from './index.js';
 import type { ToolRegistry } from '../tools/tool-registry.js';
 import { createDebugLogger } from '../utils/debugLogger.js';
 import type { PluginDefinition } from './types.js';
+import type { Config } from '../config/config.js';
 
 const debugLogger = createDebugLogger('PLUGIN_REGISTRY');
 
@@ -27,6 +28,7 @@ const debugLogger = createDebugLogger('PLUGIN_REGISTRY');
 export class PluginRegistry {
   private initialized = false;
   private toolRegistry: ToolRegistry | null = null;
+  private config: Config | null = null;
   private projectRoot: string;
   
   constructor(projectRoot?: string) {
@@ -34,15 +36,16 @@ export class PluginRegistry {
   }
   
   /**
-   * Initialize the plugin registry with a tool registry
+   * Initialize the plugin registry with a tool registry and config
    */
-  async initialize(toolRegistry: ToolRegistry): Promise<void> {
+  async initialize(toolRegistry: ToolRegistry, config?: Config): Promise<void> {
     if (this.initialized) {
       debugLogger.warn('Plugin registry already initialized');
       return;
     }
     
     this.toolRegistry = toolRegistry;
+    this.config = config || null;
     
     // Load builtin plugins
     await this.loadBuiltinPlugins();
@@ -64,14 +67,30 @@ export class PluginRegistry {
           await pluginManager.registerPlugin(plugin);
           await pluginManager.enablePlugin(plugin.metadata.id);
           
-          // Register tool classes with ToolRegistry (for real DeclarativeTool instances)
+          // Register tool classes with ToolRegistry (for DeclarativeTool instances without config)
           if (plugin.toolClasses && this.toolRegistry) {
             for (const toolClass of plugin.toolClasses) {
               if (toolClass && typeof toolClass === 'function') {
                 try {
-                  this.toolRegistry.registerTool(toolClass as unknown as Parameters<typeof this.toolRegistry.registerTool>[0]);
+                  // Try to instantiate without config (for tools that don't need it)
+                  const toolInstance = new (toolClass as new () => unknown)();
+                  this.toolRegistry.registerTool(toolInstance as Parameters<typeof this.toolRegistry.registerTool>[0]);
                 } catch (e) {
-                  debugLogger.warn(`Failed to register tool class: ${e}`);
+                  debugLogger.warn(`Failed to register tool class without config: ${e}`);
+                }
+              }
+            }
+          }
+          
+          // Register tools from factories (for tools that need config)
+          if (plugin.toolFactories && this.toolRegistry && this.config) {
+            for (const factory of plugin.toolFactories) {
+              if (factory && typeof factory === 'function') {
+                try {
+                  const toolInstance = factory(this.config);
+                  this.toolRegistry.registerTool(toolInstance as Parameters<typeof this.toolRegistry.registerTool>[0]);
+                } catch (e) {
+                  debugLogger.warn(`Failed to register tool from factory: ${e}`);
                 }
               }
             }
@@ -102,119 +121,34 @@ export class PluginRegistry {
   private async importBuiltinPlugins(): Promise<PluginDefinition[]> {
     const plugins: PluginDefinition[] = [];
     
-    // Core tools - basic utilities
-    try {
-      const coreTools = await import('./builtin/core-tools/index.js');
-      plugins.push(coreTools.default);
-    } catch {
-      debugLogger.debug('Core tools plugin not available');
-    }
+    // List of builtin plugins to load
+    const pluginModules = [
+      './builtin/core-tools/index.js',
+      './builtin/file-tools/index.js',
+      './builtin/shell-tools/index.js',
+      './builtin/search-tools/index.js',
+      './builtin/dev-tools/index.js',
+      './builtin/agent-tools/index.js',
+      './builtin/memory-tools/index.js',
+      './builtin/productivity-tools/index.js',
+      './builtin/api-tools/index.js',
+      './builtin/database-tools/index.js',
+      './builtin/git-tools/index.js',
+      './builtin/lsp-tools/index.js',
+      './builtin/mcp-tools/index.js',
+      './builtin/utility-tools/index.js',
+    ];
     
-    // File tools - file system operations
-    try {
-      const fileTools = await import('./builtin/file-tools/index.js');
-      plugins.push(fileTools.default);
-    } catch {
-      debugLogger.debug('File tools plugin not available');
+    for (const modulePath of pluginModules) {
+      try {
+        const module = await import(modulePath);
+        if (module.default) {
+          plugins.push(module.default);
+        }
+      } catch (error) {
+        debugLogger.debug(`Plugin not available: ${modulePath}`);
+      }
     }
-    
-    // Shell tools - command execution
-    try {
-      const shellTools = await import('./builtin/shell-tools/index.js');
-      plugins.push(shellTools.default);
-    } catch {
-      debugLogger.debug('Shell tools plugin not available');
-    }
-    
-    // Search tools - grep, web search/fetch
-    try {
-      const searchTools = await import('./builtin/search-tools/index.js');
-      plugins.push(searchTools.default);
-    } catch {
-      debugLogger.debug('Search tools plugin not available');
-    }
-    
-    // Dev tools - language-specific tools
-    try {
-      const devTools = await import('./builtin/dev-tools/index.js');
-      plugins.push(devTools.default);
-    } catch {
-      debugLogger.debug('Dev tools plugin not available');
-    }
-    
-    // Agent tools - task, skill
-    try {
-      const agentTools = await import('./builtin/agent-tools/index.js');
-      plugins.push(agentTools.default);
-    } catch {
-      debugLogger.debug('Agent tools plugin not available');
-    }
-    
-    // Memory tools - save_memory
-    try {
-      const memoryTools = await import('./builtin/memory-tools/index.js');
-      plugins.push(memoryTools.default);
-    } catch {
-      debugLogger.debug('Memory tools plugin not available');
-    }
-    
-    // Productivity tools - todo_write, exit_plan_mode
-    try {
-      const productivityTools = await import('./builtin/productivity-tools/index.js');
-      plugins.push(productivityTools.default);
-    } catch {
-      debugLogger.debug('Productivity tools plugin not available');
-    }
-    
-    // API tools - api_tester
-    try {
-      const apiTools = await import('./builtin/api-tools/index.js');
-      plugins.push(apiTools.default);
-    } catch {
-      debugLogger.debug('API tools plugin not available');
-    }
-    
-    // Database tools - docker, database, redis
-    try {
-      const databaseTools = await import('./builtin/database-tools/index.js');
-      plugins.push(databaseTools.default);
-    } catch {
-      debugLogger.debug('Database tools plugin not available');
-    }
-    
-    // Git tools - git-advanced
-    try {
-      const gitTools = await import('./builtin/git-tools/index.js');
-      plugins.push(gitTools.default);
-    } catch {
-      debugLogger.debug('Git tools plugin not available');
-    }
-    
-    // LSP tools - language server protocol
-    try {
-      const lspTools = await import('./builtin/lsp-tools/index.js');
-      plugins.push(lspTools.default);
-    } catch {
-      debugLogger.debug('LSP tools plugin not available');
-    }
-    
-    // MCP tools - model context protocol
-    try {
-      const mcpTools = await import('./builtin/mcp-tools/index.js');
-      plugins.push(mcpTools.default);
-    } catch {
-      debugLogger.debug('MCP tools plugin not available');
-    }
-    
-    // Utility tools - diagram-generator, code-analyzer
-    try {
-      const utilityTools = await import('./builtin/utility-tools/index.js');
-      plugins.push(utilityTools.default);
-    } catch {
-      debugLogger.debug('Utility tools plugin not available');
-    }
-    
-    // Note: Additional builtin plugins can be added here as they are developed
     
     debugLogger.info(`Loaded ${plugins.length} builtin plugins`);
     return plugins;
@@ -362,9 +296,10 @@ export function getPluginRegistry(projectRoot?: string): PluginRegistry {
  */
 export async function initializePluginRegistry(
   toolRegistry: ToolRegistry,
-  projectRoot?: string
+  projectRoot?: string,
+  config?: Config
 ): Promise<PluginRegistry> {
   const registry = getPluginRegistry(projectRoot);
-  await registry.initialize(toolRegistry);
+  await registry.initialize(toolRegistry, config);
   return registry;
 }

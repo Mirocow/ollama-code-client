@@ -1216,10 +1216,12 @@ class RedisToolInvocation extends BaseToolInvocation<
 /**
  * Redis Tool class definition
  */
-class RedisTool extends BaseDeclarativeTool<RedisToolParams, ToolResult> {
+export class RedisTool extends BaseDeclarativeTool<RedisToolParams, ToolResult> {
+  static readonly Name = 'redis';
+  
   constructor() {
     super(
-      'redis',
+      RedisTool.Name,
       'Redis',
       `Provides Redis operations for caching, queuing, and pub/sub messaging.
 

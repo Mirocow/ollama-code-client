@@ -637,10 +637,12 @@ class DatabaseToolInvocation extends BaseToolInvocation<
 /**
  * Database Tool class definition
  */
-class DatabaseTool extends BaseDeclarativeTool<DatabaseToolParams, ToolResult> {
+export class DatabaseTool extends BaseDeclarativeTool<DatabaseToolParams, ToolResult> {
+  static readonly Name = 'database';
+  
   constructor() {
     super(
-      'database',
+      DatabaseTool.Name,
       'Database',
       `Provides database operations for SQLite, PostgreSQL, and MySQL/MariaDB.
 

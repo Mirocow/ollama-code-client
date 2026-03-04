@@ -662,13 +662,15 @@ ${result.summary.recommendations.map((r) => `- ${r}`).join('\n')}`;
 /**
  * Code Analyzer Tool class definition
  */
-class CodeAnalyzerTool extends BaseDeclarativeTool<
+export class CodeAnalyzerTool extends BaseDeclarativeTool<
   CodeAnalyzerParams,
   ToolResult
 > {
+  static readonly Name = 'code_analyzer';
+  
   constructor() {
     super(
-      'code_analyzer',
+      CodeAnalyzerTool.Name,
       'Code Analyzer',
       `Analyzes code files for complexity, security issues, patterns, and provides recommendations.
 
