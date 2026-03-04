@@ -35,6 +35,8 @@ export const ToolNames = {
   RUST: 'rust_dev',
   SWIFT: 'swift_dev',
   TYPESCRIPT: 'typescript_dev',
+  GIT_ADVANCED: 'git_advanced',
+  GIT_WORKFLOW: 'git_workflow',
 } as const;
 
 export type ToolName = (typeof ToolNames)[keyof typeof ToolNames];
@@ -70,6 +72,8 @@ export const ToolDisplayNames = {
   RUST: 'RustDev',
   SWIFT: 'SwiftDev',
   TYPESCRIPT: 'TypeScriptDev',
+  GIT_ADVANCED: 'GitAdvanced',
+  GIT_WORKFLOW: 'GitWorkflow',
 } as const;
 
 // Migration from old tool names to new tool names
@@ -374,16 +378,51 @@ export const ToolAliases: Record<string, ToolName> = {
   intellisense: ToolNames.LSP,
 
   // ═══════════════════════════════════════════════════════════════════════
-  // Git aliases (redirects to run_shell_command for git commands)
+  // Git workflow aliases (git_workflow tool)
   // Models often hallucinate git_dev, git_tool, etc.
   // ═══════════════════════════════════════════════════════════════════════
-  git: ToolNames.SHELL,
-  git_dev: ToolNames.SHELL,
-  git_tool: ToolNames.SHELL,
-  git_cmd: ToolNames.SHELL,
-  version_control: ToolNames.SHELL,
-  vcs: ToolNames.SHELL,
-  scm: ToolNames.SHELL,
+  git_commit: ToolNames.GIT_WORKFLOW,
+  commit: ToolNames.GIT_WORKFLOW,
+  git_push: ToolNames.GIT_WORKFLOW,
+  push: ToolNames.GIT_WORKFLOW,
+  git_pull: ToolNames.GIT_WORKFLOW,
+  pull: ToolNames.GIT_WORKFLOW,
+  git_status: ToolNames.GIT_WORKFLOW,
+  mr: ToolNames.GIT_WORKFLOW,
+  pr: ToolNames.GIT_WORKFLOW,
+  merge_request: ToolNames.GIT_WORKFLOW,
+  pull_request: ToolNames.GIT_WORKFLOW,
+  create_mr: ToolNames.GIT_WORKFLOW,
+  create_pr: ToolNames.GIT_WORKFLOW,
+  git_mr: ToolNames.GIT_WORKFLOW,
+  git_pr: ToolNames.GIT_WORKFLOW,
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Git advanced aliases (git_advanced tool)
+  // ═══════════════════════════════════════════════════════════════════════
+  git_stash: ToolNames.GIT_ADVANCED,
+  stash: ToolNames.GIT_ADVANCED,
+  git_cherry_pick: ToolNames.GIT_ADVANCED,
+  cherry_pick: ToolNames.GIT_ADVANCED,
+  git_rebase: ToolNames.GIT_ADVANCED,
+  rebase: ToolNames.GIT_ADVANCED,
+  git_bisect: ToolNames.GIT_ADVANCED,
+  bisect: ToolNames.GIT_ADVANCED,
+  git_blame: ToolNames.GIT_ADVANCED,
+  blame: ToolNames.GIT_ADVANCED,
+  git_branch: ToolNames.GIT_ADVANCED,
+  git_remote: ToolNames.GIT_ADVANCED,
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Generic git aliases (redirects to git_workflow for basic operations)
+  // ═══════════════════════════════════════════════════════════════════════
+  git: ToolNames.GIT_WORKFLOW,
+  git_dev: ToolNames.GIT_WORKFLOW,
+  git_tool: ToolNames.GIT_WORKFLOW,
+  git_cmd: ToolNames.GIT_WORKFLOW,
+  version_control: ToolNames.GIT_WORKFLOW,
+  vcs: ToolNames.GIT_WORKFLOW,
+  scm: ToolNames.GIT_WORKFLOW,
 
   // ═══════════════════════════════════════════════════════════════════════
   // Docker / Container aliases (redirects to run_shell_command)
