@@ -56,6 +56,8 @@ export type GitWorkflowOperation =
   | 'diff'
   | 'create_mr'
   | 'create_pr'
+  | 'create_merge'
+  | 'clone'
   | 'remote_info';
 
 /**
@@ -118,15 +120,31 @@ function isGitHubRemote(cwd: string): boolean {
 }
 
 /**
- * Detects if the remote is GitLab
+ * Detects if the remote is GitLab (including self-hosted)
  */
 function isGitLabRemote(cwd: string): boolean {
   const result = executeGitCommand('git remote get-url origin', cwd);
   if (!result.success) return false;
+  const url = result.output.toLowerCase();
   return (
-    result.output.includes('gitlab.com') ||
-    result.output.includes('gitlab')
+    url.includes('gitlab.com') ||
+    url.includes('gitlab') ||
+    // Check for self-hosted GitLab patterns
+    (url.includes('gitlab') === false && !url.includes('github.com'))
   );
+}
+
+/**
+ * Detects remote host type (github, gitlab, or unknown)
+ */
+function getRemoteHostType(cwd: string): 'github' | 'gitlab' | 'unknown' {
+  const result = executeGitCommand('git remote get-url origin', cwd);
+  if (!result.success) return 'unknown';
+  const url = result.output.toLowerCase();
+  if (url.includes('github.com')) return 'github';
+  if (url.includes('gitlab')) return 'gitlab';
+  // Default to GitLab for non-GitHub URLs (most self-hosted are GitLab)
+  return url.includes('github') ? 'github' : 'gitlab';
 }
 
 /**
@@ -452,6 +470,105 @@ Git commands executed:
     );
   },
 
+  // ---- CREATE MERGE (Auto-detect GitHub/GitLab) ----
+  create_merge: (args, cwd) => {
+    const hostType = getRemoteHostType(cwd);
+    const title = args['title'];
+    const description = args['description'] || '';
+    const targetBranch = args['targetBranch'] || args['target_branch'] || args['base'] || 'main';
+    const sourceBranch = args['sourceBranch'] || args['source_branch'] || args['head'] || getCurrentBranch(cwd);
+    const assignee = args['assignee'] ? ` --assignee ${args['assignee']}` : '';
+    const labels = args['labels'] ? ` --labels "${args['labels']}"` : '';
+    const draft = args['draft'] ? ' --draft' : '';
+    const push = args['push'] !== false ? true : false;
+
+    const remoteInfo = getRemoteInfo(cwd);
+    if (!remoteInfo) {
+      return { success: false, output: '', error: 'Could not determine remote repository info' };
+    }
+
+    // Push branch first if requested
+    if (push) {
+      const pushResult = executeGitCommand(`git push -u origin ${sourceBranch}`, cwd);
+      if (!pushResult.success) {
+        const pushResult2 = executeGitCommand(`git push origin ${sourceBranch}`, cwd);
+        if (!pushResult2.success && !pushResult2.error?.includes('up to date')) {
+          return pushResult2;
+        }
+      }
+    }
+
+    const escapedTitle = (title as string)?.replace(/"/g, '\\"') || `Merge ${sourceBranch} into ${targetBranch}`;
+    const escapedDesc = (description as string)?.replace(/"/g, '\\"') || '';
+
+    // GitHub
+    if (hostType === 'github') {
+      const ghCheck = executeGitCommand('gh version', cwd);
+      if (!ghCheck.success) {
+        return {
+          success: true,
+          output: `GitHub detected. GitHub CLI (gh) is not installed.
+
+To create a Pull Request:
+
+1. Install gh CLI: https://cli.github.com
+2. Run: gh auth login
+3. Then run: gh pr create --title "${escapedTitle}" --body "${escapedDesc}" --base ${targetBranch}
+
+Or create PR manually at:
+https://${remoteInfo.host}/${remoteInfo.owner}/${remoteInfo.repo}/compare/${targetBranch}...${sourceBranch}?expand=1`,
+        };
+      }
+
+      return executeGitCommand(
+        `gh pr create --title "${escapedTitle}" --body "${escapedDesc}" --base ${targetBranch}${assignee}${labels}${draft}`,
+        cwd,
+      );
+    }
+
+    // GitLab (including self-hosted)
+    const glabCheck = executeGitCommand('glab version', cwd);
+    if (!glabCheck.success) {
+      return {
+        success: true,
+        output: `GitLab detected. GitLab CLI (glab) is not installed.
+
+To create a Merge Request:
+
+1. Install glab CLI: https://gitlab.com/gitlab-org/cli
+2. Run: glab auth login --hostname ${remoteInfo.host}
+3. Then run: glab mr create --title "${escapedTitle}" --description "${escapedDesc}" --target-branch ${targetBranch}
+
+Or create MR manually at:
+https://${remoteInfo.host}/${remoteInfo.owner}/${remoteInfo.repo}/-/merge_requests/new?source_branch=${sourceBranch}`,
+      };
+    }
+
+    return executeGitCommand(
+      `glab mr create --title "${escapedTitle}" --description "${escapedDesc}" --target-branch ${targetBranch}${assignee}${labels}${draft} --yes`,
+      cwd,
+    );
+  },
+
+  // ---- CLONE ----
+  clone: (args, cwd) => {
+    const url = args['url'];
+    if (!url || typeof url !== 'string') {
+      return { success: false, output: '', error: 'Repository URL is required' };
+    }
+
+    const directory = args['directory'] ? ` "${args['directory']}"` : '';
+    const branch = args['branch'] ? ` --branch ${args['branch']}` : '';
+    const depth = args['depth'] ? ` --depth ${args['depth']}` : '';
+    const singleBranch = args['singleBranch'] ? ' --single-branch' : '';
+    const recursive = args['recursive'] ? ' --recursive' : '';
+
+    return executeGitCommand(
+      `git clone${branch}${depth}${singleBranch}${recursive} ${url}${directory}`,
+      cwd,
+    );
+  },
+
   // ---- REMOTE INFO ----
   remote_info: (_args, cwd) => {
     const remoteUrl = executeGitCommand('git remote get-url origin', cwd);
@@ -694,6 +811,8 @@ const gitWorkflowToolSchema = {
         'diff',
         'create_mr',
         'create_pr',
+        'create_merge',
+        'clone',
         'remote_info',
       ],
       description: 'Type of git workflow operation to perform',
@@ -735,15 +854,21 @@ function getGitWorkflowToolDescription(): string {
 ### Info Operations
 - **log**: Show commit history. Args: \`oneline\`, \`graph\`, \`count\`, \`branch\`
 - **diff**: Show differences. Args: \`staged\`, \`file\`, \`branch1\`, \`branch2\`
-- **remote_info**: Get remote repository info
+- **remote_info**: Get remote repository info (host, owner, repo, platform)
 
 ### MR/PR Operations
 - **create_mr**: Create GitLab Merge Request. Args: \`title\`, \`description\`, \`targetBranch\`, \`sourceBranch\`, \`assignee\`, \`labels\`, \`draft\`, \`push\`
 - **create_pr**: Create GitHub Pull Request. Args: \`title\`, \`description\`, \`base\`, \`head\`, \`assignee\`, \`labels\`, \`draft\`, \`push\`
+- **create_merge**: Auto-detect platform and create MR/PR. Works with both GitHub and GitLab (including self-hosted). Args: \`title\`, \`description\`, \`targetBranch\`/ \`base\`, \`sourceBranch\`/ \`head\`, \`assignee\`, \`labels\`, \`draft\`, \`push\`
+
+### Clone Operations
+- **clone**: Clone repository. Args: \`url\`, \`directory\`, \`branch\`, \`depth\`, \`singleBranch\`, \`recursive\`
 
 ## Usage Notes
+- **create_merge** is the recommended operation - it auto-detects GitHub vs GitLab
 - MR/PR creation requires \`glab\` (GitLab) or \`gh\` (GitHub) CLI installed
 - Without CLI, instructions are provided for manual creation
+- Supports self-hosted GitLab instances
 - All operations work in the configured project directory`;
 }
 

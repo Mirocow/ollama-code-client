@@ -396,8 +396,16 @@ export const ToolAliases: Record<string, ToolName> = {
   pull_request: ToolNames.GIT_WORKFLOW,
   create_mr: ToolNames.GIT_WORKFLOW,
   create_pr: ToolNames.GIT_WORKFLOW,
+  create_merge: ToolNames.GIT_WORKFLOW,
   git_mr: ToolNames.GIT_WORKFLOW,
   git_pr: ToolNames.GIT_WORKFLOW,
+  git_clone: ToolNames.GIT_WORKFLOW,
+  clone: ToolNames.GIT_WORKFLOW,
+  git_fetch: ToolNames.GIT_WORKFLOW,
+  git_log: ToolNames.GIT_WORKFLOW,
+  git_diff: ToolNames.GIT_WORKFLOW,
+  git_switch: ToolNames.GIT_WORKFLOW,
+  git_checkout: ToolNames.GIT_WORKFLOW,
 
   // ═══════════════════════════════════════════════════════════════════════
   // Git advanced aliases (git_advanced tool)
