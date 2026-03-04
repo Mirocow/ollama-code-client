@@ -6,7 +6,7 @@
     "build": "node build.mjs"
   },
   "dependencies": {
-    "@ollama-code/webui": "workspace:0.11.0"
+    "@ollama-code/webui": "file:../../../webui"
   },
   "devDependencies": {
     "esbuild": "0.25.0"
