@@ -50,6 +50,17 @@
 - **pnpm** >= 10.0.0
 - **Ollama** installed and running (https://ollama.ai)
 
+### Node.js Compatibility with node-pty
+
+| Node.js Version | Status            | node-pty Compatibility |
+| --------------- | ----------------- | ---------------------- |
+| 18.x            | LTS (Maintenance) | ✅ Works               |
+| 20.x            | LTS (Current)     | ✅ Works               |
+| 22.x            | LTS (Latest)      | ✅ Works               |
+| 23.x            | Current           | ⚠️ May work            |
+| 24.x            | Nightly           | ❌ Does not work       |
+| 25.x            | Experimental      | ❌ **Does not work**   |
+
 > ⚠️ **Important**: Node.js 23+ is not supported. The `node-pty` native module requires Node.js 20.x or 22.x LTS. If you have Node.js 23+, please downgrade:
 >
 > ```bash
