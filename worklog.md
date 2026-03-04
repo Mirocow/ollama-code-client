@@ -11,6 +11,7 @@
 ### Task: Verify model loading and unloading implementation when switching models via menu
 
 ### Work Log:
+
 - Analyzed ModelDialog.tsx component (packages/cli/src/ui/components/ModelDialog.tsx)
 - Checked OllamaNativeClient API (packages/core/src/core/ollamaNativeClient.ts)
 - Verified settings schema (packages/cli/src/config/settingsSchema.ts)
@@ -23,27 +24,30 @@
 #### Implementation Details:
 
 1. **Settings** (`settingsSchema.ts` lines 682-701):
+
    - `model.autoPullOnSwitch` (default: `true`) - Auto download model if not available locally
    - `model.autoUnloadPrevious` (default: `false`) - Auto unload previous model from memory
 
 2. **OllamaNativeClient Methods** (`ollamaNativeClient.ts`):
+
    - `isModelAvailable(modelName)` (lines 1625-1634) - Check if model exists locally
    - `pullModel(name, progressCallback)` (lines 1213-1237) - Download model from registry
    - `unloadModel(modelName)` (lines 1655-1661) - Unload model from memory using `keep_alive: 0`
 
 3. **ModelDialog.tsx Implementation** (lines 400-547):
+
    ```typescript
    // When selecting a model:
    // 1. Check if model is available locally
    const isAvailable = await ollamaClient.isModelAvailable(modelId);
-   
+
    // 2. If not available and autoPullOnSwitch is enabled -> pull it
    if (!isAvailable && autoPullOnSwitch) {
      await ollamaClient.pullModel(modelId, (progress) => {
        setLoadingProgress(progress);
      });
    }
-   
+
    // 3. If autoUnloadPrevious is enabled -> unload previous model
    if (autoUnloadPrevious && authType === AuthType.USE_OLLAMA) {
      await ollamaClient.unloadModel(previousModelId);
@@ -59,6 +63,7 @@
 #### User Experience:
 
 When user opens model selection dialog (`/model` command) and selects a model:
+
 1. Dialog shows loading indicator while checking/pulling model
 2. If model needs download, progress is displayed in real-time
 3. Previous model can be auto-unloaded (if setting enabled)
@@ -67,6 +72,7 @@ When user opens model selection dialog (`/model` command) and selects a model:
 #### Configuration:
 
 Users can configure behavior in settings:
+
 ```json
 {
   "model": {
@@ -326,6 +332,7 @@ Created comprehensive test files for all tool modules that lacked test coverage.
 #### Core Tool Tests
 
 1. **tool-error.test.ts** - Tests for the ToolErrorType enum
+
    - Tests all enum values exist
    - Tests type safety
    - Tests categorization (General, File System, Edit, Tool-specific, Web)
@@ -339,6 +346,7 @@ Created comprehensive test files for all tool modules that lacked test coverage.
 #### Language Development Tool Tests
 
 3. **cpp.test.ts** - Tests for C/C++ development tool
+
    - Tool definition validation
    - Parameter validation for all actions
    - Compiler type validation
@@ -347,6 +355,7 @@ Created comprehensive test files for all tool modules that lacked test coverage.
    - Confirmation requirements for destructive actions
 
 4. **java.test.ts** - Tests for Java development tool
+
    - Tool definition validation
    - Parameter validation for Maven/Gradle actions
    - Build tool options
@@ -354,6 +363,7 @@ Created comprehensive test files for all tool modules that lacked test coverage.
    - Invocation description tests
 
 5. **rust.test.ts** - Tests for Rust development tool
+
    - Tool definition validation
    - All Cargo action types
    - Feature flag validation
@@ -361,6 +371,7 @@ Created comprehensive test files for all tool modules that lacked test coverage.
    - Confirmation requirements
 
 6. **typescript.test.ts** - Tests for TypeScript development tool
+
    - Tool definition validation
    - All tsc action types
    - ts-node execution actions
@@ -376,12 +387,14 @@ Created comprehensive test files for all tool modules that lacked test coverage.
 #### Infrastructure Tool Tests
 
 8. **database.test.ts** - Tests for database tool
+
    - SQLite, PostgreSQL, MySQL, MariaDB types
    - Query and execute operations
    - Schema operations
    - Backup operations
 
 9. **docker.test.ts** - Tests for Docker tool
+
    - Container operations (ps, run, stop, start, etc.)
    - Image operations (build, pull, push)
    - Network and volume operations
@@ -389,6 +402,7 @@ Created comprehensive test files for all tool modules that lacked test coverage.
    - ContainerInfo and ImageInfo types
 
 10. **redis.test.ts** - Tests for Redis tool
+
     - String operations (get, set, del, etc.)
     - Hash operations (hget, hset, etc.)
     - List operations (lpush, rpush, etc.)
@@ -409,6 +423,7 @@ Created comprehensive test files for all tool modules that lacked test coverage.
 #### Utility Tool Tests
 
 12. **diagram-generator.test.ts** - Tests for diagram generation
+
     - Mermaid diagram detection
     - PlantUML diagram detection
     - Auto-detection functionality
@@ -416,6 +431,7 @@ Created comprehensive test files for all tool modules that lacked test coverage.
     - Syntax validation
 
 13. **code-analyzer.test.ts** - Tests for code analysis
+
     - Complexity analysis
     - Security analysis
     - Pattern detection
@@ -423,6 +439,7 @@ Created comprehensive test files for all tool modules that lacked test coverage.
     - Score calculation
 
 14. **api-tester.test.ts** - Tests for API testing tool
+
     - HTTP method validation
     - Authentication types (bearer, basic, api-key)
     - Response validation
@@ -430,12 +447,14 @@ Created comprehensive test files for all tool modules that lacked test coverage.
     - Timeout handling
 
 15. **glob.test.ts** - Tests for file pattern matching
+
     - Pattern validation
     - Path validation
     - sortFileEntries function
     - Edge cases for file sorting
 
 16. **read-many-files.test.ts** - Tests for reading multiple files
+
     - Path array validation
     - Empty array handling
     - FileReadInfo type
@@ -819,10 +838,12 @@ Created comprehensive documentation for the prompt system that defines AI agent 
 #### Sections Covered
 
 1. **Overview & Pipeline**
+
    - Visual diagram of prompt assembly
    - Component flow from base to final
 
 2. **getCoreSystemPrompt()**
+
    - Function signature and parameters
    - Structure breakdown (~450 lines)
    - Section-by-section documentation
@@ -830,34 +851,41 @@ Created comprehensive documentation for the prompt system that defines AI agent 
    - Model-specific examples
 
 3. **getCompressionPrompt()**
+
    - XML structure for state_snapshot
    - Compression flow diagram
    - All XML sections documented
 
 4. **getProjectSummaryPrompt()**
+
    - Markdown format specification
    - Section descriptions
 
 5. **getToolCallFormatInstructions()**
+
    - Conditional activation logic
    - All three format variants
    - Valid tool names list
 
 6. **getToolLearningContext()**
+
    - Learning feedback integration
    - Common mistake patterns
    - Storage location
 
 7. **getEnvironmentInfo()**
+
    - Data sources table
    - Output format
 
 8. **Model-Specific Examples**
+
    - qwen-coder format (function tags)
    - qwen-vl format (JSON objects)
    - general format (bracket notation)
 
 9. **Customization Options**
+
    - Via system.md file
    - Via environment variables
    - Programmatic customization
@@ -1274,6 +1302,7 @@ Updated all project documentation to reflect current v0.15.0 status with Web UI 
 ### Key Features Documented
 
 1. **Web UI (v0.15.0)**
+
    - ChatInterface with streaming
    - FileExplorer with Monaco editor
    - TerminalEmulator with xterm.js
@@ -1281,6 +1310,7 @@ Updated all project documentation to reflect current v0.15.0 status with Web UI 
    - Terminal WebSocket server with PTY
 
 2. **TSDoc API Documentation**
+
    - packages/core/src/index.ts
    - packages/sdk-typescript/src/index.ts
    - @packageDocumentation with module overview
@@ -1325,3 +1355,89 @@ Updated all project documentation to reflect current v0.15.0 status with Web UI 
 2. Finish TSDoc for packages/cli
 3. Performance benchmarks for v1.0.0
 4. Security audit for v1.0.0
+
+---
+
+## Session: Build Script Fix - 2025-03-04
+
+### Summary
+
+Fixed parallel-build.mjs to work on systems without bun installed.
+
+### Problem
+
+The build script was hardcoded to use `bun`, causing build failures on systems without bun:
+
+```
+Error: spawn bun ENOENT
+```
+
+### Solution
+
+Modified `packages/cli/assets/parallel-build.mjs` to:
+
+1. Auto-detect available package manager (pnpm preferred, npm fallback)
+2. Use `spawnSync` to check if command is available
+3. Replace hardcoded bun command with detected package manager
+
+### Changes Made
+
+**File:** `packages/cli/assets/parallel-build.mjs`
+
+```typescript
+// Before: hardcoded bun command
+const getBunCommand = () => {
+  if (process.platform === 'win32') return 'bun.cmd';
+  return 'bun';
+};
+
+// After: auto-detect package manager
+const getPackageManager = () => {
+  const checkCommand = (cmd) => {
+    try {
+      const result = spawnSync(cmd, ['--version'], {
+        shell: process.platform === 'win32',
+        stdio: 'pipe',
+      });
+      return result.status === 0;
+    } catch {
+      return false;
+    }
+  };
+
+  // Prefer pnpm for workspace/monorepo projects
+  if (checkCommand('pnpm')) {
+    return process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+  }
+  // Fallback to npm (always available with Node.js)
+  return process.platform === 'win32' ? 'npm.cmd' : 'npm';
+};
+```
+
+### Build Verification
+
+```bash
+node scripts/build.js
+# ✅ Build successful
+# - test-utils: copied
+# - core: copied
+# - cli: assets built with npm
+# - webui: vite build (3.76s)
+# - sdk: compiled (6.31s)
+```
+
+### Files Modified
+
+| File                                     | Changes                        |
+| ---------------------------------------- | ------------------------------ |
+| `packages/cli/assets/parallel-build.mjs` | Package manager auto-detection |
+
+### Commit
+
+```
+fix: use pnpm/npm instead of bun in parallel-build.mjs
+
+- Add package manager auto-detection (pnpm preferred, npm fallback)
+- Use spawnSync to check if package manager is available
+- Fix build error: spawn bun ENOENT on systems without bun
+```
