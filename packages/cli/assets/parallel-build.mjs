@@ -1,18 +1,34 @@
 import { access, readdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 
 const assetsDir = dirname(fileURLToPath(import.meta.url));
 
-// Use bun for workspace protocol support
-const getBunCommand = () => {
-  if (process.platform === 'win32') return 'bun.cmd';
-  return 'bun';
+// Detect available package manager (prefer pnpm for monorepo support)
+const getPackageManager = () => {
+  const checkCommand = (cmd) => {
+    try {
+      const result = spawnSync(cmd, ['--version'], {
+        shell: process.platform === 'win32',
+        stdio: 'pipe',
+      });
+      return result.status === 0;
+    } catch {
+      return false;
+    }
+  };
+
+  // Prefer pnpm for workspace/monorepo projects
+  if (checkCommand('pnpm')) {
+    return process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+  }
+  // Fallback to npm (always available with Node.js)
+  return process.platform === 'win32' ? 'npm.cmd' : 'npm';
 };
 
-const bunCommand = getBunCommand();
+const packageManager = getPackageManager();
 
 const entries = await readdir(assetsDir, { withFileTypes: true });
 const assetBuilds = [];
@@ -81,10 +97,10 @@ const runBuild = async (asset) => {
     // Skip install - dependencies are installed at workspace root
     // Just run build
     await runCommand({
-      command: bunCommand,
+      command: packageManager,
       args: ['run', 'build'],
       cwd: asset.assetPath,
-      label: `bun run build`,
+      label: `${packageManager} run build`,
     });
     return;
   }
