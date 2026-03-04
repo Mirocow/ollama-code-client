@@ -67,6 +67,10 @@ import { t } from '../../i18n/index.js';
 
 const debugLogger = createDebugLogger('OLLAMA_STREAM');
 
+// Throttle interval for UI updates during streaming (ms)
+// This helps reduce terminal flickering when scrolling during streaming
+const STREAM_UPDATE_THROTTLE_MS = 50;
+
 enum StreamProcessingStatus {
   Completed,
   UserCancelled,
@@ -123,6 +127,10 @@ export const useOllamaStream = (
   const [thought, setThought] = useState<ThoughtSummary | null>(null);
   const [pendingHistoryItem, pendingHistoryItemRef, setPendingHistoryItem] =
     useStateAndRef<HistoryItemWithoutId | null>(null);
+  // Throttle tracking for pending history updates
+  const lastPendingUpdateRef = useRef<number>(0);
+  const pendingTextBufferRef = useRef<string>('');
+  const pendingUpdateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingRetryErrorItem, setPendingRetryErrorItem] =
     useState<HistoryItemWithoutId | null>(null);
   const [
@@ -262,6 +270,59 @@ export const useOllamaStream = (
   );
 
   useEffect(() => () => stopRetryCountdownTimer(), [stopRetryCountdownTimer]);
+
+  // Throttled version of setPendingHistoryItem for streaming updates
+  // This reduces terminal flickering by limiting UI update frequency
+  const throttledSetPendingHistoryItem = useCallback(
+    (item: HistoryItemWithoutId | null, force: boolean = false) => {
+      // Always update ref immediately for internal state tracking
+      pendingHistoryItemRef.current = item;
+      pendingTextBufferRef.current = item?.text ?? '';
+
+      const now = Date.now();
+      const timeSinceLastUpdate = now - lastPendingUpdateRef.current;
+
+      // Update state immediately if forced or enough time has passed
+      if (force || timeSinceLastUpdate >= STREAM_UPDATE_THROTTLE_MS) {
+        lastPendingUpdateRef.current = now;
+        setPendingHistoryItem(item);
+        
+        // Clear any pending timer
+        if (pendingUpdateTimerRef.current) {
+          clearTimeout(pendingUpdateTimerRef.current);
+          pendingUpdateTimerRef.current = null;
+        }
+      } else if (!pendingUpdateTimerRef.current) {
+        // Schedule a deferred update if one isn't already pending
+        pendingUpdateTimerRef.current = setTimeout(() => {
+          pendingUpdateTimerRef.current = null;
+          lastPendingUpdateRef.current = Date.now();
+          setPendingHistoryItem(pendingHistoryItemRef.current);
+        }, STREAM_UPDATE_THROTTLE_MS - timeSinceLastUpdate);
+      }
+    },
+    [setPendingHistoryItem, pendingHistoryItemRef],
+  );
+
+  // Flush any pending throttled updates immediately
+  const flushPendingHistoryItem = useCallback(() => {
+    if (pendingUpdateTimerRef.current) {
+      clearTimeout(pendingUpdateTimerRef.current);
+      pendingUpdateTimerRef.current = null;
+    }
+    if (pendingHistoryItemRef.current !== pendingHistoryItem) {
+      setPendingHistoryItem(pendingHistoryItemRef.current);
+    }
+  }, [setPendingHistoryItem, pendingHistoryItemRef, pendingHistoryItem]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (pendingUpdateTimerRef.current) {
+        clearTimeout(pendingUpdateTimerRef.current);
+      }
+    };
+  }, []);
 
   const onExec = useCallback(async (done: Promise<void>) => {
     setIsResponding(true);
@@ -500,18 +561,19 @@ export const useOllamaStream = (
         if (pendingHistoryItemRef.current) {
           addItem(pendingHistoryItemRef.current, userMessageTimestamp);
         }
-        setPendingHistoryItem({ type: 'ollama', text: '' });
+        throttledSetPendingHistoryItem({ type: 'ollama', text: '' }, true);
         newOllamaMessageBuffer = eventValue;
       }
       // Split large messages for better rendering performance. Ideally,
       // we should maximize the amount of output sent to <Static />.
       const splitPoint = findLastSafeSplitPoint(newOllamaMessageBuffer);
       if (splitPoint === newOllamaMessageBuffer.length) {
-        // Update the existing message with accumulated content
-        setPendingHistoryItem((item) => ({
-          type: item?.type as 'ollama' | 'ollama_content',
+        // Update the existing message with accumulated content (throttled)
+        const currentType = pendingHistoryItemRef.current?.type as 'ollama' | 'ollama_content' | undefined;
+        throttledSetPendingHistoryItem({
+          type: currentType ?? 'ollama',
           text: newOllamaMessageBuffer,
-        }));
+        });
       } else {
         // This indicates that we need to split up this Gemini Message.
         // Splitting a message is primarily a performance consideration. There is a
@@ -532,12 +594,12 @@ export const useOllamaStream = (
           },
           userMessageTimestamp,
         );
-        setPendingHistoryItem({ type: 'ollama_content', text: afterText });
+        throttledSetPendingHistoryItem({ type: 'ollama_content', text: afterText }, true);
         newOllamaMessageBuffer = afterText;
       }
       return newOllamaMessageBuffer;
     },
-    [addItem, pendingHistoryItemRef, setPendingHistoryItem],
+    [addItem, pendingHistoryItemRef, throttledSetPendingHistoryItem],
   );
 
   const mergeThought = useCallback(
@@ -583,7 +645,7 @@ export const useOllamaStream = (
         if (pendingHistoryItemRef.current) {
           addItem(pendingHistoryItemRef.current, userMessageTimestamp);
         }
-        setPendingHistoryItem({ type: 'ollama_thought', text: '' });
+        throttledSetPendingHistoryItem({ type: 'ollama_thought', text: '' }, true);
       }
 
       // Split large thought messages for better rendering performance (same rationale
@@ -596,8 +658,8 @@ export const useOllamaStream = (
           : 'ollama_thought';
 
       if (splitPoint === newThoughtBuffer.length) {
-        // Update the existing thought message with accumulated content
-        setPendingHistoryItem({
+        // Update the existing thought message with accumulated content (throttled)
+        throttledSetPendingHistoryItem({
           type: nextPendingType,
           text: newThoughtBuffer,
         });
@@ -611,10 +673,10 @@ export const useOllamaStream = (
           },
           userMessageTimestamp,
         );
-        setPendingHistoryItem({
+        throttledSetPendingHistoryItem({
           type: 'ollama_thought_content',
           text: afterText,
-        });
+        }, true);
         newThoughtBuffer = afterText;
       }
 
@@ -623,7 +685,7 @@ export const useOllamaStream = (
 
       return newThoughtBuffer;
     },
-    [addItem, pendingHistoryItemRef, setPendingHistoryItem, mergeThought],
+    [addItem, pendingHistoryItemRef, throttledSetPendingHistoryItem, mergeThought],
   );
 
   const handleUserCancelledEvent = useCallback(
@@ -1116,6 +1178,8 @@ export const useOllamaStream = (
           }
 
           if (pendingHistoryItemRef.current) {
+            // Flush any throttled updates before adding to history
+            flushPendingHistoryItem();
             addItem(pendingHistoryItemRef.current, userMessageTimestamp);
             setPendingHistoryItem(null);
           }
