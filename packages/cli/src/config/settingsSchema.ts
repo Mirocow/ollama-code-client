@@ -679,6 +679,26 @@ const SETTINGS_SCHEMA = {
           },
         },
       },
+      autoPullOnSwitch: {
+        type: 'boolean',
+        label: 'Auto Pull Model on Switch',
+        category: 'Model',
+        requiresRestart: false,
+        default: true,
+        description:
+          'Automatically pull (download) the model from Ollama registry when switching to a model that is not available locally.',
+        showInDialog: true,
+      },
+      autoUnloadPrevious: {
+        type: 'boolean',
+        label: 'Auto Unload Previous Model',
+        category: 'Model',
+        requiresRestart: false,
+        default: false,
+        description:
+          'Automatically unload the previous model from memory when switching to a new model. This frees up VRAM but may slow down subsequent switches back.',
+        showInDialog: true,
+      },
     },
   },
 

@@ -26,6 +26,10 @@ import type { AnyToolInvocation } from '../tools/tools.js';
 import { BaseLlmClient } from '../core/baseLlmClient.js';
 import { OllamaClient } from '../core/ollamaClient.js';
 import {
+  OllamaNativeClient,
+  DEFAULT_OLLAMA_NATIVE_URL,
+} from '../core/ollamaNativeClient.js';
+import {
   type AuthType,
   createContentGenerator,
   resolveContentGeneratorConfigWithSources,
@@ -437,6 +441,7 @@ export class Config {
   private readonly gitCoAuthor: GitCoAuthorSettings;
   private readonly usageStatisticsEnabled: boolean;
   private ollamaClient!: OllamaClient;
+  private ollamaNativeClient: OllamaNativeClient | null = null;
   private baseLlmClient!: BaseLlmClient;
   private readonly fileFiltering: {
     respectGitIgnore: boolean;
@@ -1178,6 +1183,22 @@ export class Config {
 
   getOllamaClient(): OllamaClient {
     return this.ollamaClient;
+  }
+
+  /**
+   * Get the OllamaNativeClient for direct API access.
+   * Used for model management operations like pull, unload, list models.
+   */
+  getOllamaNativeClient(): OllamaNativeClient {
+    if (!this.ollamaNativeClient) {
+      const baseUrl =
+        this.contentGeneratorConfig?.baseUrl ?? DEFAULT_OLLAMA_NATIVE_URL;
+      this.ollamaNativeClient = new OllamaNativeClient({
+        baseUrl,
+        timeout: this.contentGeneratorConfig?.timeout,
+      });
+    }
+    return this.ollamaNativeClient;
   }
 
   getEnableRecursiveFileSearch(): boolean {

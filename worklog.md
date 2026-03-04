@@ -1,5 +1,87 @@
 # Worklog - Ollama Code Development
 
+---
+
+## Session: Model Loading/Unloading Verification - 2025-06-17
+
+### Task ID: 1
+
+### Agent: Main Agent
+
+### Task: Verify model loading and unloading implementation when switching models via menu
+
+### Work Log:
+- Analyzed ModelDialog.tsx component (packages/cli/src/ui/components/ModelDialog.tsx)
+- Checked OllamaNativeClient API (packages/core/src/core/ollamaNativeClient.ts)
+- Verified settings schema (packages/cli/src/config/settingsSchema.ts)
+- Confirmed all required methods exist and are properly integrated
+
+### Stage Summary:
+
+**✅ Model loading and unloading is ALREADY FULLY IMPLEMENTED!**
+
+#### Implementation Details:
+
+1. **Settings** (`settingsSchema.ts` lines 682-701):
+   - `model.autoPullOnSwitch` (default: `true`) - Auto download model if not available locally
+   - `model.autoUnloadPrevious` (default: `false`) - Auto unload previous model from memory
+
+2. **OllamaNativeClient Methods** (`ollamaNativeClient.ts`):
+   - `isModelAvailable(modelName)` (lines 1625-1634) - Check if model exists locally
+   - `pullModel(name, progressCallback)` (lines 1213-1237) - Download model from registry
+   - `unloadModel(modelName)` (lines 1655-1661) - Unload model from memory using `keep_alive: 0`
+
+3. **ModelDialog.tsx Implementation** (lines 400-547):
+   ```typescript
+   // When selecting a model:
+   // 1. Check if model is available locally
+   const isAvailable = await ollamaClient.isModelAvailable(modelId);
+   
+   // 2. If not available and autoPullOnSwitch is enabled -> pull it
+   if (!isAvailable && autoPullOnSwitch) {
+     await ollamaClient.pullModel(modelId, (progress) => {
+       setLoadingProgress(progress);
+     });
+   }
+   
+   // 3. If autoUnloadPrevious is enabled -> unload previous model
+   if (autoUnloadPrevious && authType === AuthType.USE_OLLAMA) {
+     await ollamaClient.unloadModel(previousModelId);
+   }
+   ```
+
+4. **UI Features**:
+   - Progress bar during model download
+   - Status messages showing download progress
+   - Error handling for failed downloads
+   - Info messages about successful operations
+
+#### User Experience:
+
+When user opens model selection dialog (`/model` command) and selects a model:
+1. Dialog shows loading indicator while checking/pulling model
+2. If model needs download, progress is displayed in real-time
+3. Previous model can be auto-unloaded (if setting enabled)
+4. Success/error messages are shown in history
+
+#### Configuration:
+
+Users can configure behavior in settings:
+```json
+{
+  "model": {
+    "autoPullOnSwitch": true,
+    "autoUnloadPrevious": false
+  }
+}
+```
+
+### No Changes Required
+
+The feature requested by user ("дописать загрузку и выгрузку модели при ее смене через меню") is already implemented and functional.
+
+---
+
 ## Session: Context Caching Tests (v0.10.9)
 
 ### Summary

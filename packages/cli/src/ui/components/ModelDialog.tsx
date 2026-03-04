@@ -15,6 +15,7 @@ import {
   type ContentGeneratorConfig,
   type ContentGeneratorConfigSource,
   type ContentGeneratorConfigSources,
+  type OllamaProgressEvent,
   getModelCapabilities,
   tokenLimit,
 } from '@ollama-code/ollama-code-core';
@@ -226,6 +227,30 @@ function getCapabilityDescription(modelName: string): string {
   return parts.length > 0 ? parts.join(', ') : t('Basic');
 }
 
+/**
+ * Format download progress for display
+ */
+function formatProgress(event: OllamaProgressEvent): string {
+  const { status, percentage, completed, total } = event;
+  
+  if (status === 'success') {
+    return t('✓ Model loaded successfully');
+  }
+  
+  if (percentage !== undefined) {
+    return `${status}: ${percentage.toFixed(1)}%`;
+  }
+  
+  if (completed !== undefined && total !== undefined && total > 0) {
+    const pct = (completed / total) * 100;
+    const completedMB = (completed / 1024 / 1024).toFixed(1);
+    const totalMB = (total / 1024 / 1024).toFixed(1);
+    return `${status}: ${pct.toFixed(1)}% (${completedMB}/${totalMB} MB)`;
+  }
+  
+  return status;
+}
+
 export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
   const config = useContext(ConfigContext);
   const uiState = useContext(UIStateContext);
@@ -233,6 +258,11 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
 
   // Local error state for displaying errors within the dialog
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // State for model loading progress
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingModelId, setLoadingModelId] = useState<string | null>(null);
+  const [loadingProgress, setLoadingProgress] = useState<OllamaProgressEvent | null>(null);
 
   const authType = config?.getAuthType();
   const effectiveConfig =
@@ -240,6 +270,10 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
       | ContentGeneratorConfig
       | undefined) ?? undefined;
   const sources = readSourcesFromConfig(config);
+
+  // Get settings for auto-pull and auto-unload
+  const autoPullOnSwitch = settings.merged.model?.autoPullOnSwitch ?? true;
+  const autoUnloadPrevious = settings.merged.model?.autoUnloadPrevious ?? false;
 
   const availableModelEntries = useMemo(() => {
     const allModels = config ? config.getAllConfiguredModels() : [];
@@ -349,7 +383,7 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
 
   useKeypress(
     (key) => {
-      if (key.name === 'escape') {
+      if (key.name === 'escape' && !isLoading) {
         onClose();
       }
     },
@@ -365,17 +399,19 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
 
   const handleSelect = useCallback(
     async (selected: string) => {
+      if (!config) {
+        onClose();
+        return;
+      }
+
       setErrorMessage(null);
+      setIsLoading(false);
+      setLoadingProgress(null);
 
       let after: ContentGeneratorConfig | undefined;
       let effectiveAuthType: AuthType | undefined;
       let effectiveModelId = selected;
       let isRuntime = false;
-
-      if (!config) {
-        onClose();
-        return;
-      }
 
       try {
         // Determine if this is a runtime model selection
@@ -404,6 +440,75 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
           modelId = idx >= 0 ? selected.slice(idx + sep.length) : selected;
         }
 
+        // Only handle Ollama models for pull/unload operations
+        if (selectedAuthType === AuthType.USE_OLLAMA && !isRuntime) {
+          const ollamaClient = config.getOllamaNativeClient();
+          
+          // Check if model is available locally
+          const isAvailable = await ollamaClient.isModelAvailable(modelId);
+          
+          if (!isAvailable && autoPullOnSwitch) {
+            // Model not available locally - pull it
+            setIsLoading(true);
+            setLoadingModelId(modelId);
+            
+            // Unload previous model if enabled
+            if (autoUnloadPrevious && authType === AuthType.USE_OLLAMA) {
+              const previousModelId = config.getModel();
+              if (previousModelId && previousModelId !== modelId) {
+                try {
+                  await ollamaClient.unloadModel(previousModelId);
+                  uiState?.historyManager.addItem(
+                    {
+                      type: 'info',
+                      text: t('Unloaded previous model: {{model}}', { model: previousModelId }),
+                    },
+                    Date.now(),
+                  );
+                } catch (unloadError) {
+                  // Log but don't fail - unloading is optional
+                  console.warn('Failed to unload previous model:', unloadError);
+                }
+              }
+            }
+            
+            // Pull the model with progress callback
+            await ollamaClient.pullModel(modelId, (progress) => {
+              setLoadingProgress(progress);
+            });
+            
+            setIsLoading(false);
+            setLoadingModelId(null);
+            setLoadingProgress(null);
+            
+            uiState?.historyManager.addItem(
+              {
+                type: 'info',
+                text: t('Model {{model}} downloaded successfully', { model: modelId }),
+              },
+              Date.now(),
+            );
+          } else if (autoUnloadPrevious && authType === AuthType.USE_OLLAMA) {
+            // Model is available but we should unload previous if enabled
+            const previousModelId = config.getModel();
+            if (previousModelId && previousModelId !== modelId) {
+              try {
+                await ollamaClient.unloadModel(previousModelId);
+                uiState?.historyManager.addItem(
+                  {
+                    type: 'info',
+                    text: t('Unloaded previous model: {{model}}', { model: previousModelId }),
+                  },
+                  Date.now(),
+                );
+              } catch (unloadError) {
+                // Log but don't fail
+                console.warn('Failed to unload previous model:', unloadError);
+              }
+            }
+          }
+        }
+
         await config.switchModel(selectedAuthType, modelId);
 
         if (!isRuntime) {
@@ -417,6 +522,9 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
         effectiveAuthType = after?.authType ?? selectedAuthType ?? authType;
         effectiveModelId = after?.model ?? modelId;
       } catch (e) {
+        setIsLoading(false);
+        setLoadingModelId(null);
+        setLoadingProgress(null);
         const baseErrorMessage = e instanceof Error ? e.message : String(e);
         const errorPrefix = isRuntime
           ? 'Failed to switch to runtime model.'
@@ -435,7 +543,7 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
       });
       onClose();
     },
-    [authType, config, onClose, settings, uiState, setErrorMessage],
+    [authType, config, onClose, settings, uiState, setErrorMessage, autoPullOnSwitch, autoUnloadPrevious],
   );
 
   const hasModels = MODEL_OPTIONS.length > 0;
@@ -512,6 +620,27 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
         </Box>
       </Box>
 
+      {/* Loading progress display */}
+      {isLoading && loadingModelId && (
+        <Box marginTop={1} flexDirection="column" paddingX={1}>
+          <Text color={theme.status.warning} bold>
+            {t('Loading model: {{model}}', { model: loadingModelId })}
+          </Text>
+          {loadingProgress && (
+            <Box marginTop={1}>
+              <Text color={theme.text.accent}>
+                {formatProgress(loadingProgress)}
+              </Text>
+            </Box>
+          )}
+          <Box marginTop={1}>
+            <Text color={theme.text.secondary}>
+              {t('Please wait...')}
+            </Text>
+          </Box>
+        </Box>
+      )}
+
       {!hasModels ? (
         <Box marginTop={1} flexDirection="column">
           <Text color={theme.status.warning}>
@@ -537,6 +666,7 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
             onSelect={handleSelect}
             initialIndex={initialIndex}
             showNumbers={true}
+            isFocused={!isLoading}
           />
         </Box>
       )}
@@ -550,7 +680,9 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
       )}
 
       <Box marginTop={1} flexDirection="column">
-        <Text color={theme.text.secondary}>{t('(Press Esc to close)')}</Text>
+        <Text color={theme.text.secondary}>
+          {isLoading ? t('(Loading in progress...)') : t('(Press Esc to close)')}
+        </Text>
       </Box>
     </Box>
   );
