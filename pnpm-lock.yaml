@@ -231,7 +231,7 @@ importers:
         specifier: 1.27.1
         version: 1.27.1(zod@4.3.6)
       '@ollama-code/ollama-code-core':
-        specifier: workspace:0.11.0
+        specifier: 'workspace:'
         version: link:../core
       '@types/update-notifier':
         specifier: 6.0.8
@@ -340,7 +340,7 @@ importers:
         specifier: 7.27.6
         version: 7.27.6
       '@ollama-code/ollama-code-test-utils':
-        specifier: workspace:0.11.0
+        specifier: 'workspace:'
         version: link:../test-utils
       '@testing-library/react':
         specifier: 16.3.0
@@ -546,7 +546,7 @@ importers:
         version: 8.18.0
     devDependencies:
       '@ollama-code/ollama-code-test-utils':
-        specifier: workspace:0.11.0
+        specifier: 'workspace:'
         version: link:../test-utils
       '@types/diff':
         specifier: 7.0.2
@@ -641,7 +641,7 @@ importers:
         specifier: 4.6.0
         version: 4.6.0(monaco-editor@0.55.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@ollama-code/ollama-code-core':
-        specifier: workspace:0.11.0
+        specifier: workspace:*
         version: link:../core
       '@ollama-code/webui':
         specifier: workspace:*

@@ -14,8 +14,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ollama-code/ollama-code-core": "file:../core",
-    "@ollama-code/webui": "file:../webui",
+    "@ollama-code/ollama-code-core": "workspace:*",
+    "@ollama-code/webui": "workspace:*",
     "next": "16.1.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",

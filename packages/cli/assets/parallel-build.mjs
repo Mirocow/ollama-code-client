@@ -5,7 +5,14 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 
 const assetsDir = dirname(fileURLToPath(import.meta.url));
-const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+
+// Use pnpm for workspace protocol support
+const getPnpmCommand = () => {
+  if (process.platform === 'win32') return 'pnpm.cmd';
+  return 'pnpm';
+};
+
+const pnpmCommand = getPnpmCommand();
 
 const entries = await readdir(assetsDir, { withFileTypes: true });
 const assetBuilds = [];
@@ -71,17 +78,17 @@ const runCommand = ({ command, args, cwd, label }) =>
 const runBuild = async (asset) => {
   if (asset.useNpm) {
     await runCommand({
-      command: npmCommand,
-      args: ['install'],
+      command: pnpmCommand,
+      args: ['install', '--prefer-offline'],
       cwd: asset.assetPath,
-      label: `npm install`,
+      label: `pnpm install`,
     });
 
     await runCommand({
-      command: npmCommand,
+      command: pnpmCommand,
       args: ['run', 'build'],
       cwd: asset.assetPath,
-      label: `npm run build`,
+      label: `pnpm run build`,
     });
     return;
   }
