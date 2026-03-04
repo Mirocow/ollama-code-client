@@ -70,7 +70,7 @@
     "@lydell/node-pty-win32-x64": "1.1.0"
   },
   "devDependencies": {
-    "@ollama-code/ollama-code-test-utils": "workspace:0.11.0",
+    "@ollama-code/ollama-code-test-utils": "workspace:*",
     "@types/diff": "7.0.2",
     "@types/dotenv": "6.1.1",
     "@types/fast-levenshtein": "0.0.4",

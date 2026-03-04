@@ -40,18 +40,9 @@ function hasRangePrefix(version) {
     return false;
   }
 
-  // Check for workspace wildcards - these should be exact versions
+  // Check for workspace wildcards - these are allowed
   if (version.startsWith('workspace:')) {
-    const spec = version.replace('workspace:', '');
-    // workspace:* ^ ~ are wildcards, need exact version
-    if (spec === '*' || spec === '^' || spec === '~') {
-      return true;
-    }
-    // workspace:1.0.0 or workspace:^1.0.0 - extract and check
-    const versionPart = spec.replace(/^[\^~]/, '');
-    if (/^\d/.test(versionPart)) {
-      return false; // Has a version number, OK
-    }
+    // workspace:* workspace:^ workspace:~ are all valid for monorepo
     return false;
   }
 
