@@ -17,7 +17,7 @@ overrides:
   vitest: 3.2.4
   '@vitest/coverage-v8': 3.2.4
   '@vitest/browser': 3.2.4
-  glob: ^13.0.0
+  glob: 13.0.0
   rimraf@<4: 6.0.1
   inflight: npm:@jsdevtools/inflight@^2.0.0
 
@@ -128,8 +128,8 @@ importers:
         specifier: 0.12.0
         version: 0.12.0(eslint@9.24.0(jiti@2.6.1))(typescript@5.8.2)
       glob:
-        specifier: ^13.0.0
-        version: 13.0.6
+        specifier: 13.0.0
+        version: 13.0.0
       globals:
         specifier: 16.0.0
         version: 16.0.0
@@ -231,7 +231,7 @@ importers:
         specifier: 1.27.1
         version: 1.27.1(zod@4.3.6)
       '@ollama-code/ollama-code-core':
-        specifier: file:../core
+        specifier: workspace:0.11.0
         version: link:../core
       '@types/update-notifier':
         specifier: 6.0.8
@@ -264,8 +264,8 @@ importers:
         specifier: 0.5.2
         version: 0.5.2
       glob:
-        specifier: ^13.0.0
-        version: 13.0.6
+        specifier: 13.0.0
+        version: 13.0.0
       highlight.js:
         specifier: 11.11.1
         version: 11.11.1
@@ -340,7 +340,7 @@ importers:
         specifier: 7.27.6
         version: 7.27.6
       '@ollama-code/ollama-code-test-utils':
-        specifier: file:../test-utils
+        specifier: workspace:0.11.0
         version: link:../test-utils
       '@testing-library/react':
         specifier: 16.3.0
@@ -488,8 +488,8 @@ importers:
         specifier: 0.5.2
         version: 0.5.2
       glob:
-        specifier: ^13.0.0
-        version: 13.0.6
+        specifier: 13.0.0
+        version: 13.0.0
       google-auth-library:
         specifier: 10.5.0
         version: 10.5.0
@@ -546,7 +546,7 @@ importers:
         version: 8.18.0
     devDependencies:
       '@ollama-code/ollama-code-test-utils':
-        specifier: file:../test-utils
+        specifier: workspace:0.11.0
         version: link:../test-utils
       '@types/diff':
         specifier: 7.0.2
@@ -644,7 +644,7 @@ importers:
         specifier: workspace:0.11.0
         version: link:../core
       '@ollama-code/webui':
-        specifier: workspace:0.11.0
+        specifier: workspace:*
         version: link:../webui
       '@xterm/addon-fit':
         specifier: 0.11.0
@@ -4416,9 +4416,9 @@ packages:
     peerDependencies:
       tslib: '2'
 
-  glob@13.0.6:
-    resolution: {integrity: sha512-Wjlyrolmm8uDpm/ogGyXZXb1Z+Ca2B8NbJwqBVg0axK9GbBeoS7yGV6vjXnYdGm6X53iehEuxxbyiKp8QmN4Vw==}
-    engines: {node: 18 || 20 || >=22}
+  glob@13.0.0:
+    resolution: {integrity: sha512-tvZgpqk6fz4BaNZ66ZsRaZnbHvP/jG3uKJvAZOwEVUL4RTA5nJeeLYfyN9/VA8NX/V3IBG+hkeuGpKjvELkVhA==}
+    engines: {node: 20 || >=22}
 
   global-directory@4.0.1:
     resolution: {integrity: sha512-wHTUcDUoZ1H5/0iVqEudYW4/kAlN5cZ3j/bXn0Dpbizl9iaUVeWSHqiOjsgk6OW2bkLclbBjzewBz6weQ1zA2Q==}
@@ -8180,7 +8180,7 @@ snapshots:
 
   '@joshwooding/vite-plugin-react-docgen-typescript@0.6.4(typescript@5.3.3)(vite@5.4.19(@types/node@22.18.0)(lightningcss@1.30.1))':
     dependencies:
-      glob: 13.0.6
+      glob: 13.0.0
       react-docgen-typescript: 2.4.0(typescript@5.3.3)
       vite: 5.4.19(@types/node@22.18.0)(lightningcss@1.30.1)
     optionalDependencies:
@@ -9766,7 +9766,7 @@ snapshots:
 
   archiver-utils@5.0.2:
     dependencies:
-      glob: 13.0.6
+      glob: 13.0.0
       graceful-fs: 4.2.11
       is-stream: 2.0.1
       lazystream: 1.0.1
@@ -11413,7 +11413,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  glob@13.0.6:
+  glob@13.0.0:
     dependencies:
       minimatch: 10.2.4
       minipass: 7.1.3
@@ -14087,7 +14087,7 @@ snapshots:
 
   rimraf@5.0.10:
     dependencies:
-      glob: 13.0.6
+      glob: 13.0.0
 
   robust-predicates@3.0.2: {}
 
@@ -14714,7 +14714,7 @@ snapshots:
   test-exclude@7.0.2:
     dependencies:
       '@istanbuljs/schema': 0.1.3
-      glob: 13.0.6
+      glob: 13.0.0
       minimatch: 10.2.4
 
   text-decoder@1.2.7:

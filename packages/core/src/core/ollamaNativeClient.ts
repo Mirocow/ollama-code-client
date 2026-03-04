@@ -927,6 +927,14 @@ export class OllamaNativeClient {
       // Handle stream events
       await new Promise<void>((resolve, reject) => {
         stream.on('data', (chunk: Buffer) => {
+          // Check if request was aborted (Ctrl+C support)
+          if (combinedSignal?.aborted) {
+            debugLog('info', 'Stream aborted by user', { chunkCount });
+            stream.destroy();
+            reject(new OllamaAbortError('Request aborted by user'));
+            return;
+          }
+          
           // Refresh timeout on each chunk to handle long-running generations
           refreshTimeout();
           chunkCount++;
@@ -1084,6 +1092,18 @@ export class OllamaNativeClient {
         });
       });
     } catch (error) {
+      // Handle abort (Ctrl+C)
+      if (error instanceof OllamaAbortError) {
+        debugLog('info', 'Streaming request aborted by user');
+        apiLogger
+          .logInteraction(
+            requestLogData,
+            { chunks: responseChunks, aborted: true },
+            error,
+          )
+          .catch(() => {});
+        throw error;
+      }
       // Handle timeout
       if (
         (error as Error).name === 'AbortError' ||
