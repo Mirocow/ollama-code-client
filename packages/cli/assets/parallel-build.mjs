@@ -95,7 +95,7 @@ const runCommand = ({ command, args, cwd, label }) =>
 const runBuild = async (asset) => {
   if (asset.useNpm) {
     // Skip install - dependencies are installed at workspace root
-    // Just run build
+    // Just run build using detected package manager (pnpm preferred for workspace protocol)
     await runCommand({
       command: packageManager,
       args: ['run', 'build'],

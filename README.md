@@ -48,7 +48,6 @@
 
 - **Node.js** 20.x or 22.x LTS (Node.js 23+ / 24+ / 25+ NOT supported due to node-pty compilation issues)
 - **pnpm** >= 10.0.0
-- **bun** >= 1.0.0 (for assets build)
 - **Ollama** installed and running (https://ollama.ai)
 
 > ⚠️ **Important**: Node.js 23+ is not supported. The `node-pty` native module requires Node.js 20.x or 22.x LTS. If you have Node.js 23+, please downgrade:
