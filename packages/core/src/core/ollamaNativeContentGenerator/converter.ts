@@ -607,7 +607,19 @@ export class OllamaContentConverter {
           hasArgs: !!tc.function.arguments,
         })),
         done: ollamaChunk.done,
+        doneType: typeof ollamaChunk.done,
         accumulatedToolCallsSize: accumulatedToolCalls?.size,
+        hasAccumulatedToolCalls: !!accumulatedToolCalls,
+      });
+    }
+
+    // Log ALL chunks with done=true for debugging
+    if (ollamaChunk.done) {
+      debugLogger.info('Chunk with done=true received', {
+        hasMessage: !!ollamaChunk.message,
+        hasToolCallsInMessage: !!ollamaChunk.message?.tool_calls,
+        accumulatedToolCallsSize: accumulatedToolCalls?.size,
+        willEmit: accumulatedToolCalls && accumulatedToolCalls.size > 0,
       });
     }
 
@@ -642,11 +654,19 @@ export class OllamaContentConverter {
     // NOTE: This must be OUTSIDE the tool_calls check above, because the final
     // chunk with done=true may not contain tool_calls, but we still need to emit
     // the previously accumulated ones.
-    if (
+    const shouldEmitToolCalls =
       ollamaChunk.done &&
       accumulatedToolCalls &&
-      accumulatedToolCalls.size > 0
-    ) {
+      accumulatedToolCalls.size > 0;
+
+    debugLogger.debug('Tool calls emit check', {
+      done: ollamaChunk.done,
+      hasAccumulatedToolCalls: !!accumulatedToolCalls,
+      accumulatedSize: accumulatedToolCalls?.size,
+      shouldEmit: shouldEmitToolCalls,
+    });
+
+    if (shouldEmitToolCalls) {
       debugLogger.info('Emitting accumulated tool calls', {
         count: accumulatedToolCalls.size,
         tools: [...accumulatedToolCalls.values()].map((tc) => tc.name),
