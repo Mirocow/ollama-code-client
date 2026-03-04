@@ -1,5 +1,95 @@
 # Changelog
 
+## 0.17.0
+
+_SSH Tools Plugin — Remote Server Connectivity_
+
+### New Features
+
+#### SSH Tools Plugin
+
+New dedicated SSH plugin for remote server management:
+
+| Tool              | Name             | Description                                    |
+| ----------------- | ---------------- | ---------------------------------------------- |
+| **SSH Connect**   | `ssh_connect`    | Connect to remote servers and execute commands |
+| **SSH Add Host**  | `ssh_add_host`   | Save SSH host profiles with credentials        |
+| **SSH List Hosts**| `ssh_list_hosts` | List saved SSH profiles                        |
+| **SSH Remove Host**| `ssh_remove_host`| Remove saved SSH profiles                     |
+
+**SSH Connect Features:**
+
+- Host and user authentication (required)
+- Custom port configuration (default: 22)
+- SSH key-based authentication (`identity_file`)
+- Password authentication (discouraged)
+- Timeout configuration (max 10 minutes)
+- Profile-based connections
+
+**SSH Profile Management:**
+
+```bash
+# Save SSH profile
+ssh_add_host(name="prod", host="192.168.1.100", user="admin", identity_file="~/.ssh/id_rsa")
+
+# List profiles
+ssh_list_hosts()
+
+# Connect using profile
+ssh_connect(profile="prod", command="docker ps")
+
+# Remove profile
+ssh_remove_host(name="prod")
+```
+
+**Tool Aliases:**
+
+| Alias              | Tool            |
+| ------------------ | --------------- |
+| `ssh`              | `ssh_connect`   |
+| `ssh_connect`      | `ssh_connect`   |
+| `ssh_dev`          | `ssh_connect`   |
+| `remote`           | `ssh_connect`   |
+| `remote_shell`     | `ssh_connect`   |
+| `remote_exec`      | `ssh_connect`   |
+| `connect`          | `ssh_connect`   |
+| `telnet`           | `ssh_connect`   |
+
+**Security Notes:**
+
+- SSH connections always require user confirmation
+- Credentials stored in `~/.ollama-code/ssh_credentials.json`
+- Use SSH key authentication when possible
+- Passwords stored in plain text (use keys for production)
+
+### Files Added
+
+| File                                                   | Description                |
+| ------------------------------------------------------ | -------------------------- |
+| `plugins/builtin/ssh-tools/index.ts`                   | SSH plugin definition      |
+| `plugins/builtin/ssh-tools/ssh.ts`                     | SSH connect tool           |
+| `plugins/builtin/ssh-tools/ssh-hosts.ts`               | SSH profile management     |
+| `plugins/builtin/ssh-tools/index.test.ts`              | SSH tests                  |
+
+### Files Modified
+
+| File                                                   | Changes                              |
+| ------------------------------------------------------ | ------------------------------------ |
+| `packages/core/src/tools/tool-names.ts`                | Added SSH tool names and aliases     |
+| `packages/core/src/config/storage.ts`                  | Added SSH credentials storage        |
+| `packages/core/src/plugins/pluginRegistry.ts`          | Registered SSH tools plugin          |
+| `packages/core/src/index.ts`                           | Exported SSH plugin                  |
+| `README.md`                                            | Added SSH Tools feature              |
+| `README.ru.md`                                         | Added SSH Tools feature (Russian)    |
+
+### Commits
+
+```
+b2707127 feat: Add SSH Tools plugin for remote server connectivity
+```
+
+---
+
 ## 0.16.9
 
 _Tool Aliases Expansion & IDE Support Improvements_

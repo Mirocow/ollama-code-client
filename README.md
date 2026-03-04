@@ -39,6 +39,7 @@
 - 🎨 **Diagram Generator** — create Mermaid and PlantUML diagrams
 - 🔀 **Git Advanced** — advanced git operations (stash, cherry-pick, rebase, bisect)
 - 🌐 **API Tester** — REST API endpoint testing
+- 🔐 **SSH Tools** — remote server connectivity with profile management
 - 🏷️ **Tool Aliases** — short names for tools (`run` → `run_shell_command`)
 - 🧠 **Self-Learning** — automatic learning of tool names from errors
 - 🔄 **Undo/Redo** — reversible operations with command pattern

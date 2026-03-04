@@ -14,6 +14,7 @@ export { OLLAMA_DIR };
 
 export const GOOGLE_ACCOUNTS_FILENAME = 'google_accounts.json';
 export const OAUTH_FILE = 'oauth_creds.json';
+export const SSH_CREDENTIALS_FILE = 'ssh_credentials.json';
 const TMP_DIR_NAME = 'tmp';
 const BIN_DIR_NAME = 'bin';
 const PROJECT_DIR_NAME = 'projects';
@@ -146,9 +147,124 @@ export class Storage {
     return path.join(this.getProjectTempDir(), 'shell_history');
   }
 
+  // ============================================================================
+  // SSH Credentials Storage
+  // ============================================================================
+
+  /**
+   * Get the path to SSH credentials file
+   */
+  static getSSHCredentialsPath(): string {
+    return path.join(Storage.getGlobalOllamaDir(), SSH_CREDENTIALS_FILE);
+  }
+
+  /**
+   * Load SSH credentials from storage
+   */
+  static loadSSHCredentials(): SSHCredentialsStore {
+    const filePath = Storage.getSSHCredentialsPath();
+    try {
+      if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        return JSON.parse(content) as SSHCredentialsStore;
+      }
+    } catch (error) {
+      // Return empty store if file doesn't exist or is corrupted
+    }
+    return { hosts: {} };
+  }
+
+  /**
+   * Save SSH credentials to storage
+   */
+  static saveSSHCredentials(store: SSHCredentialsStore): void {
+    const filePath = Storage.getSSHCredentialsPath();
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(filePath, JSON.stringify(store, null, 2), 'utf-8');
+  }
+
+  /**
+   * Get SSH host configuration by name
+   */
+  static getSSHHost(name: string): SSHHostConfig | undefined {
+    const store = Storage.loadSSHCredentials();
+    return store.hosts[name];
+  }
+
+  /**
+   * Add or update SSH host configuration
+   */
+  static setSSHHost(name: string, config: SSHHostConfig): void {
+    const store = Storage.loadSSHCredentials();
+    store.hosts[name] = {
+      ...config,
+      createdAt: config.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    Storage.saveSSHCredentials(store);
+  }
+
+  /**
+   * Remove SSH host configuration
+   */
+  static removeSSHHost(name: string): boolean {
+    const store = Storage.loadSSHCredentials();
+    if (store.hosts[name]) {
+      delete store.hosts[name];
+      Storage.saveSSHCredentials(store);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * List all SSH host configurations
+   */
+  static listSSHHosts(): Record<string, SSHHostConfig> {
+    const store = Storage.loadSSHCredentials();
+    return store.hosts;
+  }
+
   private sanitizeCwd(cwd: string): string {
     // On Windows, normalize to lowercase for case-insensitive matching
     const normalizedCwd = os.platform() === 'win32' ? cwd.toLowerCase() : cwd;
     return normalizedCwd.replace(/[^a-zA-Z0-9]/g, '-');
   }
+}
+
+/**
+ * SSH Host Configuration
+ */
+export interface SSHHostConfig {
+  /** Hostname or IP address */
+  host: string;
+  /** Username for SSH */
+  user: string;
+  /** SSH port (default: 22) */
+  port?: number;
+  /** Path to SSH private key file */
+  identity_file?: string;
+  /** Password (not recommended, use identity_file instead) */
+  password?: string;
+  /** SSH options */
+  options?: Record<string, string>;
+  /** Description of the host */
+  description?: string;
+  /** Tags for organization */
+  tags?: string[];
+  /** Creation timestamp */
+  createdAt?: string;
+  /** Last update timestamp */
+  updatedAt?: string;
+}
+
+/**
+ * SSH Credentials Store
+ */
+export interface SSHCredentialsStore {
+  /** Named host configurations */
+  hosts: Record<string, SSHHostConfig>;
 }
