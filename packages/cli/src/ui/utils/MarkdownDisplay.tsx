@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, Box } from 'ink';
+import Spinner from 'ink-spinner';
 import { theme } from '../semantic-colors.js';
 import { colorizeCode } from './CodeColorizer.js';
 import { TableRenderer } from './TableRenderer.js';
@@ -306,6 +307,16 @@ const RenderCodeBlockInternal: React.FC<RenderCodeBlockProps> = ({
   const settings = useSettings();
   const MIN_LINES_FOR_MESSAGE = 1; // Minimum lines to show before the "generating more" message
   const RESERVED_LINES = 2; // Lines reserved for the message itself and potential padding
+  
+  // Animated dots for streaming indicator
+  const [dotCount, setDotCount] = useState(0);
+  useEffect(() => {
+    if (!isPending) return;
+    const interval = setInterval(() => {
+      setDotCount((d) => (d + 1) % 4);
+    }, 300);
+    return () => clearInterval(interval);
+  }, [isPending]);
 
   if (isPending && availableTerminalHeight !== undefined) {
     const MAX_CODE_LINES_WHEN_PENDING = Math.max(
@@ -314,12 +325,15 @@ const RenderCodeBlockInternal: React.FC<RenderCodeBlockProps> = ({
     );
 
     if (content.length > MAX_CODE_LINES_WHEN_PENDING) {
+      const totalLines = content.length;
+      const visibleLines = Math.min(MAX_CODE_LINES_WHEN_PENDING, totalLines);
+      
       if (MAX_CODE_LINES_WHEN_PENDING < MIN_LINES_FOR_MESSAGE) {
         // Not enough space to even show the message meaningfully
         return (
           <Box paddingLeft={CODE_BLOCK_PREFIX_PADDING}>
-            <Text color={theme.text.secondary}>
-              ... code is being written ...
+            <Text color={theme.text.accent}>
+              <Spinner type="dots" /> writing code... ({totalLines} lines)
             </Text>
           </Box>
         );
@@ -333,10 +347,24 @@ const RenderCodeBlockInternal: React.FC<RenderCodeBlockProps> = ({
         undefined,
         settings,
       );
+      
+      // Show streaming indicator with line count
+      const dots = '.'.repeat(dotCount);
+      const streamingIndicator = (
+        <Box paddingLeft={CODE_BLOCK_PREFIX_PADDING}>
+          <Text color={theme.text.accent}>
+            <Spinner type="dots" />
+          </Text>
+          <Text color={theme.text.secondary}>
+            {' '}generating{dots} ({visibleLines}/{totalLines} lines)
+          </Text>
+        </Box>
+      );
+      
       return (
         <Box paddingLeft={CODE_BLOCK_PREFIX_PADDING} flexDirection="column">
           {colorizedTruncatedCode}
-          <Text color={theme.text.secondary}>... generating more ...</Text>
+          {streamingIndicator}
         </Box>
       );
     }

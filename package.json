@@ -90,7 +90,7 @@
       "vitest": "3.2.4",
       "@vitest/coverage-v8": "3.2.4",
       "@vitest/browser": "3.2.4",
-      "glob": "^13.0.0",
+      "glob": "13.0.0",
       "rimraf@<4": "6.0.1",
       "inflight": "npm:@jsdevtools/inflight@^2.0.0"
     },
@@ -175,7 +175,7 @@
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "5.2.0",
     "eslint-plugin-storybook": "0.12.0",
-    "glob": "^13.0.0",
+    "glob": "13.0.0",
     "globals": "16.0.0",
     "husky": "9.1.7",
     "json": "11.0.0",
