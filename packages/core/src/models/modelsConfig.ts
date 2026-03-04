@@ -1124,4 +1124,30 @@ export class ModelsConfig {
   ): void {
     this.modelRegistry.reloadModels(modelProvidersConfig);
   }
+
+  /**
+   * Load local models from Ollama API /api/tags.
+   * This populates the model registry with models that are pulled locally in Ollama.
+   *
+   * @param baseUrl - Optional base URL override for Ollama API
+   * @returns Promise<boolean> - true if models were loaded successfully
+   */
+  async loadLocalOllamaModels(baseUrl?: string): Promise<boolean> {
+    return this.modelRegistry.loadLocalOllamaModels(baseUrl);
+  }
+
+  /**
+   * Check if local Ollama models have been loaded.
+   */
+  hasLocalOllamaModelsLoaded(): boolean {
+    return this.modelRegistry.hasLocalModelsLoaded();
+  }
+
+  /**
+   * Set Ollama base URL for model discovery.
+   * Should be called when baseUrl changes in config.
+   */
+  setOllamaBaseUrlForDiscovery(baseUrl: string): void {
+    this.modelRegistry.setOllamaBaseUrl(baseUrl);
+  }
 }

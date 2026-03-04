@@ -5,7 +5,7 @@
  */
 
 import type React from 'react';
-import { useCallback, useContext, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Box, Text } from 'ink';
 import {
   AuthType,
@@ -264,6 +264,38 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
   const [loadingModelId, setLoadingModelId] = useState<string | null>(null);
   const [loadingProgress, setLoadingProgress] = useState<OllamaProgressEvent | null>(null);
 
+  // State for tracking if local models are being loaded
+  const [isLoadingLocalModels, setIsLoadingLocalModels] = useState(false);
+  const [localModelsLoaded, setLocalModelsLoaded] = useState(false);
+
+  // Load local models from Ollama API on mount
+  useEffect(() => {
+    if (!config || localModelsLoaded || isLoadingLocalModels) {
+      return;
+    }
+
+    const loadLocalModels = async () => {
+      // Check if already loaded
+      if (config.hasLocalOllamaModelsLoaded()) {
+        setLocalModelsLoaded(true);
+        return;
+      }
+
+      setIsLoadingLocalModels(true);
+      try {
+        await config.loadLocalOllamaModels();
+        setLocalModelsLoaded(true);
+      } catch (error) {
+        // Silently ignore - local models are optional
+        console.debug('Failed to load local models:', error);
+      } finally {
+        setIsLoadingLocalModels(false);
+      }
+    };
+
+    loadLocalModels();
+  }, [config, localModelsLoaded, isLoadingLocalModels]);
+
   const authType = config?.getAuthType();
   const effectiveConfig =
     (config?.getContentGeneratorConfig?.() as
@@ -327,7 +359,7 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
     }
 
     return result;
-  }, [config]);
+  }, [config, localModelsLoaded]);
 
   const MODEL_OPTIONS = useMemo(
     () =>
@@ -638,6 +670,15 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
               {t('Please wait...')}
             </Text>
           </Box>
+        </Box>
+      )}
+
+      {/* Local models loading indicator */}
+      {isLoadingLocalModels && (
+        <Box marginTop={1}>
+          <Text color={theme.text.secondary}>
+            {t('Loading local models from Ollama...')}
+          </Text>
         </Box>
       )}
 
