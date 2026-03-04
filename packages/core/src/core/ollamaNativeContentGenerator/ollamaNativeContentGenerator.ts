@@ -446,7 +446,12 @@ export class OllamaNativeContentGenerator implements ContentGenerator {
       return error as Error;
     }
 
-    const message = error instanceof Error ? error.message : String(error);
+    // If it's already an OllamaApiError, preserve it
+    if (error instanceof Error) {
+      return error;
+    }
+
+    const message = String(error);
     return new Error(`Ollama API error: ${message}`);
   }
 }

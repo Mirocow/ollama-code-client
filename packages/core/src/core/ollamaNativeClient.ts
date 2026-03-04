@@ -739,15 +739,31 @@ export class OllamaNativeClient {
         if (axiosError.response) {
           const status = axiosError.response.status;
           const errorData = axiosError.response.data;
-          const errorMessage =
-            errorData?.error ||
-            `Ollama API error: ${status} ${axiosError.response.statusText}`;
+          
+          // Extract model name from request body for better error messages
+          const requestBody = body as { model?: string } | undefined;
+          const modelName = requestBody?.model;
+          
+          // Build a more informative error message
+          let errorMessage: string;
+          if (status === 404) {
+            // 404 typically means model not found in Ollama
+            errorMessage = errorData?.error || 
+              (modelName 
+                ? `Model '${modelName}' not found. Make sure the model is installed (try: ollama pull ${modelName})`
+                : 'Resource not found');
+          } else {
+            errorMessage = errorData?.error ||
+              `Ollama API error: ${status} ${axiosError.response.statusText}`;
+          }
 
           debugLog('error', 'API request failed', {
             status,
             error: errorMessage,
           });
-          const wrappedError = detectOllamaError(new Error(errorMessage), {});
+          const wrappedError = detectOllamaError(new Error(errorMessage), {
+            modelName,
+          });
           apiLogger
             .logInteraction(
               requestLogData,
@@ -888,7 +904,11 @@ export class OllamaNativeClient {
 
       // Check for non-OK status
       if (response.status < 200 || response.status >= 300) {
-        let errorMessage = `Ollama API error: ${response.status} ${response.statusText}`;
+        // Extract model name from request body for better error messages
+        const bodyWithModel = body as { model?: string } | undefined;
+        const modelName = bodyWithModel?.model;
+        
+        let errorMessage: string;
         // Try to read error from stream
         const chunks: Buffer[] = [];
         for await (const chunk of response.data) {
@@ -899,10 +919,20 @@ export class OllamaNativeClient {
           const errorJson = JSON.parse(errorText);
           if (errorJson.error) {
             errorMessage = errorJson.error;
+          } else {
+            errorMessage = `Ollama API error: ${response.status} ${response.statusText}`;
           }
         } catch {
-          // Use default error message
+          errorMessage = `Ollama API error: ${response.status} ${response.statusText}`;
         }
+        
+        // Enhance error message for 404 (model not found)
+        if (response.status === 404 && !errorText.includes('not found')) {
+          errorMessage = modelName 
+            ? `Model '${modelName}' not found. Make sure the model is installed (try: ollama pull ${modelName})`
+            : 'Resource not found';
+        }
+        
         debugLog('error', 'Streaming request failed', {
           status: response.status,
           error: errorMessage,
@@ -915,7 +945,7 @@ export class OllamaNativeClient {
             responseError,
           )
           .catch(() => {});
-        throw detectOllamaError(new Error(errorMessage), {});
+        throw detectOllamaError(new Error(errorMessage), { modelName });
       }
 
       // Process the stream

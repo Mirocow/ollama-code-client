@@ -220,7 +220,7 @@ export class OllamaResourceError extends OllamaApiError {
  * Error patterns for detecting specific error types from Ollama responses.
  */
 const ERROR_PATTERNS = {
-  modelNotFound: /model ".*" not found|model .* does not exist/i,
+  modelNotFound: /model ".*" not found|model .* does not exist|model .* not found|\bnot found\b.*model/i,
   contextLength: /context length|token limit|maximum context/i,
   memory: /out of memory|OOM|CUDA out of memory|GPU memory/i,
   connection: /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|network|connection refused/i,
