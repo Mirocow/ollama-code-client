@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # Ollama Code Installation Script
-# This script installs Node.js (via NVM), pnpm, and Ollama Code CLI
+# This script installs Node.js 22 (via NVM), pnpm, and Ollama Code CLI
 # Supports Linux and macOS
 #
-# Usage: install-ollama-with-source.sh --source [github|npm|internal|local-build]
-#        install-ollama-with-source.sh -s [github|npm|internal|local-build]
+# Repository: http://178.140.10.58:8082/ai/ollama-code.git
+#
+# Usage: install-ollama-with-source.sh --source [gitlab|npm|internal|local-build]
+#        install-ollama-with-source.sh -s [gitlab|npm|internal|local-build]
 
 # Re-execute with bash if running with sh or other shells
 # This block must use POSIX-compliant syntax ([ not [[) since it runs before we know bash is available
@@ -45,7 +47,8 @@ OLLAMA_CODE_DIR="${OLLAMA_CODE_DIR:-}"
 PACKAGE_NAME="@ollama-code/ollama-code"
 CLI_COMMAND="ollama-code"
 DATA_DIR_NAME=".ollama-code"
-REQUIRED_NODE_VERSION="20"
+REQUIRED_NODE_VERSION="22"
+GIT_REPOSITORY="http://178.140.10.58:8082/ai/ollama-code.git"
 
 # ============================================
 # Color definitions
@@ -171,15 +174,17 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  -s, --source SOURCE       Specify the installation source (e.g., github, npm, internal, local-build)"
+            echo "  -s, --source SOURCE       Specify the installation source (e.g., gitlab, npm, internal, local-build)"
             echo "  --build-from-source       Build from source code instead of npm"
             echo "  --dir DIR                 Path to source directory (for local-build)"
             echo "  -h, --help                Show this help message"
             echo ""
             echo "Examples:"
+            echo "  $0 --source gitlab                 # Install from GitLab"
             echo "  $0 --source npm                    # Install from npm"
-            echo "  $0 --source github                 # Install from GitHub"
             echo "  $0 --source local-build --dir /path/to/ollama-code  # Build from local source"
+            echo ""
+            echo "Repository: ${GIT_REPOSITORY}"
             echo ""
             exit 0
             ;;
@@ -197,6 +202,7 @@ print_header() {
     echo ""
     echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${CYAN}║${NC}       ${GREEN}Ollama Code Installation Script${NC}                       ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}       ${YELLOW}Node.js ${REQUIRED_NODE_VERSION} + pnpm${NC}                              ${CYAN}║${NC}"
     echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     get_platform_info
@@ -204,6 +210,7 @@ print_header() {
     log_info "Shell: $(basename "${SHELL}")"
     log_info "Package Manager: ${PACKAGE_MANAGER}"
     log_info "Installation Source: ${SOURCE}"
+    log_info "Required Node.js: v${REQUIRED_NODE_VERSION}"
     if [[ "${BUILD_FROM_SOURCE}" == "true" ]]; then
         log_info "Build Mode: From Source"
     fi
@@ -470,7 +477,7 @@ install_nodejs() {
 
     case "${platform}" in
         Linux|Darwin)
-            log_step "Installing Node.js on ${platform}..."
+            log_step "Installing Node.js ${REQUIRED_NODE_VERSION} on ${platform}..."
 
             # Install NVM
             if ! install_nvm; then
@@ -509,7 +516,7 @@ check_and_install_nodejs() {
         log_info "Using existing Node.js installation"
         clean_npmrc_conflict
     else
-        log_warning "Installing or upgrading Node.js..."
+        log_warning "Installing or upgrading Node.js to v${REQUIRED_NODE_VERSION}..."
         install_nodejs
     fi
 }
@@ -609,6 +616,36 @@ fix_npm_permissions() {
 }
 
 # ============================================
+# Clone repository from GitLab
+# ============================================
+clone_from_gitlab() {
+    local target_dir="${OLLAMA_CODE_DIR:-${HOME}/ollama-code}"
+
+    log_step "Cloning Ollama Code from GitLab..."
+    log_info "Repository: ${GIT_REPOSITORY}"
+    log_info "Target directory: ${target_dir}"
+
+    if [[ -d "${target_dir}" ]]; then
+        log_warning "Directory ${target_dir} already exists"
+        log_info "Updating existing repository..."
+        cd "${target_dir}"
+        git pull || {
+            log_error "Failed to update repository"
+            exit 1
+        }
+    else
+        git clone "${GIT_REPOSITORY}" "${target_dir}" || {
+            log_error "Failed to clone repository"
+            exit 1
+        }
+        cd "${target_dir}"
+    fi
+
+    OLLAMA_CODE_DIR="${target_dir}"
+    log_success "Repository cloned to ${target_dir}"
+}
+
+# ============================================
 # Build from source
 # ============================================
 build_from_source() {
@@ -630,7 +667,7 @@ build_from_source() {
     cd "${source_dir}"
 
     # Install dependencies
-    log_info "Installing dependencies..."
+    log_info "Installing dependencies with pnpm..."
     pnpm install --frozen-lockfile || pnpm install
 
     # Build the project
@@ -705,6 +742,14 @@ install_ollama_code_npm() {
 }
 
 # ============================================
+# Install from GitLab (clone + build)
+# ============================================
+install_from_gitlab() {
+    clone_from_gitlab
+    build_from_source
+}
+
+# ============================================
 # Create source.json
 # ============================================
 create_source_json() {
@@ -721,7 +766,9 @@ create_source_json() {
   "source": "${ESCAPED_SOURCE}",
   "installed_at": "$(date -Iseconds 2>/dev/null || date +%Y-%m-%dT%H:%M:%S)",
   "platform": "${PLATFORM}",
-  "arch": "${ARCH}"
+  "arch": "${ARCH}",
+  "node_version": "${REQUIRED_NODE_VERSION}",
+  "repository": "${GIT_REPOSITORY}"
 }
 EOF
 
@@ -767,12 +814,29 @@ main() {
     install_pnpm
     echo ""
 
-    # Build from source or install from npm
-    if [[ "${BUILD_FROM_SOURCE}" == "true" ]]; then
-        build_from_source
-    else
-        install_ollama_code_npm
-    fi
+    # Build from source, install from GitLab, or install from npm
+    case "${SOURCE}" in
+        gitlab)
+            install_from_gitlab
+            ;;
+        local-build)
+            if [[ -z "${OLLAMA_CODE_DIR}" ]]; then
+                log_error "--dir is required for local-build source"
+                exit 1
+            fi
+            build_from_source
+            ;;
+        npm)
+            install_ollama_code_npm
+            ;;
+        internal)
+            install_ollama_code_npm
+            ;;
+        *)
+            # Default: install from npm
+            install_ollama_code_npm
+            ;;
+    esac
     echo ""
 
     # Create source.json if source parameter was provided
