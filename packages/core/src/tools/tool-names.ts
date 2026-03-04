@@ -384,6 +384,80 @@ export const ToolAliases: Record<string, ToolName> = {
   version_control: ToolNames.SHELL,
   vcs: ToolNames.SHELL,
   scm: ToolNames.SHELL,
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Docker / Container aliases (redirects to run_shell_command)
+  // Models often hallucinate docker_dev, container_dev, etc.
+  // ═══════════════════════════════════════════════════════════════════════
+  docker: ToolNames.SHELL,
+  docker_dev: ToolNames.SHELL,
+  container: ToolNames.SHELL,
+  container_dev: ToolNames.SHELL,
+  docker_compose: ToolNames.SHELL,
+  compose: ToolNames.SHELL,
+  podman: ToolNames.SHELL,
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Database aliases (redirects to run_shell_command)
+  // Models often hallucinate db_dev, database_dev, sql_dev, etc.
+  // ═══════════════════════════════════════════════════════════════════════
+  database: ToolNames.SHELL,
+  db: ToolNames.SHELL,
+  database_dev: ToolNames.SHELL,
+  db_dev: ToolNames.SHELL,
+  sql: ToolNames.SHELL,
+  sql_dev: ToolNames.SHELL,
+  mysql: ToolNames.SHELL,
+  postgresql: ToolNames.SHELL,
+  postgres: ToolNames.SHELL,
+  psql: ToolNames.SHELL,
+  sqlite: ToolNames.SHELL,
+  mongodb: ToolNames.SHELL,
+  mongo: ToolNames.SHELL,
+  redis: ToolNames.SHELL,
+  redis_dev: ToolNames.SHELL,
+  redis_cli: ToolNames.SHELL,
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Kubernetes / Cloud aliases (redirects to run_shell_command)
+  // ═══════════════════════════════════════════════════════════════════════
+  kubernetes: ToolNames.SHELL,
+  k8s: ToolNames.SHELL,
+  kubectl: ToolNames.SHELL,
+  helm: ToolNames.SHELL,
+  k8s_dev: ToolNames.SHELL,
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // CI/CD aliases (redirects to run_shell_command)
+  // ═══════════════════════════════════════════════════════════════════════
+  ci: ToolNames.SHELL,
+  cd: ToolNames.SHELL,
+  github_actions: ToolNames.SHELL,
+  gitlab_ci: ToolNames.SHELL,
+  jenkins: ToolNames.SHELL,
+  circleci: ToolNames.SHELL,
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Infrastructure aliases (redirects to run_shell_command)
+  // ═══════════════════════════════════════════════════════════════════════
+  terraform: ToolNames.SHELL,
+  tf: ToolNames.SHELL,
+  ansible: ToolNames.SHELL,
+  aws: ToolNames.SHELL,
+  azure: ToolNames.SHELL,
+  gcp: ToolNames.SHELL,
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Additional shell aliases for common tools
+  // ═══════════════════════════════════════════════════════════════════════
+  ssh: ToolNames.SHELL,
+  scp: ToolNames.SHELL,
+  rsync: ToolNames.SHELL,
+  tar: ToolNames.SHELL,
+  zip: ToolNames.SHELL,
+  unzip: ToolNames.SHELL,
+  curl_dev: ToolNames.SHELL,
+  wget_dev: ToolNames.SHELL,
 };
 
 export const DynamicAliases: Record<string, ToolName> = {};
