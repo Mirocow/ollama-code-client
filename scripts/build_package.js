@@ -27,9 +27,15 @@ if (!process.cwd().includes('packages')) {
 }
 
 // build typescript files with increased memory limit
+// CI=true disables TypeScript progress animation to prevent terminal flickering
 execSync('npx tsc --build', {
   stdio: 'inherit',
-  env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' },
+  env: { 
+    ...process.env, 
+    NODE_OPTIONS: '--max-old-space-size=8192',
+    CI: 'true',
+    TERM: 'dumb',
+  },
 });
 
 // copy .{md,json} files

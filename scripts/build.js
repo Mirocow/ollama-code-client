@@ -35,10 +35,11 @@ if (!existsSync(join(root, 'node_modules'))) {
 }
 
 // build all workspaces/packages in dependency order
+// CI=true disables progress animations to prevent terminal flickering
 execSync('npm run generate', {
   stdio: 'inherit',
   cwd: root,
-  env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' },
+  env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192', CI: 'true', TERM: 'dumb' },
 });
 
 // Build in dependency order:
@@ -59,7 +60,7 @@ for (const workspace of buildOrder) {
   execSync(`npm run build --workspace=${workspace}`, {
     stdio: 'inherit',
     cwd: root,
-    env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' },
+    env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192', CI: 'true', TERM: 'dumb' },
   });
 }
 
@@ -69,6 +70,7 @@ try {
   execSync('node scripts/sandbox_command.js -q', {
     stdio: 'inherit',
     cwd: root,
+    env: { ...process.env, CI: 'true', TERM: 'dumb' },
   });
   if (
     process.env.BUILD_SANDBOX === '1' ||

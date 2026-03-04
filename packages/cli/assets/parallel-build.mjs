@@ -62,7 +62,8 @@ const runCommand = ({ command, args, cwd, label }) =>
       cwd,
       stdio: 'inherit',
       shell: process.platform === 'win32',
-      env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' },
+      // CI=true disables progress animations to prevent terminal flickering
+      env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192', CI: 'true', TERM: 'dumb' },
     });
 
     child.on('error', reject);
