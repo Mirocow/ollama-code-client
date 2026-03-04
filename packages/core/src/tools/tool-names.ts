@@ -17,6 +17,7 @@ export const ToolNames = {
   GREP: 'grep_search',
   GLOB: 'glob',
   SHELL: 'run_shell_command',
+  SSH: 'ssh_connect',
   TODO_WRITE: 'todo_write',
   MEMORY: 'save_memory',
   TASK: 'task',
@@ -54,6 +55,7 @@ export const ToolDisplayNames = {
   GREP: 'Grep',
   GLOB: 'Glob',
   SHELL: 'Shell',
+  SSH: 'SSH',
   TODO_WRITE: 'TodoWrite',
   MEMORY: 'SaveMemory',
   TASK: 'Task',
@@ -487,9 +489,21 @@ export const ToolAliases: Record<string, ToolName> = {
   gcp: ToolNames.SHELL,
 
   // ═══════════════════════════════════════════════════════════════════════
+  // SSH tool aliases (ssh_connect)
+  // Dedicated SSH tool for remote server connections
+  // ═══════════════════════════════════════════════════════════════════════
+  ssh: ToolNames.SSH,
+  ssh_connect: ToolNames.SSH,
+  ssh_dev: ToolNames.SSH,
+  remote: ToolNames.SSH,
+  remote_shell: ToolNames.SSH,
+  remote_exec: ToolNames.SSH,
+  connect: ToolNames.SSH,
+  telnet: ToolNames.SSH,
+
+  // ═══════════════════════════════════════════════════════════════════════
   // Additional shell aliases for common tools
   // ═══════════════════════════════════════════════════════════════════════
-  ssh: ToolNames.SHELL,
   scp: ToolNames.SHELL,
   rsync: ToolNames.SHELL,
   tar: ToolNames.SHELL,

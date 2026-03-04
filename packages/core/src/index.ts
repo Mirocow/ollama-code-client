@@ -394,6 +394,7 @@ export * from './prompts/mcp-prompts.js';
 export * from './plugins/builtin/file-tools/index.js';
 export * from './plugins/builtin/search-tools/index.js';
 export * from './plugins/builtin/shell-tools/index.js';
+export * from './plugins/builtin/ssh-tools/index.js';
 export * from './plugins/builtin/dev-tools/index.js';
 export * from './plugins/builtin/agent-tools/index.js';
 export * from './plugins/builtin/productivity-tools/index.js';
