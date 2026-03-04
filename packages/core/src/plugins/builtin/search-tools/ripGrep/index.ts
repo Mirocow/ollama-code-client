@@ -12,7 +12,7 @@ import { ToolNames } from '../../../../tools/tool-names.js';
 import { resolveAndValidatePath } from '../../../../utils/paths.js';
 import { getErrorMessage } from '../../../../utils/errors.js';
 import type { Config } from '../../../../config/config.js';
-import { runRipgrep } from '../../../../utils/ripgrepUtils.js';
+import { runRipgrep, requiresPcre2 } from '../../../../utils/ripgrepUtils.js';
 import { SchemaValidator } from '../../../../utils/schemaValidator.js';
 import type { FileFilteringOptions } from '../../../../config/constants.js';
 import { DEFAULT_FILE_FILTERING_OPTIONS } from '../../../../config/constants.js';
@@ -185,6 +185,11 @@ class GrepToolInvocation extends BaseToolInvocation<
       '--regexp',
       pattern,
     ];
+
+    // Add PCRE2 support for look-around patterns
+    if (requiresPcre2(pattern)) {
+      rgArgs.push('--pcre2');
+    }
 
     // Add file exclusions from .gitignore and .ollama-codeignore
     const filteringOptions = this.getFileFilteringOptions();
