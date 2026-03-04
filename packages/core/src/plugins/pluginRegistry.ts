@@ -142,8 +142,79 @@ export class PluginRegistry {
       debugLogger.debug('Dev tools plugin not available');
     }
     
+    // Agent tools - task, skill
+    try {
+      const agentTools = await import('./builtin/agent-tools/index.js');
+      plugins.push(agentTools.default);
+    } catch {
+      debugLogger.debug('Agent tools plugin not available');
+    }
+    
+    // Memory tools - save_memory
+    try {
+      const memoryTools = await import('./builtin/memory-tools/index.js');
+      plugins.push(memoryTools.default);
+    } catch {
+      debugLogger.debug('Memory tools plugin not available');
+    }
+    
+    // Productivity tools - todo_write, exit_plan_mode
+    try {
+      const productivityTools = await import('./builtin/productivity-tools/index.js');
+      plugins.push(productivityTools.default);
+    } catch {
+      debugLogger.debug('Productivity tools plugin not available');
+    }
+    
+    // API tools - api_tester
+    try {
+      const apiTools = await import('./builtin/api-tools/index.js');
+      plugins.push(apiTools.default);
+    } catch {
+      debugLogger.debug('API tools plugin not available');
+    }
+    
+    // Database tools - docker, database, redis
+    try {
+      const databaseTools = await import('./builtin/database-tools/index.js');
+      plugins.push(databaseTools.default);
+    } catch {
+      debugLogger.debug('Database tools plugin not available');
+    }
+    
+    // Git tools - git-advanced
+    try {
+      const gitTools = await import('./builtin/git-tools/index.js');
+      plugins.push(gitTools.default);
+    } catch {
+      debugLogger.debug('Git tools plugin not available');
+    }
+    
+    // LSP tools - language server protocol
+    try {
+      const lspTools = await import('./builtin/lsp-tools/index.js');
+      plugins.push(lspTools.default);
+    } catch {
+      debugLogger.debug('LSP tools plugin not available');
+    }
+    
+    // MCP tools - model context protocol
+    try {
+      const mcpTools = await import('./builtin/mcp-tools/index.js');
+      plugins.push(mcpTools.default);
+    } catch {
+      debugLogger.debug('MCP tools plugin not available');
+    }
+    
+    // Utility tools - diagram-generator, code-analyzer
+    try {
+      const utilityTools = await import('./builtin/utility-tools/index.js');
+      plugins.push(utilityTools.default);
+    } catch {
+      debugLogger.debug('Utility tools plugin not available');
+    }
+    
     // Note: Additional builtin plugins can be added here as they are developed
-    // Currently available: core-tools, file-tools, shell-tools, search-tools, dev-tools
     
     debugLogger.info(`Loaded ${plugins.length} builtin plugins`);
     return plugins;
@@ -258,6 +329,15 @@ export class PluginRegistry {
       'shell-tools',
       'search-tools',
       'dev-tools',
+      'agent-tools',
+      'memory-tools',
+      'productivity-tools',
+      'api-tools',
+      'database-tools',
+      'git-tools',
+      'lsp-tools',
+      'mcp-tools',
+      'utility-tools',
     ];
   }
 }
