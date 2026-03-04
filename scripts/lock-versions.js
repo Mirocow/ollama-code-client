@@ -60,9 +60,15 @@ function lockVersion(version, _workspaceVersions) {
       return version; // Return as-is, will be processed in processPackage
     }
 
-    // workspace:^1.0.0 -> 1.0.0
-    // workspace:1.0.0 -> 1.0.0
-    return spec.replace(/^[\^~]/, '');
+    // workspace:^1.0.0 -> workspace:1.0.0
+    // workspace:1.0.0 -> workspace:1.0.0 (keep as-is)
+    const versionOnly = spec.replace(/^[\^~]/, '');
+    if (/^\d/.test(versionOnly)) {
+      // Already has a valid version, keep workspace: prefix
+      return `workspace:${versionOnly}`;
+    }
+
+    return version;
   }
 
   // Skip file references, git URLs, etc.
@@ -190,12 +196,12 @@ function processPackage(pkg, workspaceVersions) {
         if (spec === '*' || spec === '^' || spec === '~') {
           const exactVersion = workspaceVersions.get(name);
           if (exactVersion) {
-            targetObj[key][name] = exactVersion;
+            targetObj[key][name] = `workspace:${exactVersion}`;
             changed.push({
               type: overrideType,
               name,
               from: version,
-              to: exactVersion,
+              to: `workspace:${exactVersion}`,
             });
             continue;
           }
