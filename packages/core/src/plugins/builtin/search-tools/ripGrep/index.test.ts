@@ -18,20 +18,23 @@ import { RipGrepTool } from './index.js';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import os, { EOL } from 'node:os';
-import type { Config } from '../config/config.js';
-import { createMockWorkspaceContext } from '../test-utils/mockWorkspaceContext.js';
+import type { Config } from '../../../../config/config.js';
+import { createMockWorkspaceContext } from '../../../../test-utils/mockWorkspaceContext.js';
 import { spawn } from 'node:child_process';
-import { runRipgrep } from '../utils/ripgrepUtils.js';
-import { DEFAULT_FILE_FILTERING_OPTIONS } from '../config/constants.js';
+import { runRipgrep } from '../../../../utils/ripgrepUtils.js';
+import { DEFAULT_FILE_FILTERING_OPTIONS } from '../../../../config/constants.js';
 
 // Mock ripgrepUtils
-vi.mock('../utils/ripgrepUtils.js', () => ({
+vi.mock('../../../../utils/ripgrepUtils.js', () => ({
   runRipgrep: vi.fn(),
+  requiresPcre2: vi.fn().mockReturnValue(false),
 }));
 
 // Mock child_process for ripgrep calls
 vi.mock('child_process', () => ({
   spawn: vi.fn(),
+  exec: vi.fn(),
+  execFile: vi.fn(),
 }));
 
 const mockSpawn = vi.mocked(spawn);
