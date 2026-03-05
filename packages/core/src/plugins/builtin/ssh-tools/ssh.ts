@@ -5,6 +5,7 @@
  */
 
 import type { Config } from '../../../config/config.js';
+import { Storage, type SSHHostConfig } from '../../../config/storage.js';
 import { ToolNames, ToolDisplayNames } from '../../../tools/tool-names.js';
 import { ToolErrorType } from '../../../tools/tool-error.js';
 import type {
@@ -31,9 +32,31 @@ import { createDebugLogger } from '../../../utils/debugLogger.js';
 const debugLogger = createDebugLogger('SSH');
 
 export interface SSHToolParams {
+  /** Name of saved SSH profile (optional - use instead of host/user) */
+  profile?: string;
+  /** Hostname or IP address (required if no profile) */
+  host?: string;
+  /** Username for SSH (required if no profile) */
+  user?: string;
+  /** Command to execute on remote server */
+  command?: string;
+  /** SSH port number */
+  port?: number;
+  /** Path to SSH private key file */
+  identity_file?: string;
+  /** Password for authentication (not recommended) */
+  password?: string;
+  /** Timeout in milliseconds */
+  timeout?: number;
+  /** Description of the operation */
+  description?: string;
+}
+
+/** Resolved SSH parameters after profile lookup */
+interface ResolvedSSHParams {
   host: string;
   user: string;
-  command: string;
+  command?: string;
   port?: number;
   identity_file?: string;
   password?: string;
@@ -42,9 +65,53 @@ export interface SSHToolParams {
 }
 
 /**
+ * Resolves SSH parameters from profile or direct parameters
+ */
+function resolveSSHParams(params: SSHToolParams): ResolvedSSHParams {
+  // If profile is specified, load from storage
+  if (params.profile) {
+    const hostConfig = Storage.getSSHHost(params.profile);
+    if (!hostConfig) {
+      throw new Error(`SSH profile '${params.profile}' not found. Use ssh_add_host to create it.`);
+    }
+
+    // Merge profile with overrides
+    return {
+      host: hostConfig.host,
+      user: hostConfig.user,
+      port: params.port ?? hostConfig.port,
+      identity_file: params.identity_file ?? hostConfig.identity_file,
+      password: params.password ?? hostConfig.password,
+      command: params.command,
+      timeout: params.timeout,
+      description: params.description,
+    };
+  }
+
+  // Direct parameters - validate required fields
+  if (!params.host) {
+    throw new Error('Host is required (or specify a profile name).');
+  }
+  if (!params.user) {
+    throw new Error('User is required (or specify a profile name).');
+  }
+
+  return {
+    host: params.host,
+    user: params.user,
+    command: params.command,
+    port: params.port,
+    identity_file: params.identity_file,
+    password: params.password,
+    timeout: params.timeout,
+    description: params.description,
+  };
+}
+
+/**
  * Builds an SSH command string from the parameters.
  */
-function buildSSHCommand(params: SSHToolParams): string {
+function buildSSHCommand(params: ResolvedSSHParams): string {
   const parts = ['ssh'];
 
   // Add port if specified
@@ -81,25 +148,33 @@ export class SSHToolInvocation extends BaseToolInvocation<
   SSHToolParams,
   ToolResult
 > {
+  private resolvedParams: ResolvedSSHParams;
+
   constructor(
     private readonly config: Config,
     params: SSHToolParams,
     private readonly allowlist: Set<string>,
   ) {
     super(params);
+    // Resolve params at construction time (throws if profile not found)
+    this.resolvedParams = resolveSSHParams(params);
   }
 
   getDescription(): string {
-    const host = `${this.params.user}@${this.params.host}`;
-    const port = this.params.port ? `:${this.params.port}` : '';
+    const host = `${this.resolvedParams.user}@${this.resolvedParams.host}`;
+    const port = this.resolvedParams.port ? `:${this.resolvedParams.port}` : '';
     let description = `ssh ${host}${port}`;
 
-    if (this.params.command) {
-      description += ` "${this.params.command}"`;
+    if (this.resolvedParams.command) {
+      description += ` "${this.resolvedParams.command}"`;
     }
 
-    if (this.params.description) {
-      description += ` (${this.params.description.replace(/\n/g, ' ')})`;
+    if (this.params.profile) {
+      description += ` [profile: ${this.params.profile}]`;
+    }
+
+    if (this.resolvedParams.description) {
+      description += ` (${this.resolvedParams.description.replace(/\n/g, ' ')})`;
     }
 
     return description;
@@ -112,7 +187,7 @@ export class SSHToolInvocation extends BaseToolInvocation<
     const confirmationDetails: ToolExecuteConfirmationDetails = {
       type: 'exec',
       title: 'Confirm SSH Connection',
-      command: buildSSHCommand(this.params),
+      command: buildSSHCommand(this.resolvedParams),
       rootCommand: 'ssh',
       onConfirm: async (
         outcome: ToolConfirmationOutcome,
@@ -138,8 +213,8 @@ export class SSHToolInvocation extends BaseToolInvocation<
       };
     }
 
-    const sshCommand = buildSSHCommand(this.params);
-    const effectiveTimeout = this.params.timeout ?? 60000; // Default 1 minute for SSH
+    const sshCommand = buildSSHCommand(this.resolvedParams);
+    const effectiveTimeout = this.resolvedParams.timeout ?? 60000; // Default 1 minute for SSH
 
     try {
       let cumulativeOutput: string | AnsiOutput = '';
@@ -185,8 +260,8 @@ export class SSHToolInvocation extends BaseToolInvocation<
         }
       } else {
         llmContent = [
-          `SSH Connection: ${this.params.user}@${this.params.host}${this.params.port ? `:${this.params.port}` : ''}`,
-          `Command: ${this.params.command || '(interactive shell)'}`,
+          `SSH Connection: ${this.resolvedParams.user}@${this.resolvedParams.host}${this.resolvedParams.port ? `:${this.resolvedParams.port}` : ''}`,
+          `Command: ${this.resolvedParams.command || '(interactive shell)'}`,
           `Output: ${result.output || '(empty)'}`,
           `Exit Code: ${result.exitCode ?? '(none)'}`,
           result.error ? `Error: ${result.error.message}` : '',
@@ -228,28 +303,39 @@ function getSSHToolDescription(): string {
 
 This tool provides secure SSH connectivity to remote servers for remote command execution, system administration, and file operations.
 
-**Usage notes**:
-- The \`host\` and \`user\` parameters are required.
-- You can specify an optional \`port\` (defaults to 22).
-- Use \`identity_file\` for SSH key authentication (recommended).
-- Use \`password\` only when key-based auth is not available (less secure).
-- Specify \`command\` to execute a remote command, or leave empty for interactive shell.
-- You can specify an optional \`timeout\` in milliseconds (max 600000ms / 10 minutes, default 60000ms).
+**Usage Modes:**
 
-**Security notes**:
-- SSH connections always require user confirmation.
-- Password authentication is discouraged; use SSH keys when possible.
-- The tool uses \`StrictHostKeyChecking=accept-new\` for host key verification.
+1. **Using saved profile (recommended):**
+   \`{ "profile": "myserver", "command": "docker ps" }\`
 
-**Examples**:
-1. Connect and run a command:
+2. **Direct connection:**
    \`{ "host": "192.168.1.100", "user": "admin", "command": "ls -la" }\`
 
-2. Connect with custom port and key:
+**Parameters:**
+- \`profile\` - Name of a saved SSH profile (use ssh_add_host to create profiles)
+- \`host\` - Hostname or IP address (required if no profile)
+- \`user\` - Username for SSH (required if no profile)
+- \`command\` - Command to execute on the remote server
+- \`port\` - SSH port number (default: 22)
+- \`identity_file\` - Path to SSH private key file (recommended)
+- \`password\` - Password (not recommended, use identity_file instead)
+- \`timeout\` - Timeout in milliseconds (max 600000, default 60000)
+
+**Security notes:**
+- SSH connections always require user confirmation
+- Use \`ssh_add_host\` to save SSH profiles with credentials
+- Use \`ssh_list_hosts\` to see available profiles
+- Use \`ssh_remove_host\` to delete saved profiles
+
+**Examples:**
+1. Using a saved profile:
+   \`{ "profile": "production", "command": "systemctl status nginx" }\`
+
+2. Direct connection with key:
    \`{ "host": "server.com", "user": "deploy", "port": 2222, "identity_file": "~/.ssh/deploy_key", "command": "docker ps" }\`
 
-3. Interactive shell session:
-   \`{ "host": "192.168.1.100", "user": "root" }\`
+3. Interactive shell (no command):
+   \`{ "profile": "dev-server" }\`
 `;
 }
 
@@ -269,13 +355,17 @@ export class SSHTool extends BaseDeclarativeTool<
       {
         type: 'object',
         properties: {
+          profile: {
+            type: 'string',
+            description: 'Name of saved SSH profile (use ssh_add_host to create). Alternative to host/user.',
+          },
           host: {
             type: 'string',
-            description: 'The hostname or IP address of the remote server.',
+            description: 'The hostname or IP address of the remote server (or use profile).',
           },
           user: {
             type: 'string',
-            description: 'The username for SSH authentication.',
+            description: 'The username for SSH authentication (or use profile).',
           },
           command: {
             type: 'string',
@@ -302,22 +392,31 @@ export class SSHTool extends BaseDeclarativeTool<
             description: 'Brief description of what this SSH connection does.',
           },
         },
-        required: ['host', 'user'],
+        required: [], // profile OR host+user required (validated in validateToolParamValues)
       },
       false, // output is not markdown
       true, // output can be updated
     );
   }
 
-  protected override validateToolParamValues(
-    params: SSHToolParams,
-  ): string | null {
-    if (!params.host?.trim()) {
-      return 'Host is required.';
+  protected override validateToolParamValues(params: SSHToolParams): string | null {
+    // Either profile OR (host + user) must be specified
+    if (params.profile) {
+      // Profile specified - validate it exists
+      const hostConfig = Storage.getSSHHost(params.profile);
+      if (!hostConfig) {
+        return `SSH profile '${params.profile}' not found. Use ssh_add_host to create it, or use ssh_list_hosts to see available profiles.`;
+      }
+    } else {
+      // No profile - host and user are required
+      if (!params.host?.trim()) {
+        return 'Host is required when not using a profile. Alternatively, specify a profile name.';
+      }
+      if (!params.user?.trim()) {
+        return 'User is required when not using a profile. Alternatively, specify a profile name.';
+      }
     }
-    if (!params.user?.trim()) {
-      return 'User is required.';
-    }
+
     if (params.port !== undefined) {
       if (typeof params.port !== 'number' || !Number.isInteger(params.port)) {
         return 'Port must be an integer.';

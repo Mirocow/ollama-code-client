@@ -40,6 +40,7 @@
 - 🔀 **Git Workflow** — полный git workflow (commit, push, pull, создание MR/PR)
 - 🔀 **Git Advanced** — продвинутые git операции (stash, cherry-pick, rebase, bisect)
 - 🌐 **API Tester** — тестирование REST API endpoints
+- 🔐 **SSH Tools** — подключение к удалённым серверам с управлением профилями
 - 🏷️ **Алиасы инструментов** — короткие имена для инструментов (`run` → `run_shell_command`)
 - 🧠 **Самообучение** — автоматическое обучение правильным именам инструментов
 - 🔄 **Undo/Redo** — обратимые операции с command pattern
