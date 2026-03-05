@@ -21,6 +21,10 @@ Complete reference documentation for all available tools in Ollama Code.
 - [Web & Network](#web--network)
   - [web_search](#web_search)
   - [web_fetch](#web_fetch)
+  - [ssh_connect](#ssh_connect)
+  - [ssh_add_host](#ssh_add_host)
+  - [ssh_list_hosts](#ssh_list_hosts)
+  - [ssh_remove_host](#ssh_remove_host)
 - [Task Management](#task-management)
   - [todo_write](#todo_write)
   - [task](#task)
@@ -55,6 +59,10 @@ Ollama Code supports short aliases for common tools. You can use these instead o
 | `py`, `python`, `pip`, `pytest` | `python_dev` |
 | `node`, `npm`, `yarn`, `pnpm`, `bun` | `nodejs_dev` |
 | `go`, `golang` | `golang_dev` |
+| `ssh`, `remote`, `connect` | `ssh_connect` |
+| `add_host`, `save_ssh` | `ssh_add_host` |
+| `list_hosts`, `ssh_profiles` | `ssh_list_hosts` |
+| `remove_host`, `delete_ssh` | `ssh_remove_host` |
 
 ---
 
@@ -564,6 +572,124 @@ Fetches content from a URL and processes it with AI to extract relevant informat
 {
   "url": "https://react.dev/learn",
   "prompt": "Extract the main concepts and key takeaways from this React documentation page"
+}
+```
+
+---
+
+### ssh_connect
+
+Connects to remote servers via SSH and executes commands. Supports both direct connection and profile-based connections.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `profile` | string | No | Name of saved SSH profile (use instead of host/user) |
+| `host` | string | No* | Hostname or IP address (*required if no profile) |
+| `user` | string | No* | Username for SSH (*required if no profile) |
+| `command` | string | No | Command to execute on remote server |
+| `port` | number | No | SSH port number (default: 22) |
+| `identity_file` | string | No | Path to SSH private key file |
+| `password` | string | No | Password for authentication (not recommended) |
+| `timeout` | number | No | Timeout in milliseconds (max 600000, default 60000) |
+
+**Examples:**
+```json
+// Using a saved profile
+{
+  "profile": "production",
+  "command": "docker ps"
+}
+
+// Direct connection with SSH key
+{
+  "host": "192.168.1.100",
+  "user": "admin",
+  "port": 2222,
+  "identity_file": "~/.ssh/deploy_key",
+  "command": "systemctl status nginx"
+}
+
+// Interactive shell (no command)
+{
+  "profile": "dev-server"
+}
+```
+
+**Security Notes:**
+- SSH connections always require user confirmation
+- Use `ssh_add_host` to save profiles with credentials
+- Prefer SSH key authentication over passwords
+
+---
+
+### ssh_add_host
+
+Saves an SSH host configuration for later use with `ssh_connect`.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `name` | string | Yes | Unique name for this SSH profile |
+| `host` | string | Yes | Hostname or IP address |
+| `user` | string | Yes | Username for SSH |
+| `port` | number | No | SSH port (default: 22) |
+| `identity_file` | string | No | Path to SSH private key file |
+| `password` | string | No | Password (not recommended, use identity_file) |
+| `description` | string | No | Description of this host |
+| `tags` | string[] | No | Tags for organization |
+
+**Example:**
+```json
+{
+  "name": "prod",
+  "host": "192.168.1.100",
+  "user": "admin",
+  "identity_file": "~/.ssh/id_rsa",
+  "description": "Production server",
+  "tags": ["production", "aws"]
+}
+```
+
+---
+
+### ssh_list_hosts
+
+Lists all saved SSH host profiles.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag` | string | No | Filter profiles by tag |
+
+**Example:**
+```json
+// List all profiles
+{}
+
+// List profiles with specific tag
+{ "tag": "production" }
+```
+
+---
+
+### ssh_remove_host
+
+Removes a saved SSH host profile.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `name` | string | Yes | Name of the profile to remove |
+
+**Example:**
+```json
+{
+  "name": "old-server"
 }
 ```
 

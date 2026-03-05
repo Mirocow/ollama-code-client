@@ -12,7 +12,6 @@
 
 import type { Config } from '../../../config/config.js';
 import { Storage, type SSHHostConfig } from '../../../config/storage.js';
-import { ToolNames, ToolDisplayNames } from '../../../tools/tool-names.js';
 import { ToolErrorType } from '../../../tools/tool-error.js';
 import type {
   ToolInvocation,

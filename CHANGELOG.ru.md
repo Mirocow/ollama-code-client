@@ -44,16 +44,36 @@ ssh_remove_host(name="prod")
 
 **Алиасы инструментов:**
 
-| Алиас               | Инструмент      |
-| ------------------- | --------------- |
-| `ssh`               | `ssh_connect`   |
-| `ssh_connect`       | `ssh_connect`   |
-| `ssh_dev`           | `ssh_connect`   |
-| `remote`            | `ssh_connect`   |
-| `remote_shell`      | `ssh_connect`   |
-| `remote_exec`       | `ssh_connect`   |
-| `connect`           | `ssh_connect`   |
-| `telnet`            | `ssh_connect`   |
+| Алиас                  | Инструмент       |
+| ---------------------- | ---------------- |
+| `ssh`                  | `ssh_connect`    |
+| `ssh_connect`          | `ssh_connect`    |
+| `ssh_dev`              | `ssh_connect`    |
+| `remote`               | `ssh_connect`    |
+| `remote_shell`         | `ssh_connect`    |
+| `remote_exec`          | `ssh_connect`    |
+| `connect`              | `ssh_connect`    |
+| `telnet`               | `ssh_connect`    |
+| `ssh_add_host`         | `ssh_add_host`   |
+| `add_host`             | `ssh_add_host`   |
+| `add_ssh_host`         | `ssh_add_host`   |
+| `save_ssh`             | `ssh_add_host`   |
+| `ssh_save`             | `ssh_add_host`   |
+| `ssh_profile_add`      | `ssh_add_host`   |
+| `ssh_config_add`       | `ssh_add_host`   |
+| `ssh_list_hosts`       | `ssh_list_hosts` |
+| `list_hosts`           | `ssh_list_hosts` |
+| `list_ssh`             | `ssh_list_hosts` |
+| `ssh_hosts`            | `ssh_list_hosts` |
+| `ssh_profiles`         | `ssh_list_hosts` |
+| `ssh_config_list`      | `ssh_list_hosts` |
+| `ssh_remove_host`      | `ssh_remove_host`|
+| `remove_host`          | `ssh_remove_host`|
+| `remove_ssh`           | `ssh_remove_host`|
+| `delete_ssh`           | `ssh_remove_host`|
+| `ssh_delete`           | `ssh_remove_host`|
+| `ssh_profile_remove`   | `ssh_remove_host`|
+| `ssh_config_remove`    | `ssh_remove_host`|
 
 **Примечания по безопасности:**
 

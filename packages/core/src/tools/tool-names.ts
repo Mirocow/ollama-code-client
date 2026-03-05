@@ -18,6 +18,9 @@ export const ToolNames = {
   GLOB: 'glob',
   SHELL: 'run_shell_command',
   SSH: 'ssh_connect',
+  SSH_ADD_HOST: 'ssh_add_host',
+  SSH_LIST_HOSTS: 'ssh_list_hosts',
+  SSH_REMOVE_HOST: 'ssh_remove_host',
   TODO_WRITE: 'todo_write',
   MEMORY: 'save_memory',
   TASK: 'task',
@@ -56,6 +59,9 @@ export const ToolDisplayNames = {
   GLOB: 'Glob',
   SHELL: 'Shell',
   SSH: 'SSH',
+  SSH_ADD_HOST: 'SSHAddHost',
+  SSH_LIST_HOSTS: 'SSHListHosts',
+  SSH_REMOVE_HOST: 'SSHRemoveHost',
   TODO_WRITE: 'TodoWrite',
   MEMORY: 'SaveMemory',
   TASK: 'Task',
@@ -508,6 +514,38 @@ export const ToolAliases: Record<string, ToolName> = {
   remote_exec: ToolNames.SSH,
   connect: ToolNames.SSH,
   telnet: ToolNames.SSH,
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // SSH Add Host aliases (ssh_add_host)
+  // ═══════════════════════════════════════════════════════════════════════
+  ssh_add_host: ToolNames.SSH_ADD_HOST,
+  add_host: ToolNames.SSH_ADD_HOST,
+  add_ssh_host: ToolNames.SSH_ADD_HOST,
+  save_ssh: ToolNames.SSH_ADD_HOST,
+  ssh_save: ToolNames.SSH_ADD_HOST,
+  ssh_profile_add: ToolNames.SSH_ADD_HOST,
+  ssh_config_add: ToolNames.SSH_ADD_HOST,
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // SSH List Hosts aliases (ssh_list_hosts)
+  // ═══════════════════════════════════════════════════════════════════════
+  ssh_list_hosts: ToolNames.SSH_LIST_HOSTS,
+  list_hosts: ToolNames.SSH_LIST_HOSTS,
+  list_ssh: ToolNames.SSH_LIST_HOSTS,
+  ssh_hosts: ToolNames.SSH_LIST_HOSTS,
+  ssh_profiles: ToolNames.SSH_LIST_HOSTS,
+  ssh_config_list: ToolNames.SSH_LIST_HOSTS,
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // SSH Remove Host aliases (ssh_remove_host)
+  // ═══════════════════════════════════════════════════════════════════════
+  ssh_remove_host: ToolNames.SSH_REMOVE_HOST,
+  remove_host: ToolNames.SSH_REMOVE_HOST,
+  remove_ssh: ToolNames.SSH_REMOVE_HOST,
+  delete_ssh: ToolNames.SSH_REMOVE_HOST,
+  ssh_delete: ToolNames.SSH_REMOVE_HOST,
+  ssh_profile_remove: ToolNames.SSH_REMOVE_HOST,
+  ssh_config_remove: ToolNames.SSH_REMOVE_HOST,
 
   // ═══════════════════════════════════════════════════════════════════════
   // Additional shell aliases for common tools

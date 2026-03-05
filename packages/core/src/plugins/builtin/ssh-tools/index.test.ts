@@ -55,13 +55,13 @@ describe('SSHTool', () => {
   describe('parameter validation', () => {
     it('should validate required host parameter', () => {
       expect(() => sshTool.build({ host: '', user: 'test' } as any)).toThrow(
-        'Host is required.',
+        'Host is required when not using a profile',
       );
     });
 
     it('should validate required user parameter', () => {
       expect(() => sshTool.build({ host: 'localhost', user: '' } as any)).toThrow(
-        'User is required.',
+        'User is required when not using a profile',
       );
     });
 
