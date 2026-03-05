@@ -2,7 +2,29 @@
 
 Explore all the powerful features of Ollama Code.
 
-## 🆕 Latest Release (v0.17.0)
+## 🆕 Latest Release (v0.17.1)
+
+### SSH Profile Management Tools
+Complete SSH profile management for storing and reusing SSH credentials:
+- **ssh_connect**: Connect to remote servers with saved profiles or direct parameters
+- **ssh_add_host**: Save SSH profiles with host, user, port, and identity file
+- **ssh_list_hosts**: List all saved SSH profiles with optional tag filtering
+- **ssh_remove_host**: Delete saved SSH profiles
+
+### Enhanced SSH Connect
+- Use saved profiles: `{ "profile": "production", "command": "docker ps" }`
+- Direct connection: `{ "host": "192.168.1.100", "user": "admin", "command": "ls -la" }`
+- Support for SSH key authentication (recommended)
+- Password authentication support (not recommended)
+
+### Security Notes
+- SSH credentials stored in `~/.ollama-code/ssh_credentials.json`
+- Use `identity_file` (SSH key) authentication instead of password when possible
+- Passwords are masked in tool output
+
+---
+
+## 🆕 Previous Release (v0.17.0)
 
 ### Git Workflow Tool
 Complete git workflow integration with support for GitHub and GitLab (including self-hosted):
@@ -59,6 +81,9 @@ Execute Python, Node.js, Go, Rust, and Java code.
 
 ### Git Operations
 Complete git workflow: commit, push, pull, create branches, and MR/PR creation. Advanced operations: stash, cherry-pick, rebase, bisect.
+
+### SSH Tools
+Connect to remote servers via SSH. Save and manage SSH profiles. Execute remote commands.
 
 ### Search
 Search within files. Search the web. Fetch web content.

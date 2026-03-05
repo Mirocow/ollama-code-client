@@ -198,6 +198,46 @@ npm run dev:server
 
 ---
 
+## What's New in v0.17.1
+
+### SSH Profile Management Tools
+
+Complete SSH profile management system for storing and reusing SSH credentials:
+
+| Tool              | Description                       |
+| ----------------- | --------------------------------- |
+| `ssh_add_host`    | Save SSH profile with credentials |
+| `ssh_list_hosts`  | List all saved SSH profiles       |
+| `ssh_remove_host` | Delete a saved SSH profile        |
+
+### Enhanced SSH Connect
+
+The `ssh_connect` tool now supports using saved profiles:
+
+```json
+// Using saved profile
+{ "profile": "production", "command": "docker ps" }
+
+// Direct connection (still supported)
+{ "host": "192.168.1.100", "user": "admin", "command": "ls -la" }
+```
+
+### SSH Tool Aliases
+
+| Alias                            | Tool              |
+| -------------------------------- | ----------------- |
+| `ssh`, `ssh_connect`, `remote`   | `ssh_connect`     |
+| `ssh_add_host`, `add_host`       | `ssh_add_host`    |
+| `ssh_list_hosts`, `list_hosts`   | `ssh_list_hosts`  |
+| `ssh_remove_host`, `remove_host` | `ssh_remove_host` |
+
+### Security Notes
+
+- SSH credentials are stored in `~/.ollama-code/ssh_credentials.json`
+- Use `identity_file` (SSH key) authentication instead of password when possible
+
+---
+
 ## What's New in v0.17.0
 
 ### Git Workflow Tool — Complete Git Integration
