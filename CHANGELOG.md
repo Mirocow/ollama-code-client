@@ -1,5 +1,72 @@
 # Changelog
 
+## 0.17.1
+
+_SSH Profile Management Tools_
+
+### New Features
+
+#### SSH Host Management Tools
+
+Complete SSH profile management system for storing and reusing SSH credentials:
+
+| Tool              | Description                       | Key Parameters                                              |
+| ----------------- | --------------------------------- | ----------------------------------------------------------- |
+| `ssh_add_host`    | Save SSH profile with credentials | `name`, `host`, `user`, `port`, `identity_file`, `password` |
+| `ssh_list_hosts`  | List all saved SSH profiles       | `tag` (optional filter)                                     |
+| `ssh_remove_host` | Delete a saved SSH profile        | `name`                                                      |
+
+#### Enhanced SSH Connect Tool
+
+The `ssh_connect` tool now supports using saved profiles:
+
+```json
+// Using saved profile
+{ "profile": "production", "command": "docker ps" }
+
+// Direct connection (still supported)
+{ "host": "192.168.1.100", "user": "admin", "command": "ls -la" }
+```
+
+#### Tool Aliases for SSH
+
+| Alias                            | Tool              |
+| -------------------------------- | ----------------- |
+| `ssh`, `ssh_connect`, `remote`   | `ssh_connect`     |
+| `ssh_add_host`, `add_host`       | `ssh_add_host`    |
+| `ssh_list_hosts`, `list_hosts`   | `ssh_list_hosts`  |
+| `ssh_remove_host`, `remove_host` | `ssh_remove_host` |
+
+### Security Notes
+
+- SSH credentials are stored in `~/.ollama-code/ssh_credentials.json`
+- Use `identity_file` (SSH key) authentication instead of password when possible
+- Passwords are masked in tool output
+
+### Files Added
+
+| File                                                       | Description               |
+| ---------------------------------------------------------- | ------------------------- |
+| `packages/core/src/plugins/builtin/ssh-tools/ssh-hosts.ts` | SSH host management tools |
+
+### Files Modified
+
+| File                                                   | Changes                             |
+| ------------------------------------------------------ | ----------------------------------- |
+| `packages/core/src/plugins/builtin/ssh-tools/index.ts` | Export SSH host management tools    |
+| `packages/core/src/plugins/builtin/ssh-tools/ssh.ts`   | Add profile support to SSH connect  |
+| `packages/core/src/config/storage.ts`                  | Add SSH credentials storage methods |
+| `packages/core/src/tools/tool-names.ts`                | Add SSH tool names and aliases      |
+
+### Commits
+
+```
+b6676e41 merge: resolve conflicts by accepting remote
+bfddf968 feat(ssh): add SSH profile management tools
+```
+
+---
+
 ## 0.17.0
 
 _Git Workflow Tool — Complete Git Integration_

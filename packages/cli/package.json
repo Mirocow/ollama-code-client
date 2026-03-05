@@ -1,6 +1,6 @@
 {
   "name": "@ollama-code/ollama-code",
-  "version": "0.11.0",
+  "version": "0.17.1",
   "description": "Ollama Code",
   "repository": {
     "type": "git",
