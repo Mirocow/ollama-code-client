@@ -198,6 +198,50 @@ npm run dev:server
 
 ---
 
+## What's New in v0.17.0
+
+### Git Workflow Tool — Complete Git Integration
+
+Full git workflow integration with support for GitHub and GitLab (including self-hosted):
+
+| Operation       | Description                  |
+| --------------- | ---------------------------- |
+| `status`        | Check repository status      |
+| `add`, `commit` | Stage and commit changes     |
+| `push`, `pull`  | Remote operations            |
+| `clone`         | Clone repository             |
+| `create_branch` | Create new branch            |
+| `switch`        | Switch to branch             |
+| `log`, `diff`   | History and differences      |
+| `create_mr`     | Create GitLab Merge Request  |
+| `create_pr`     | Create GitHub Pull Request   |
+| `create_merge`  | Auto-detect and create MR/PR |
+
+### Authentication Operations
+
+| Operation     | Description                                   |
+| ------------- | --------------------------------------------- |
+| `auth_status` | Check authentication status for GitHub/GitLab |
+| `auth_login`  | Interactive login instructions                |
+| `auth_logout` | Logout from GitHub/GitLab                     |
+| `auth_token`  | Set authentication token                      |
+
+### Platform Support
+
+- **GitHub**: Full support via `gh` CLI
+- **GitLab.com**: Full support via `glab` CLI
+- **Self-hosted GitLab**: Auto-detection and support
+
+### SSH Tools Plugin
+
+New SSH Tools plugin for remote server connectivity with profile management:
+
+- SSH connection management
+- SCP file transfer
+- Profile-based configuration
+
+---
+
 ## What's New in v0.16.9
 
 ### Extended Tool Aliases for Model Hallucinations
